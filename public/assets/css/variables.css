@@ -1,0 +1,43 @@
+/* =========================================
+   VARIABLES GLOBALES DEL PROYECTO
+   Sobrescribe colores de Bootstrap 5
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@400;700&display=swap');
+
+:root {
+    /* ===== Colores sobreescritos de Bootstrap ===== */
+    --bs-primary: #221C35;   /*Header, botones principales, enlaces, acentos*/
+    --bs-secondary: #F9FAFB; /*Fondo general de la app detrás de cards*/
+    --bs-success: #5CB244;   /*Confirmaciones*/
+    --bs-danger: #A41E34;    /*Alertas, errores*/
+    --bs-warning: #DB912F;   /*Comunicados importantes, incidencias en curso, avisos*/
+    --bs-info: #ECECF0;      /*Fondo secundario, areas informativas*/
+    --bs-light: #FFFFFF;     /*Fondo principal de la app y fondo tarjetas*/
+    --bs-dark: #121111;      /*Texto principal*/
+
+    /* ===== Colores personalizados se usan como clases en css===== */
+    --color-fondo-formularios: #F3F3F5; /*Fondo inputs formularios*/
+    --color-texto: #565656;             /*Texto secundario y descripciones*/
+    --color-borde: #e0e0e0;
+    --color--hover: #E9EBEF;            /*Hover en botones ghost/outline*/
+
+    /* ===== Tipografías ===== */
+    --fuente-base: 'Lato', sans-serif; /* para h1, h2, h3*/
+    --fuente-titulos: 'Montserrat', sans-serif; /*body, parrafos, labels, botones, inputs*/
+
+    /* ===== Espaciados ===== */
+    --espacio-xs: 4px;
+    --espacio-sm: 8px;
+    --espacio-md: 16px;
+    --espacio-lg: 24px;
+    --espacio-xl: 32px;
+
+    /* ===== Bordes ===== */
+    --radio-sm: 4px;
+    --radio-md: 8px;
+    --radio-lg: 12px;
+
+    /* ===== Sombras ===== */
+    --sombra-suave: 0 2px 6px rgba(0,0,0,0.08);
+    --sombra-media: 0 4px 12px rgba(0,0,0,0.12);
+}

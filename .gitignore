@@ -1,0 +1,17 @@
+# Archivos con credenciales
+config.local.php
+.env
+
+# Dependencias
+vendor/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cachés
+cache/
+tmp/

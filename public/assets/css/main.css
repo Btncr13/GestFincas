@@ -1,0 +1,21 @@
+@import url(reset.css);
+@import url(variables.css);
+@import url(layout.css);
+
+body {
+    font-family: var(--fuente-base);
+    background-color: var(--bs-secondary);
+    color: var(--bs-dark);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+/* Estilos para el toggle de contraseña */
+.border-right-0 {
+    border-right: none !important;
+}
