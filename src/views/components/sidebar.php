@@ -1,0 +1,86 @@
+<?php 
+// Obtenemos la ruta actual del enrutador para marcar el menú activo
+$ruta_actual = $_GET['route'] ?? 'auth/panelpresi';
+
+// Extraemos los datos de la comunidad de la sesión
+$nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
+$calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
+$numero = $_SESSION['vivienda']['numero'] ?? '';
+
+// Unimos la calle y el número
+$direccionCompleta = trim($calle . ' ' . $numero);
+?>
+
+<div class="sidebar offcanvas-md offcanvas-start col-md-3 col-lg-2 p-0 shadow-sm border-end" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel" style="background-color: var(--bs-light); min-height: calc(100vh - 76px);">
+
+    <div class="offcanvas-header d-md-none border-bottom" style="min-height: 76px;">
+        <h5 class="offcanvas-title fw-bold" id="sidebarMenuLabel" style="color: var(--bs-primary); font-family: var(--fuente-titulos);">Menú</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body d-md-flex flex-column p-0 pt-3 pt-lg-4 overflow-y-auto">
+        
+        <div class="px-3 mb-4">
+            <div class="d-flex align-items-center p-2 rounded-3" style="background-color: var(--color-fondo-formularios); border: 1px solid var(--color-borde);">
+                <div class="d-flex justify-content-center align-items-center rounded-2 me-2" style="width: 40px; height: 40px; background-color: var(--bs-primary); color: white; flex-shrink: 0;">
+                    <i class="fa-regular fa-building fs-5"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.85rem; font-family: var(--fuente-titulos); color: var(--bs-dark);"><?= htmlspecialchars($nombreComunidad) ?></h6>
+                    <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;"><?= htmlspecialchars($direccionCompleta) ?></small>
+                </div>
+            </div>
+        </div>
+
+        <hr class="dropdown-divider my-2" style="border-color: var(--color-borde);">
+
+        <ul class="nav flex-column px-2 mb-auto" style="font-family: var(--fuente-base);">
+            
+            <li class="nav-item">
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/panelpresi') ? 'active fw-bold' : '' ?>" 
+                   href="index.php?route=auth/panelpresi" 
+                   style="background-color: <?= ($ruta_actual == 'auth/panelpresi') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/panelpresi') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-table-cells-large me-2"></i> Dashboard
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/incidencias') ? 'active fw-bold' : '' ?>" 
+                   href="index.php?route=auth/incidencias" 
+                   style="background-color: <?= ($ruta_actual == 'auth/incidencias') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/incidencias') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> Incidencias
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/finanzas') ? 'active fw-bold' : '' ?>" 
+                   href="index.php?route=auth/finanzas" 
+                   style="background-color: <?= ($ruta_actual == 'auth/finanzas') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/finanzas') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-piggy-bank me-2"></i> Finanzas
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/usuarios') ? 'active fw-bold' : '' ?>" 
+                   href="index.php?route=auth/usuarios" 
+                   style="background-color: <?= ($ruta_actual == 'auth/usuarios') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/usuarios') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-users me-2"></i> Usuarios
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/comunicaciones') ? 'active fw-bold' : '' ?>" 
+                   href="index.php?route=auth/comunicaciones" 
+                   style="background-color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-bullhorn me-2"></i> Comunicaciones
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+</div>

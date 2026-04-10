@@ -1,21 +1,21 @@
 <?php
 
-require_once "../src/models/UsuarioModel.php"; // Ahora usamos UsuarioModel
+require_once "src/models/UsuarioModel.php";
 
 class AuthController
 {
-    private $usuarioModel; // Renombramos la propiedad a usuarioModel
+    private $usuarioModel;
 
     public function __construct($pdo)
     {
-        $this->usuarioModel = new UsuarioModel($pdo); // Instanciamos UsuarioModel
+        $this->usuarioModel = new UsuarioModel($pdo);
     }
+    
     // --------------------------------------------------- FUNCIÓN QUE LLEVA A LOGIN/GET
     public function index()
     {
         return $this->login();
     }
-
 
     // --------------------------------------------------  MOSTRAR FORMULARIO LOGIN/GET
     public function login()
@@ -24,13 +24,13 @@ class AuthController
         if (isset($_GET['registrado']) && $_GET['registrado'] === 'success') {
             $mensajeExito = "Registro completado con éxito. Ya puedes iniciar sesión.";
         }
-        require "../src/views/auth/login.php";
+        require "src/views/auth/login.php";
     }
 
     // --------------------------------------------------  MOSTRAR FORMULARIO REGISTRO/GET
     public function register()
     {
-        require "../src/views/auth/register.php";
+        require "src/views/auth/register.php";
     }
 
     // --------------------------------------------------- PROCESAR REGISTRO/POST
@@ -52,7 +52,7 @@ class AuthController
         // Validación simple de campos obligatorios
         if (!$nombre || !$apellidos || !$dni || !$email || !$password || !$codigo) {
             $error = "Todos los campos son obligatorios.";
-            require "../src/views/auth/register.php";
+            require "src/views/auth/register.php";
             return;
         }
 
@@ -60,11 +60,11 @@ class AuthController
         $codigoData = $this->usuarioModel->validarCodigo($codigo);
         if (!$codigoData) {
             $error = "El código de vivienda no es válido o ya ha sido utilizado.";
-            require "../src/views/auth/register.php";
+            require "src/views/auth/register.php";
             return;
         }
 
-        // 2. Preparar datos para el modelo (id_vivienda viene del código)
+        // 2. Preparar datos para el modelo
         $datos = [
             'id_vivienda' => $codigoData['id_vivienda'],
             'nombre'      => $nombre,
@@ -82,7 +82,7 @@ class AuthController
             exit;
         } else {
             $error = $resultado['message'];
-            require "../src/views/auth/register.php";
+            require "src/views/auth/register.php";
         }
     }
 
@@ -90,7 +90,7 @@ class AuthController
     public function loginAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405); // Method Not Allowed
+            http_response_code(405);
             echo "Método no permitido";
             return;
         }
@@ -99,32 +99,37 @@ class AuthController
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
 
-        // Validación de campos vacíos
         if ($nombreVivienda === '' || $email === '' || $password === '') {
-            http_response_code(400); // Bad Request
+            http_response_code(400);
             $error = "Debes completar todos los campos.";
-            require "../src/views/auth/login.php";
+            require "src/views/auth/login.php";
             return;
         }
 
-        // Llamada al modelo
         $resultado = $this->usuarioModel->login($nombreVivienda, $email, $password);
 
         if (!$resultado['success']) {
-            http_response_code(401); // Unauthorized
+            http_response_code(401);
             $error = $resultado['message'];
-            require "../src/views/auth/login.php";
+            require "src/views/auth/login.php";
             return;
         }
 
-        // Login correcto
+        // --- AQUÍ EMPIEZA LA MAGIA DE LOS ROLES ---
         $_SESSION['vivienda'] = $resultado['data'];
-        header("Location: index.php?route=auth/panelvecino");
+
+        // Comprobamos el rol que viene de la base de datos
+        if ($_SESSION['vivienda']['rol'] === 'presidente') {
+            // Si es presidente, lo mandamos a su panel
+            header("Location: index.php?route=auth/panelpresi");
+        } else {
+            // Si es vecino (o cualquier otro), lo mandamos al panel normal
+            header("Location: index.php?route=auth/panelvecino");
+        }
         exit;
     }
 
-
-    // ------------------------------------------------------- FUNCION LOGOUT SALIR DEL PANEL DE LA VIVIENDA
+    // ------------------------------------------------------- FUNCION LOGOUT
     public function logout()
     {
         session_destroy();
@@ -139,7 +144,25 @@ class AuthController
             header("Location: index.php?route=auth/login");
             exit;
         }
+        require "src/views/auth/panelvecino.php";
+    }
 
-        require "../src/views/auth/panelvecino.php";
+    // ------------------------------------------------------- FUNCIÓN DIRIGE A VISTAS DEL PANEL DEL PRESIDENTE
+    public function panelpresi()
+    {
+        // 1. Verificamos que haya iniciado sesión
+        if (!isset($_SESSION['vivienda'])) {
+            header("Location: index.php?route=auth/login");
+            exit;
+        }
+
+        // 2. SEGURIDAD: Verificamos que sea realmente presidente
+        // (Para evitar que un vecino listillo ponga "panelpresi" en la URL)
+        if ($_SESSION['vivienda']['rol'] !== 'presidente') {
+            header("Location: index.php?route=auth/panelvecino");
+            exit;
+        }
+
+        require "src/views/auth/panelpresi.php";
     }
 }
