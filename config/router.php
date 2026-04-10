@@ -1,12 +1,13 @@
 <?php
 
-require_once "../config/Database.php";
+require_once "config/database.php";
 
 function runRouter($config)
 {
     $db = new Database($config);
     $pdo = $db->connect();
 
+    /*
     // Ruta en formato /controlador/metodo
     $route = $_GET['route'] ?? 'home';
 
@@ -19,6 +20,18 @@ function runRouter($config)
 
     // Cargar controlador
     $controllerFile = "../src/controllers/$controllerName.php";
+    */
+
+    // 1. Ponemos el login por defecto si no hay ruta:
+    $route = $_GET['route'] ?? 'auth/login';
+    $parts = explode('/', trim($route, '/'));
+
+    // Controlador y método por defecto adaptados
+    $controllerName = ucfirst($parts[0] ?? 'Auth') . "Controller";
+    $methodName = $parts[1] ?? "login";
+
+    // 2. Quitamos el "../" de la ruta del controlador porque ya estamos en la raíz:
+    $controllerFile = "src/controllers/$controllerName.php";
 
     if (!file_exists($controllerFile)) {
         echo "Controlador no encontrado";

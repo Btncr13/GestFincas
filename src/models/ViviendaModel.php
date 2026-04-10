@@ -1,6 +1,6 @@
 <?php
 
-require_once "BaseModel.php";
+require_once "../../config/BaseModel.php";
 
 class ViviendaModel extends BaseModel
 {

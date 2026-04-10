@@ -1,6 +1,6 @@
 <?php
 
-require_once "BaseModel.php";
+require_once "config/BaseModel.php";
 
 class UsuarioModel extends BaseModel
 {
@@ -54,16 +54,18 @@ class UsuarioModel extends BaseModel
         }
     }
 
-    //  -------------------------------------------------- LOGIN DE USUARIO POR MAIL
+//  -------------------------------------------------- LOGIN DE USUARIO POR MAIL
 
     public function login($nombreVivienda, $email, $password)
     {
         try {
-            // Buscamos al usuario y traemos datos de su vivienda para la sesión
-            $sql = "SELECT u.*, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad 
+            // Añadimos el JOIN con direccion para sacar la calle y el número
+            $sql = "SELECT u.*, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad, 
+                           d.calle, d.numero
                     FROM usuario u
                     JOIN vivienda v ON u.id_vivienda = v.id_vivienda
                     JOIN comunidad c ON v.id_comunidad = c.id_comunidad
+                    JOIN direccion d ON c.id_direccion = d.id_direccion
                     WHERE u.email = :email AND v.nombre = :nombre_vivienda LIMIT 1";
 
             $stmt = $this->db->prepare($sql);

@@ -79,4 +79,106 @@
 
 /* ---------------------------------- PANEL VIVIENDA*/
 
-/* ---------------------------------- PANEL PRESIDENTE*/
+/* ---------------------------------- PANEL PRESIDENTE ---------------------------------- */
+
+/* Tarjetas de métricas superiores */
+.metric-card {
+    border-radius: var(--radio-lg);
+    border: 1px solid var(--color-borde);
+    background-color: var(--bs-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-suave);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--fuente-titulos);
+}
+
+.metric-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radio-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+/* Sección de Acciones Pendientes */
+.actions-container {
+    border-radius: var(--radio-lg);
+    border: 1px solid var(--color-borde);
+    background-color: var(--bs-light);
+    padding: var(--espacio-lg);
+}
+
+.action-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--espacio-sm) var(--espacio-md);
+    background-color: var(--bs-secondary);
+    border-radius: var(--radio-md);
+    margin-bottom: var(--espacio-sm);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.action-item:hover {
+    background-color: var(--color--hover);
+}
+
+.action-item.warning { border-left-color: var(--bs-warning); }
+.action-item.danger { border-left-color: var(--bs-danger); }
+
+/* Botones de navegación inferiores mejorados */
+.nav-card-container {
+    display: grid;
+    /* Ajustamos el tamaño mínimo a 200px para que no se estiren tanto */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--espacio-lg); /* Le damos un poquito más de aire entre ellos */
+}
+
+.nav-card {
+    background-color: var(--bs-light);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-lg);
+    padding: var(--espacio-xl) var(--espacio-md); /* Más padding vertical para hacerlos más cuadrados */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+    color: var(--bs-dark);
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animación más suave */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02); /* Sombra estática muy sutil */
+}
+
+.nav-card:hover {
+    box-shadow: var(--sombra-media);
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+    transform: translateY(-4px); /* Efecto de que el botón "se levanta" al pasar el ratón */
+}
+
+.nav-card-icon {
+    width: 54px;  /* Iconos un pelín más grandes */
+    height: 54px;
+    border-radius: var(--radio-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: var(--espacio-md);
+}
