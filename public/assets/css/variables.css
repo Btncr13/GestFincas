@@ -189,3 +189,88 @@
 [data-theme="dark"] .dropdown-divider {
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important; /* Una línea sutil pero visible */
 }
+
+/* Arreglo para la zona de Bienvenida en Modo Oscuro */
+[data-theme="dark"] .h4, 
+[data-theme="dark"] h2 {
+    color: #FFFFFF !important; /* Blanco puro para el nombre del usuario */
+}
+
+[data-theme="dark"] .text-muted.small {
+    color: #A6ADC8 !important; /* Gris claro azulado para la descripción */
+}
+
+/* Arreglo para la tarjeta blanca interna que sale en la captura */
+[data-theme="dark"] .card {
+    background-color: var(--bs-light) !important; /* Usa el fondo oscuro de tarjeta */
+    border: 1px solid var(--color-borde) !important;
+}
+
+[data-theme="dark"] .card h3,
+[data-theme="dark"] .card h6 {
+    color: var(--bs-dark) !important; /* Asegura que los números y textos dentro de mini-cards se vean */
+}
+
+/* Estilo para el botón Cerrar Sesión en esa zona específica */
+[data-theme="dark"] .btn-outline-danger {
+    color: #ff7383 !important;
+    border-color: #ff7383 !important;
+}
+
+[data-theme="dark"] .btn-outline-danger:hover {
+    background-color: rgba(255, 115, 131, 0.1) !important;
+    color: #ff7383 !important;
+}
+
+[data-theme="dark"] body.bg-light, 
+[data-theme="dark"] main.bg-light {
+    background-color: var(--bs-secondary) !important;
+}
+
+[data-theme="dark"] .login-card-custom,
+[data-theme="dark"] .register-card-custom {
+    background-color: var(--bs-light);
+    border: 1px solid var(--color-borde);
+}
+
+/* =========================================
+   MODO OSCURO (Dark Mode) - REFUERZO VISUAL
+   ========================================= */
+[data-theme="dark"] {
+    --bs-light: #1E1E2E;      /* Fondo de tarjetas */
+    --bs-secondary: #11111B;  /* Fondo general */
+    --bs-dark: #CDD6F4;       /* Texto principal (ahora claro) */
+    
+    --color-fondo-formularios: #313244; 
+    --color-texto: #A6ADC8;             
+    --color-borde: #313244;             
+}
+
+/* 1. ARREGLO DE TEXTOS: Forzamos a que las clases de Bootstrap sean legibles */
+[data-theme="dark"] .text-dark, 
+[data-theme="dark"] .form-label,
+[data-theme="dark"] h1, 
+[data-theme="dark"] p:not(.text-primary) {
+    color: var(--bs-dark) !important;
+}
+
+/* 2. ARREGLO DE BOTONES: Aseguramos texto blanco en los botones de login y register */
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-brand {
+    color: #FFFFFF !important; /* Blanco puro siempre para el texto del botón */
+    background-color: #4c407a !important; /* Un morado un poco más vibrante para el fondo */
+}
+
+/* 3. ARREGLO DE INPUTS: Mejoramos el contraste del texto que escribe el usuario */
+[data-theme="dark"] .custom-input {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .custom-input::placeholder {
+    color: #6c7086 !important;
+}
+
+/* 4. LOGO: Invertimos el color del logo si es oscuro */
+[data-theme="dark"] .logo-adaptable {
+    filter: brightness(0) invert(1);
+}
