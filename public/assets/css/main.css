@@ -1,7 +1,11 @@
 @import url(reset.css);
 @import url(variables.css);
 @import url(layout.css);
+@import url(layoutreservas.css);
 
+/* =========================================
+   ESTILOS GLOBALES BASE
+   ========================================= */
 body {
     font-family: var(--fuente-base);
     background-color: var(--bs-secondary);
@@ -9,10 +13,29 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 main {
     flex: 1;
+}
+
+/* Tipografía Global (Títulos) */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--fuente-titulos);
+    color: var(--bs-primary);
+}
+
+/* Enlaces Globales */
+a {
+    color: var(--bs-primary);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--bs-warning);
 }
 
 /* Estilos para el toggle de contraseña */
