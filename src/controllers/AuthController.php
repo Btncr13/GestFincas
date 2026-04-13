@@ -10,7 +10,7 @@ class AuthController
     {
         $this->usuarioModel = new UsuarioModel($pdo);
     }
-    
+
     // --------------------------------------------------- FUNCIÓN QUE LLEVA A LOGIN/GET
     public function index()
     {
@@ -144,6 +144,22 @@ class AuthController
             header("Location: index.php?route=auth/login");
             exit;
         }
+
+        // DATOS MOCK DEL DISEÑO DE FIGMA (Listos para conectar con BD en el futuro)
+        $nombreVivienda = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda 1º A';
+        $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Residencial Los Olivos';
+        $direccion = trim(($_SESSION['vivienda']['calle'] ?? 'Calle Mayor') . ' ' . ($_SESSION['vivienda']['numero'] ?? '45'));
+        if (empty(trim($direccion))) {
+            $direccion = 'Calle Mayor 45, 28001 Madrid';
+        }
+
+        $ultimoComunicado = [
+            'titulo' => 'Corte de agua programado',
+            'contenido' => 'Se informa que mañana día 22 de marzo habrá un corte de agua de 09:00 a 14:00 por trabajos de mantenimiento en la red general. Rogamos disculpen las molestias.',
+            'fechaPublicacion' => '21/03/2026',
+            'prioridad' => 'importante' // Posibles: 'normal', 'importante', 'urgente'
+        ];
+
         require "src/views/auth/panelvecino.php";
     }
 
@@ -162,6 +178,12 @@ class AuthController
             header("Location: index.php?route=auth/panelvecino");
             exit;
         }
+
+        // Preparamos los datos para la vista
+        $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
+        $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
+        $numero = $_SESSION['vivienda']['numero'] ?? '';
+        $direccion = trim($calle . ' ' . $numero);
 
         require "src/views/auth/panelpresi.php";
     }
