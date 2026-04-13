@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Obtenemos la ruta actual del enrutador para marcar el menú activo
 $ruta_actual = $_GET['route'] ?? 'auth/panelpresi';
 
@@ -6,6 +6,7 @@ $ruta_actual = $_GET['route'] ?? 'auth/panelpresi';
 $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
 $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
 $numero = $_SESSION['vivienda']['numero'] ?? '';
+$rol = $_SESSION['vivienda']['rol'] ?? 'vecino';
 
 // Unimos la calle y el número
 $direccionCompleta = trim($calle . ' ' . $numero);
@@ -19,7 +20,7 @@ $direccionCompleta = trim($calle . ' ' . $numero);
     </div>
 
     <div class="offcanvas-body d-md-flex flex-column p-0 pt-3 pt-lg-4 overflow-y-auto">
-        
+
         <div class="px-3 mb-4">
             <div class="d-flex align-items-center p-2 rounded-3" style="background-color: var(--color-fondo-formularios); border: 1px solid var(--color-borde);">
                 <div class="d-flex justify-content-center align-items-center rounded-2 me-2" style="width: 40px; height: 40px; background-color: var(--bs-primary); color: white; flex-shrink: 0;">
@@ -35,52 +36,114 @@ $direccionCompleta = trim($calle . ' ' . $numero);
         <hr class="dropdown-divider my-2" style="border-color: var(--color-borde);">
 
         <ul class="nav flex-column px-2 mb-auto" style="font-family: var(--fuente-base);">
-            
+
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/panelpresi') ? 'active fw-bold' : '' ?>" 
-                   href="index.php?route=auth/panelpresi" 
-                   style="background-color: <?= ($ruta_actual == 'auth/panelpresi') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/panelpresi') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=auth/panelpresi"
+                    style="background-color: <?= ($ruta_actual == 'auth/panelpresi') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/panelpresi') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-table-cells-large me-2"></i> Dashboard
                 </a>
             </li>
-            
+
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/incidencias') ? 'active fw-bold' : '' ?>" 
-                   href="index.php?route=auth/incidencias" 
-                   style="background-color: <?= ($ruta_actual == 'auth/incidencias') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/incidencias') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=auth/incidencias"
+                    style="background-color: <?= ($ruta_actual == 'auth/incidencias') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/incidencias') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-triangle-exclamation me-2"></i> Incidencias
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/finanzas') ? 'active fw-bold' : '' ?>" 
-                   href="index.php?route=auth/finanzas" 
-                   style="background-color: <?= ($ruta_actual == 'auth/finanzas') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/finanzas') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=auth/finanzas"
+                    style="background-color: <?= ($ruta_actual == 'auth/finanzas') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/finanzas') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-piggy-bank me-2"></i> Finanzas
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/usuarios') ? 'active fw-bold' : '' ?>" 
-                   href="index.php?route=auth/usuarios" 
-                   style="background-color: <?= ($ruta_actual == 'auth/usuarios') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/usuarios') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=auth/usuarios"
+                    style="background-color: <?= ($ruta_actual == 'auth/usuarios') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/usuarios') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-users me-2"></i> Usuarios
                 </a>
             </li>
-            
+
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/comunicaciones') ? 'active fw-bold' : '' ?>" 
-                   href="index.php?route=auth/comunicaciones" 
-                   style="background-color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/comunicaciones') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=auth/comunicaciones"
+                    style="background-color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-bullhorn me-2"></i> Comunicaciones
                 </a>
             </li>
-            
+
+            <li>
+                <hr class="dropdown-divider my-3" style="border-color: var(--color-borde);">
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1" href="#" id="themeToggleBtn" style="color: var(--color-texto);">
+                    <i class="fa-solid fa-moon me-2" id="themeIcon"></i> <span id="themeText">Modo Oscuro</span>
+                </a>
+            </li>
         </ul>
+
+        <!-- Botón de cambio de rol anclado al fondo -->
+        <?php if ($rol === 'presidente'): ?>
+            <div class="px-3 mt-auto mb-4">
+                <hr class="dropdown-divider mb-3" style="border-color: var(--color-borde);">
+                <?php if ($ruta_actual === 'auth/panelvecino'): ?>
+                    <a href="index.php?route=auth/panelpresi" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 fw-bold text-white shadow-sm" style="background-color: var(--bs-primary); font-size: 0.85rem;">
+                        <i class="fa-solid fa-user-tie"></i> Cambiar a Presidente
+                    </a>
+                <?php else: ?>
+                    <a href="index.php?route=auth/panelvecino" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 fw-bold text-dark shadow-sm" style="background-color: var(--bs-light); border: 1px solid var(--color-borde); font-size: 0.85rem;">
+                        <i class="fa-solid fa-house"></i> Cambiar a Vecino
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const htmlElement = document.documentElement;
+
+        // Función para cambiar el icono y el texto dependiendo del tema actual
+        const updateIcon = () => {
+            if (htmlElement.getAttribute('data-theme') === 'dark') {
+                if (themeIcon) themeIcon.classList.replace('fa-moon', 'fa-sun');
+                if (themeText) themeText.textContent = 'Modo Claro';
+            } else {
+                if (themeIcon) themeIcon.classList.replace('fa-sun', 'fa-moon');
+                if (themeText) themeText.textContent = 'Modo Oscuro';
+            }
+        };
+
+        // Configuramos la interfaz inicial
+        updateIcon();
+
+        // Evento al hacer click en el enlace del menú
+        if (themeBtn) {
+            themeBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // Evitamos que salte hacia arriba de la página
+                const currentTheme = htmlElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                htmlElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('gestfincas-theme', newTheme);
+
+                updateIcon();
+            });
+        }
+    });
+</script>
