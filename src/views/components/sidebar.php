@@ -80,10 +80,10 @@ $dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ?
             </li>
 
             <li class="nav-item">
-                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/reuniones') ? 'active fw-bold' : '' ?>"
-                    href="#"
-                    style="background-color: <?= ($ruta_actual == 'auth/reuniones') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                          color: <?= ($ruta_actual == 'auth/reuniones') ? 'white' : 'var(--color-texto)' ?>;">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'reunion/reuniones') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=reunion/reuniones"
+                    style="background-color: <?= ($ruta_actual == 'reunion/reuniones') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                        color: <?= ($ruta_actual == 'reunion/reuniones') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-people-group me-2"></i> Reuniones
                 </a>
             </li>
