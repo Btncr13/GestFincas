@@ -57,7 +57,7 @@ $titulo_pagina = "Panel del Vecino";
                     <!-- Tarjeta 1 - Comunicaciones -->
                     <div class="col">
                         <a href="index.php?route=auth/comunicaciones" class="text-decoration-none h-100 d-block">
-                            <div class="card shadow-sm h-100 border-0 text-center">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(34, 28, 53, 0.1);">
                                         <i class="bi bi-megaphone-fill text-primary fs-2"></i>
@@ -72,7 +72,7 @@ $titulo_pagina = "Panel del Vecino";
                     <!-- Tarjeta 2 - Reservas -->
                     <div class="col">
                         <a href="#" class="text-decoration-none h-100 d-block">
-                            <div class="card shadow-sm h-100 border-0 text-center">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(92, 178, 68, 0.1);">
                                         <i class="bi bi-calendar-check-fill text-success fs-2"></i>
@@ -87,7 +87,7 @@ $titulo_pagina = "Panel del Vecino";
                     <!-- Tarjeta 3 - Reuniones -->
                     <div class="col">
                         <a href="#" class="text-decoration-none h-100 d-block">
-                            <div class="card shadow-sm h-100 border-0 text-center">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(219, 145, 47, 0.1);">
                                         <i class="bi bi-people-fill text-warning fs-2"></i>
@@ -105,7 +105,7 @@ $titulo_pagina = "Panel del Vecino";
                 <div class="row g-3 mb-4">
 
                     <!-- ÚLTIMO COMUNICADO -->
-                    <div class="col-12 col-lg-6">
+                    <div class="col-12">
                         <div class="card shadow-sm h-100 border-0" style="border-left: 4px solid var(--bs-primary) !important;">
                             <div class="card-body p-4 d-flex flex-column">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -125,60 +125,6 @@ $titulo_pagina = "Panel del Vecino";
                                 <h4 class="card-title fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);"><?= htmlspecialchars($ultimoComunicado['titulo']) ?></h4>
                                 <p class="card-text text-muted mb-3"><?= htmlspecialchars($ultimoComunicado['contenido']) ?></p>
                                 <p class="card-text mb-0 mt-auto"><small class="text-muted"><?= htmlspecialchars($ultimoComunicado['fechaPublicacion']) ?></small></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- MIS INCIDENCIAS -->
-                    <div class="col-12 col-lg-6">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body p-4">
-                                <div class="mb-4">
-                                    <h5 class="fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Mis Incidencias</h5>
-                                    <p class="text-muted small mb-0">Estado de tus reportes</p>
-                                </div>
-
-                                <?php if (empty($incidencias)): ?>
-                                    <div class="text-center py-4 text-muted">No has reportado ninguna incidencia</div>
-                                <?php else: ?>
-                                    <ul class="list-group list-group-flush">
-                                        <?php foreach (array_slice($incidencias, 0, 3) as $inc): ?>
-                                            <?php
-                                            // Iconos y colores según estado
-                                            $icono = 'bi-exclamation-circle-fill text-danger';
-                                            $badgeClass = 'border-danger text-danger';
-                                            if ($inc['estado'] == 'en_curso') {
-                                                $icono = 'bi-clock-fill text-warning';
-                                                $badgeClass = 'border-warning text-warning';
-                                            }
-                                            if ($inc['estado'] == 'resuelta') {
-                                                $icono = 'bi-check-circle-fill text-success';
-                                                $badgeClass = 'border-success text-success';
-                                            }
-                                            ?>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 bg-transparent">
-                                                <div class="d-flex align-items-center gap-3 overflow-hidden">
-                                                    <i class="bi <?= $icono ?> fs-5"></i>
-                                                    <div class="text-truncate">
-                                                        <h6 class="mb-0 text-dark fw-semibold text-truncate"><?= htmlspecialchars($inc['titulo']) ?></h6>
-                                                        <small class="text-muted"><?= htmlspecialchars($inc['categoria']) ?></small>
-                                                    </div>
-                                                </div>
-                                                <span class="badge border <?= $badgeClass ?> bg-transparent ms-2">
-                                                    <?= ucfirst(str_replace('_', ' ', htmlspecialchars($inc['estado']))) ?>
-                                                </span>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-
-                                    <?php if (count($incidencias) > 3): ?>
-                                        <div class="text-center mt-3">
-                                            <a href="index.php?route=auth/incidencias" class="text-decoration-none fw-semibold">
-                                                Ver todas <i class="bi bi-arrow-right"></i>
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

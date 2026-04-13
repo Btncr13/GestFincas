@@ -10,6 +10,10 @@ $rol = $_SESSION['vivienda']['rol'] ?? 'vecino';
 
 // Unimos la calle y el número
 $direccionCompleta = trim($calle . ' ' . $numero);
+
+// Validamos si estamos en alguno de los dos dashboards para marcarlo activo
+$isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
+$dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ? 'auth/panelpresi' : 'auth/panelvecino';
 ?>
 
 <div class="sidebar offcanvas-md offcanvas-start col-md-3 col-lg-2 p-0 shadow-sm border-end" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel" style="background-color: var(--bs-light); min-height: calc(100vh - 76px);">
@@ -38,47 +42,49 @@ $direccionCompleta = trim($calle . ' ' . $numero);
         <ul class="nav flex-column px-2 mb-auto" style="font-family: var(--fuente-base);">
 
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/panelpresi') ? 'active fw-bold' : '' ?>"
-                    href="index.php?route=auth/panelpresi"
-                    style="background-color: <?= ($ruta_actual == 'auth/panelpresi') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                          color: <?= ($ruta_actual == 'auth/panelpresi') ? 'white' : 'var(--color-texto)' ?>;">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= $isDashboard ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=<?= $dashboardUrl ?>"
+                    style="background-color: <?= $isDashboard ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= $isDashboard ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-table-cells-large me-2"></i> Dashboard
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/incidencias') ? 'active fw-bold' : '' ?>"
-                    href="index.php?route=auth/incidencias"
-                    style="background-color: <?= ($ruta_actual == 'auth/incidencias') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                          color: <?= ($ruta_actual == 'auth/incidencias') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-triangle-exclamation me-2"></i> Incidencias
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/finanzas') ? 'active fw-bold' : '' ?>"
-                    href="index.php?route=auth/finanzas"
-                    style="background-color: <?= ($ruta_actual == 'auth/finanzas') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                          color: <?= ($ruta_actual == 'auth/finanzas') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-piggy-bank me-2"></i> Finanzas
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/usuarios') ? 'active fw-bold' : '' ?>"
-                    href="index.php?route=auth/usuarios"
-                    style="background-color: <?= ($ruta_actual == 'auth/usuarios') ? 'var(--bs-primary)' : 'transparent' ?>; 
+            <?php if ($rol === 'presidente'): ?>
+                <li class="nav-item">
+                    <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/usuarios') ? 'active fw-bold' : '' ?>"
+                        href="index.php?route=auth/usuarios"
+                        style="background-color: <?= ($ruta_actual == 'auth/usuarios') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/usuarios') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-users me-2"></i> Usuarios
-                </a>
-            </li>
+                        <i class="fa-solid fa-users me-2"></i> Mi Comunidad
+                    </a>
+                </li>
+            <?php endif; ?>
 
             <li class="nav-item">
-                <a class="nav-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/comunicaciones') ? 'active fw-bold' : '' ?>"
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/comunicaciones') ? 'active fw-bold' : '' ?>"
                     href="index.php?route=auth/comunicaciones"
                     style="background-color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-bullhorn me-2"></i> Comunicaciones
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/reservas') ? 'active fw-bold' : '' ?>"
+                    href="#"
+                    style="background-color: <?= ($ruta_actual == 'auth/reservas') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/reservas') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-calendar-check me-2"></i> Reservas
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/reuniones') ? 'active fw-bold' : '' ?>"
+                    href="#"
+                    style="background-color: <?= ($ruta_actual == 'auth/reuniones') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'auth/reuniones') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-people-group me-2"></i> Reuniones
                 </a>
             </li>
 

@@ -1,131 +1,137 @@
-<?php 
-$titulo_pagina = "Panel del Presidente"; 
+<?php
+$titulo_pagina = "Panel del Presidente";
 ?>
 
 <?php include 'src/views/components/topbar.php'; ?>
 
 <div class="container-fluid p-0">
     <div class="row flex-nowrap m-0">
-        
+
         <?php include 'src/views/components/sidebar.php'; ?>
 
         <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
-            
+
             <div class="container-fluid p-0">
-                
-                <div class="mb-4">
-                    <h2 class="h3 fw-bold mb-1" style="font-family: var(--fuente-titulos);">Panel del Presidente</h2>
-                    <p class="text-muted">Métricas globales de la comunidad</p>
-                </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-12 col-sm-6 col-xl-3">
-                        <div class="metric-card p-3 h-100 d-flex justify-content-between align-items-center">
+                <!-- 1. BANNER PRINCIPAL "ADMINISTRACIÓN" -->
+                <div class="card border-0 mb-4 overflow-hidden shadow-sm" style="min-height: 200px;">
+                    <img src="public/assets/img/banner.jpeg" alt="Residencial" class="card-img w-100 h-100 object-fit-cover position-absolute" style="filter: brightness(0.6);">
+                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+                                <i class="bi bi-house-door-fill fs-4 text-white"></i>
+                            </div>
                             <div>
-                                <h6 class="text-muted small mb-1">Incidencias abiertas</h6>
-                                <div class="metric-value">5</div>
-                            </div>
-                            <div class="metric-icon-box" style="background-color: var(--bs-danger);">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-sm-6 col-xl-3">
-                        <div class="metric-card p-3 h-100 d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted small mb-1">Gastos totales</h6>
-                                <div class="metric-value">3835€</div>
-                            </div>
-                            <div class="metric-icon-box" style="background-color: var(--bs-warning);">
-                                <i class="fa-solid fa-piggy-bank"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-xl-3">
-                        <div class="metric-card p-3 h-100 d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted small mb-1">Gastos pendientes</h6>
-                                <div class="metric-value">2</div>
-                            </div>
-                            <div class="metric-icon-box" style="background-color: #221c35;">
-                                <i class="fa-solid fa-file-invoice-dollar"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-xl-3">
-                        <div class="metric-card p-3 h-100 d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted small mb-1">Confirmar resolución</h6>
-                                <div class="metric-value">1</div>
-                            </div>
-                            <div class="metric-icon-box" style="background-color: var(--bs-success);">
-                                <i class="fa-solid fa-file-circle-check"></i>
+                                <h2 class="mb-1 fw-bold text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: var(--fuente-titulos);">Panel de Presidencia</h2>
+                                <p class="mb-1 fw-semibold text-white" style="font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                                    <?= htmlspecialchars($nombreComunidad) ?>
+                                </p>
+                                <div class="d-flex align-items-center gap-1 text-white opacity-75 small">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span><?= htmlspecialchars($direccion) ?></span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- 2. NOTIFICACIONES RECIENTES -->
                 <div class="actions-container mb-4">
                     <div class="d-flex align-items-center gap-2 mb-3">
-                        <i class="fa-solid fa-circle-exclamation text-danger"></i>
-                        <h5 class="mb-0 fs-6" style="font-family: var(--fuente-titulos);">Acciones Pendientes</h5>
+                        <i class="bi bi-bell-fill text-primary fs-5"></i>
+                        <h5 class="mb-0 fs-6" style="font-family: var(--fuente-titulos);">Notificaciones</h5>
                     </div>
-                    
+
                     <div class="action-list">
-                        <div class="action-item warning">
+                        <div class="action-item" style="border-left-color: var(--bs-success);">
                             <div class="d-flex align-items-center gap-3">
-                                <i class="fa-solid fa-piggy-bank text-warning"></i>
-                                <span class="text-sm-custom">Tienes 2 gastos pendientes de aprobar</span>
+                                <i class="bi bi-person-plus-fill text-success fs-5"></i>
+                                <span class="text-sm-custom">Nuevo vecino registrado: María López (Planta 2-1B)</span>
                             </div>
-                            <i class="fa-solid fa-arrow-right text-muted"></i>
+                            <i class="bi bi-arrow-right text-muted"></i>
                         </div>
-                        
-                        <div class="action-item danger">
+
+                        <div class="action-item" style="border-left-color: #20c997;">
                             <div class="d-flex align-items-center gap-3">
-                                <i class="fa-solid fa-circle-exclamation text-danger"></i>
-                                <span class="text-sm-custom">1 incidencia resuelta esperando tu confirmación</span>
+                                <i class="bi bi-calendar-check-fill fs-5" style="color: #20c997;"></i>
+                                <span class="text-sm-custom">Nueva reserva: Pista de Pádel (Planta 1-2A)</span>
                             </div>
-                            <i class="fa-solid fa-arrow-right text-muted"></i>
+                            <i class="bi bi-arrow-right text-muted"></i>
                         </div>
-                        
-                        <div class="action-item danger">
+
+                        <div class="action-item" style="border-left-color: var(--bs-warning);">
                             <div class="d-flex align-items-center gap-3">
-                                <i class="fa-solid fa-circle-exclamation text-danger"></i>
-                                <span class="text-sm-custom">1 incidencia urgente activa</span>
+                                <i class="bi bi-megaphone-fill text-warning fs-5"></i>
+                                <span class="text-sm-custom">Recordatorio: Junta Ordinaria mañana a las 19:00h</span>
                             </div>
-                            <i class="fa-solid fa-arrow-right text-muted"></i>
+                            <i class="bi bi-arrow-right text-muted"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="nav-card-container">
-                    <a href="index.php?route=auth/incidencias" class="nav-card">
-                        <div class="nav-card-icon" style="background-color: var(--bs-danger);">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                        <span>Incidencias</span>
-                    </a>
-                    <a href="index.php?route=auth/finanzas" class="nav-card">
-                        <div class="nav-card-icon" style="background-color: #0d6efd;">
-                            <i class="fa-solid fa-piggy-bank"></i>
-                        </div>
-                        <span>Finanzas</span>
-                    </a>
-                    <a href="index.php?route=auth/usuarios" class="nav-card">
-                        <div class="nav-card-icon" style="background-color: var(--bs-success);">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                        <span>Usuarios</span>
-                    </a>
-                    <a href="index.php?route=auth/comunicaciones" class="nav-card">
-                        <div class="nav-card-icon" style="background-color: #6f42c1;">
-                            <i class="fa-solid fa-bullhorn"></i>
-                        </div>
-                        <span>Comunicaciones</span>
-                    </a>
+                <!-- 3. GRID DE ACCESO RÁPIDO (Estilo unificado) -->
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
+
+                    <!-- Mi Comunidad (Usuarios) -->
+                    <div class="col">
+                        <a href="index.php?route=auth/usuarios" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(92, 178, 68, 0.1);">
+                                        <i class="bi bi-people-fill text-success fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Mi Comunidad</h5>
+                                    <p class="card-text text-muted small mb-0">Gestión de usuarios</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Comunicaciones -->
+                    <div class="col">
+                        <a href="index.php?route=auth/comunicaciones" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(111, 66, 193, 0.1);">
+                                        <i class="bi bi-megaphone-fill fs-2" style="color: #6f42c1;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Comunicaciones</h5>
+                                    <p class="card-text text-muted small mb-0">Publicar y editar avisos</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Reservas -->
+                    <div class="col">
+                        <a href="#" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(32, 201, 151, 0.1);">
+                                        <i class="bi bi-calendar-check-fill fs-2" style="color: #20c997;"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Reservas</h5>
+                                    <p class="card-text text-muted small mb-0">Administrar espacios</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Reuniones -->
+                    <div class="col">
+                        <a href="#" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(219, 145, 47, 0.1);">
+                                        <i class="bi bi-easel-fill text-warning fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Reuniones</h5>
+                                    <p class="card-text text-muted small mb-0">Convocar juntas</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
                 </div>
 
             </div>
