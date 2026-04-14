@@ -1,323 +1,619 @@
-<?php
-// === MOCK DE DATOS PARA PRUEBAS ===
-$rol = 'presidente'; // Cambiar a 'vecino' para probar la vista sin permisos de crear
-$reuniones = [
-    [
-        'id' => 1,
-        'titulo' => 'Junta Ordinaria Anual',
-        'tipo' => 'Ordinaria',
-        'fecha' => '25/05/2026',
-        'hora' => '19:00',
-        'lugar' => 'Sala Comunitaria',
-        'estado' => 'Pendiente',
-        'orden_dia' => '1. Lectura de cuentas.\n2. Renovación de cargos.\n3. Ruegos y preguntas.'
-    ],
-    [
-        'id' => 2,
-        'titulo' => 'Aprobación de Presupuestos',
-        'tipo' => 'Extraordinaria',
-        'fecha' => '10/03/2026',
-        'hora' => '18:30',
-        'lugar' => 'Videollamada',
-        'estado' => 'Finalizada',
-        'orden_dia' => '1. Votación de presupuesto para arreglo de fachada.'
-    ]
-];
-// ===================================
+<?php include 'src/views/components/topbar.php'; ?>
 
-include 'src/views/components/topbar.php';
-?>
 <div class="container-fluid p-0">
     <div class="row flex-nowrap m-0">
 
         <?php include 'src/views/components/sidebar.php'; ?>
 
-        <main class="container py-4 py-md-5">
+        <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
             
-            <!-- Header de la sección -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <h1 class="fw-bold mb-0 text-dark" style="font-family: var(--fuente-titulos);">Reuniones de la Comunidad</h1>
-                
-                <?php if ($rol === 'presidente'): ?>
-                    <!-- Botón que abre el Modal de Nueva Reunión -->
-                    <button type="button" class="btn btn-brand fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevaReunion">
-                        <i class="fa-solid fa-plus me-2"></i> Convocar Reunión
+            <!-- Contenedor global de la mini-aplicación de Reuniones -->
+            <div class="container-fluid p-0 position-relative" id="appReuniones">
+
+                <!-- TOAST CONTAINER -->
+                <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+                    <div id="reunionesToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span id="toastMensaje">Acción completada</span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VISTA 1: LISTADO PRINCIPAL -->
+                <div id="vista-lista">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
+                        <div>
+                            <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">Reuniones</h1>
+                            <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Juntas y reuniones de la comunidad</p>
+                        </div>
+                        <?php if ($rol === 'presidente'): ?>
+                        <button class="btn d-flex align-items-center gap-2" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;" onclick="app.abrirFormularioCrear()">
+                            <i class="bi bi-plus fs-6"></i> Convocar Reunión
+                        </button>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Resumen (Cards) -->
+                    <div class="row row-cols-2 row-cols-sm-4 g-2 mb-4" id="cards-resumen">
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="d-flex mb-3 p-1" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+                        <button id="btn-tab-proximas" class="btn flex-fill text-center rounded-2 py-2" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="app.switchTab('proximas')">Próximas</button>
+                        <button id="btn-tab-pasadas" class="btn flex-fill text-center rounded-2 py-2 text-muted" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="app.switchTab('pasadas')">Pasadas</button>
+                    </div>
+
+                    <!-- Contenedor Listas -->
+                    <div id="lista-proximas" class="d-flex flex-column gap-3"></div>
+                    <div id="lista-pasadas" class="d-flex flex-column gap-3 d-none"></div>
+                </div>
+
+                <!-- VISTA 2: DETALLE -->
+                <div id="vista-detalle" class="d-none">
+                    <button class="btn btn-link text-decoration-none p-0 mb-3 d-flex align-items-center gap-1" style="color: var(--color-texto); font-size: 14px; font-weight: 500;" onclick="app.showView('vista-lista')">
+                        <i class="bi bi-arrow-left"></i> Volver
                     </button>
+                    <div id="detalle-content">
+                    </div>
+                </div>
+
+                <!-- VISTA 3: FORMULARIO -->
+                <?php if ($rol === 'presidente'): ?>
+                <div id="vista-formulario" class="d-none">
+                    <button class="btn btn-link text-decoration-none p-0 mb-3 d-flex align-items-center gap-1" style="color: var(--color-texto); font-size: 14px; font-weight: 500;" onclick="app.showView('vista-lista')">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    
+                    <h1 id="form-titulo-vista" class="mb-1" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">Convocar Nueva Reunión</h1>
+                    <p id="form-desc-vista" class="mb-4" style="color: var(--color-texto); font-size: 14px;">Completa los datos para convocar una junta o reunión</p>
+
+                    <div class="card shadow-sm border-0" style="border-radius: var(--radio-lg);">
+                        <div class="card-body p-4">
+                            <form id="formReunion" onsubmit="app.crearReunion(event)">
+                                <input type="hidden" id="form-id">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Título de la Reunión *</label>
+                                    <input type="text" class="form-control custom-input" id="form-titulo" placeholder="Ej: Junta General Ordinaria 2026" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Descripción</label>
+                                    <textarea class="form-control custom-input" id="form-desc" rows="3" placeholder="Breve descripción del objetivo de la reunión..."></textarea>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Fecha *</label>
+                                        <input type="date" class="form-control custom-input" id="form-fecha" required>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Hora *</label>
+                                        <input type="time" class="form-control custom-input" id="form-hora" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Lugar *</label>
+                                    <input type="text" class="form-control custom-input" id="form-lugar" placeholder="Ej: Salón de Actos" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Orden del Día (una línea por punto)</label>
+                                    <textarea class="form-control custom-input" id="form-orden" rows="5" placeholder="1. Lectura y aprobación del acta anterior&#10;2. Aprobación de cuentas&#10;3. Ruegos y preguntas"></textarea>
+                                </div>
+
+                                <button type="submit" id="form-btn-submit" class="btn w-100 d-flex align-items-center justify-content-center gap-2" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;">
+                                    <i class="bi bi-calendar-check"></i> Convocar Reunión
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <?php endif; ?>
-            </div>
 
-            <!-- Filtros / Tabs (Corregido para Modo Oscuro) -->
-            <ul class="nav nav-tabs mb-4" id="reunionesTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active fw-bold" id="proximas-tab" data-bs-toggle="tab" data-bs-target="#proximas" type="button" role="tab" style="color: var(--bs-dark);">Próximas Reuniones</button>
-                </li>
-                <li class="nav-item ms-2" role="presentation">
-                    <button class="nav-link fw-semibold text-muted" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab">Historial / Actas</button>
-                </li>
-            </ul>
-
-            <!-- Grid de Contenido -->
-            <div class="tab-content" id="reunionesTabContent">
-                
-                <!-- Pestaña Próximas -->
-                <div class="tab-pane fade show active" id="proximas" role="tabpanel">
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                        <?php foreach ($reuniones as $reunion): ?>
-                            <?php if ($reunion['estado'] === 'Pendiente'): ?>
-                                <div class="col">
-                                    <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-warning">
-                                        <div class="card-body p-4 d-flex flex-column">
-                                            
-                                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                                <div class="text-muted small">
-                                                    <div class="mb-1"><i class="fa-regular fa-calendar me-2 text-warning"></i><?= $reunion['fecha'] ?></div>
-                                                    <div><i class="fa-regular fa-clock me-2 text-warning"></i><?= $reunion['hora'] ?> h</div>
-                                                </div>
-                                                <!-- FIX MODO OSCURO: style="color: #000 !important;" para forzar texto negro sobre fondo amarillo -->
-                                                <span class="badge bg-warning px-2 py-1 rounded-2" style="color: #000 !important; font-weight: 700;"><?= $reunion['tipo'] ?></span>
-                                            </div>
-                                            
-                                            <h3 class="fs-5 fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);"><?= $reunion['titulo'] ?></h3>
-                                            <p class="text-muted small mb-4">
-                                                <i class="fa-solid fa-location-dot me-2"></i><?= $reunion['lugar'] ?>
-                                            </p>
-                                            
-                                            <div class="mt-auto d-flex justify-content-between align-items-center border-top pt-3">
-                                                <!-- Botón que abre el Modal de Detalles -->
-                                                <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold btn-ver-detalle" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#modalDetalleReunion"
-                                                        data-titulo="<?= $reunion['titulo'] ?>"
-                                                        data-fecha="<?= $reunion['fecha'] ?>"
-                                                        data-hora="<?= $reunion['hora'] ?>"
-                                                        data-lugar="<?= $reunion['lugar'] ?>"
-                                                        data-estado="<?= $reunion['estado'] ?>"
-                                                        data-orden="<?= htmlspecialchars($reunion['orden_dia']) ?>">
-                                                    Ver Orden del Día
-                                                </button>
-                                                
-                                                <?php if ($rol === 'presidente'): ?>
-                                                    <div class="d-flex gap-2">
-                                                        <button class="btn btn-sm btn-link text-secondary p-0" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                                                        <button class="btn btn-sm btn-link text-danger p-0" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <!-- Pestaña Historial -->
-                <div class="tab-pane fade" id="historial" role="tabpanel">
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                        <?php foreach ($reuniones as $reunion): ?>
-                            <?php if ($reunion['estado'] === 'Finalizada'): ?>
-                                <div class="col">
-                                    <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-success">
-                                        <div class="card-body p-4 d-flex flex-column">
-                                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                                <div class="text-muted small">
-                                                    <div class="mb-1"><i class="fa-regular fa-calendar-check me-2 text-success"></i><?= $reunion['fecha'] ?></div>
-                                                    <div><i class="fa-regular fa-clock me-2 text-success"></i><?= $reunion['hora'] ?> h</div>
-                                                </div>
-                                                <span class="badge bg-secondary text-white px-2 py-1 rounded-2 fw-bold"><?= $reunion['tipo'] ?></span>
-                                            </div>
-                                            
-                                            <h3 class="fs-5 fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);"><?= $reunion['titulo'] ?></h3>
-                                            <p class="text-muted small mb-4">
-                                                <i class="fa-solid fa-location-dot me-2"></i><?= $reunion['lugar'] ?>
-                                            </p>
-                                            
-                                            <div class="mt-auto d-flex justify-content-start border-top pt-3">
-                                                <button type="button" class="btn btn-outline-success btn-sm fw-semibold btn-ver-detalle" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#modalDetalleReunion"
-                                                        data-titulo="<?= $reunion['titulo'] ?>"
-                                                        data-fecha="<?= $reunion['fecha'] ?>"
-                                                        data-hora="<?= $reunion['hora'] ?>"
-                                                        data-lugar="<?= $reunion['lugar'] ?>"
-                                                        data-estado="<?= $reunion['estado'] ?>"
-                                                        data-orden="<?= htmlspecialchars($reunion['orden_dia']) ?>">
-                                                    Ver Acta
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
             </div>
         </main>
+    </div>
+</div>
 
-        <!-- ======================================================= -->
-        <!-- MODAL: CONVOCAR NUEVA REUNIÓN (Solo Presidente)         -->
-        <!-- ======================================================= -->
-        <?php if ($rol === 'presidente'): ?>
-        <div class="modal fade" id="modalNuevaReunion" tabindex="-1" aria-labelledby="modalNuevaReunionLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow" style="background-color: var(--bs-light);">
-                    <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
-                        <h2 class="modal-title fw-bold text-dark" id="modalNuevaReunionLabel" style="font-family: var(--fuente-titulos);">Convocar Nueva Reunión</h2>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<script>
+// 🟢 INYECCIÓN DE DATOS PHP -> JAVASCRIPT 🟢
+let reunionesDB = <?= json_encode($reunionesData ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+const userRol = '<?= $rol ?>';
+const userIdVivienda = <?= $id_vivienda ?? 'null' ?>;
+const idComunidad = <?= json_encode($id_comunidad ?? null) ?>;
+
+// 🟢 LÓGICA PRINCIPAL (VANILLA JS) 🟢
+const app = {
+    init: function() {
+        // Formateo de fechas para que el input type="date" tenga hoy de minimo
+        const today = new Date().toISOString().split('T')[0];
+        
+        const dateInput = document.getElementById('form-fecha');
+        if (dateInput) {
+            dateInput.setAttribute('min', today);
+        }
+        
+        this.renderAll();
+    },
+    
+    showView: function(viewId) {
+        document.getElementById('vista-lista').classList.add('d-none');
+        document.getElementById('vista-detalle').classList.add('d-none');
+        
+        const formView = document.getElementById('vista-formulario');
+        if (formView) formView.classList.add('d-none');
+        
+        document.getElementById(viewId).classList.remove('d-none');
+        if(viewId === 'vista-lista') this.renderAll();
+        window.scrollTo(0,0);
+    },
+    
+    abrirFormularioCrear: function() {
+        document.getElementById('formReunion').reset();
+        document.getElementById('form-id').value = '';
+        document.getElementById('form-titulo-vista').innerText = 'Convocar Nueva Reunión';
+        document.getElementById('form-desc-vista').innerText = 'Completa los datos para convocar una junta o reunión';
+        document.getElementById('form-btn-submit').innerHTML = '<i class="bi bi-calendar-check"></i> Convocar Reunión';
+        this.showView('vista-formulario');
+    },
+
+    abrirFormularioEditar: function(id) {
+        const r = reunionesDB.find(x => x.id == id);
+        if(!r) return;
+        
+        document.getElementById('form-id').value = r.id;
+        document.getElementById('form-titulo').value = r.titulo;
+        document.getElementById('form-desc').value = r.descripcion;
+        document.getElementById('form-fecha').value = r.fecha;
+        document.getElementById('form-hora').value = r.hora;
+        document.getElementById('form-lugar').value = r.lugar;
+        document.getElementById('form-orden').value = r.ordenDelDia.join('\n');
+
+        document.getElementById('form-titulo-vista').innerText = 'Editar Reunión';
+        document.getElementById('form-desc-vista').innerText = 'Modifica los datos de esta convocatoria';
+        document.getElementById('form-btn-submit').innerHTML = '<i class="bi bi-save"></i> Guardar Cambios';
+        this.showView('vista-formulario');
+    },
+
+    switchTab: function(tabName) {
+        const isProx = tabName === 'proximas';
+        const btnProx = document.getElementById('btn-tab-proximas');
+        const btnPas = document.getElementById('btn-tab-pasadas');
+        
+        // Estilos pestaña
+        btnProx.style.backgroundColor = isProx ? 'var(--bs-light)' : 'transparent';
+        btnProx.style.boxShadow = isProx ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
+        btnProx.className = isProx ? 'btn flex-fill text-center rounded-2 py-2 text-dark' : 'btn flex-fill text-center rounded-2 py-2 text-muted';
+        
+        btnPas.style.backgroundColor = !isProx ? 'var(--bs-light)' : 'transparent';
+        btnPas.style.boxShadow = !isProx ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
+        btnPas.className = !isProx ? 'btn flex-fill text-center rounded-2 py-2 text-dark' : 'btn flex-fill text-center rounded-2 py-2 text-muted';
+        
+        // Mostrar contenedores
+        document.getElementById('lista-proximas').classList.toggle('d-none', !isProx);
+        document.getElementById('lista-pasadas').classList.toggle('d-none', isProx);
+    },
+    
+    showToast: function(msg, type = 'success') {
+        const toastEl = document.getElementById('reunionesToast');
+        document.getElementById('toastMensaje').innerText = msg;
+        toastEl.className = `toast align-items-center text-white border-0 bg-${type}`;
+        const t = new bootstrap.Toast(toastEl, { delay: 3000 });
+        t.show();
+    },
+
+    formatDateLong: function(d) {
+        const opt = { weekday: 'short', day: 'numeric', month: 'short' };
+        return new Date(d).toLocaleDateString('es-ES', opt);
+    },
+    
+    getBadgeEstado: function(estado) {
+        if(estado==='convocada') return `<span class="badge" style="background-color: var(--bs-warning); font-size:12px;">Convocada</span>`;
+        if(estado==='en_curso') return `<span class="badge" style="background-color: var(--bs-success); font-size:12px;">En Curso</span>`;
+        return `<span class="badge border text-muted bg-transparent" style="font-size:12px;">Finalizada</span>`;
+    },
+
+    renderAll: function() {
+        const proximas = reunionesDB.filter(r => r.estado !== 'finalizada').sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+        const pasadas = reunionesDB.filter(r => r.estado === 'finalizada').sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+        
+        // Actualizar nombres tabs
+        document.getElementById('btn-tab-proximas').innerText = `Próximas (${proximas.length})`;
+        document.getElementById('btn-tab-pasadas').innerText = `Pasadas (${pasadas.length})`;
+
+        // Render Resumen
+        let conf = 0, pend = 0;
+        if(proximas.length > 0) {
+            conf = proximas[0].asistencias.filter(a => a.confirmacion === 'confirmada').length;
+            pend = proximas[0].asistencias.filter(a => a.confirmacion === 'pendiente').length;
+        }
+
+        document.getElementById('cards-resumen').innerHTML = `
+            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
+                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(219,145,47,0.1);"><i class="bi bi-calendar-check" style="color: var(--bs-warning); font-size:20px;"></i></div>
+                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${proximas.length}</div><small style="font-size:10px; color:var(--color-texto);">Próximas</small></div>
+            </div></div></div>
+            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
+                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: var(--color-fondo-formularios);"><i class="bi bi-file-earmark-text text-secondary" style="font-size:20px;"></i></div>
+                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${pasadas.length}</div><small style="font-size:10px; color:var(--color-texto);">Realizadas</small></div>
+            </div></div></div>
+            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
+                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(92,178,68,0.1);"><i class="bi bi-check-circle" style="color: var(--bs-success); font-size:20px;"></i></div>
+                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${conf}</div><small style="font-size:10px; color:var(--color-texto);">Confirmadas</small></div>
+            </div></div></div>
+            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
+                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(164,30,52,0.1);"><i class="bi bi-question-circle" style="color: var(--bs-danger); font-size:20px;"></i></div>
+                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${pend}</div><small style="font-size:10px; color:var(--color-texto);">Pendientes</small></div>
+            </div></div></div>
+        `;
+
+        // Render Próximas
+        const proxHtml = proximas.length === 0 ? 
+             `<div class="text-center py-5 bg-white rounded-3 shadow-sm">
+                <i class="bi bi-calendar-check text-muted" style="font-size: 48px;"></i>
+                <p class="mt-2 mb-1 text-muted" style="font-size:14px;">No hay reuniones próximas convocadas</p>
+                <small class="text-muted d-block" style="font-size: 11px;">Comunidad actual ID: ${<?= json_encode($id_comunidad ?? 'Nulo') ?>}</small>
+                <small class="text-muted d-block" style="font-size: 11px;">Comunidad actual ID: ${idComunidad ?? 'Nulo'}</small>
+            </div>` : 
+            proximas.map(r => {
+                const total = r.asistencias.length;
+                const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
+                const pct = total>0 ? Math.round((confs/total)*100) : 0;
+                const diasRestantes = Math.ceil((new Date(r.fecha) - new Date()) / (1000 * 60 * 60 * 24));
+                const pends = r.asistencias.filter(a => a.confirmacion === 'pendiente').length;
+
+                let ordList = r.ordenDelDia.map((o,i) => `<li>${i+1}. ${o}</li>`).join('');
+
+                return `
+                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-warning) !important;">
+                    <div class="card-body p-3 p-md-4">
+                        <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                    <span style="font-size:14px; font-weight:600; color:var(--bs-dark);">${r.titulo}</span>
+                                    ${this.getBadgeEstado(r.estado)}
+                                </div>
+                                <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
+                                    <span><i class="bi bi-clock"></i> ${this.formatDateLong(r.fecha)} a las ${r.hora}</span>
+                                    <span><i class="bi bi-geo-alt"></i> ${r.lugar}</span>
+                                </div>
+                            </div>
+                            <span style="font-size:12px; font-weight:600; color:var(--bs-primary); background-color: rgba(34,28,53,0.05); padding:2px 8px; border-radius:4px; height:fit-content;">${diasRestantes} días</span>
+                        </div>
+
+                        <div class="d-flex gap-2 align-items-center mt-3 mb-2" style="font-size:12px;">
+                            <i class="bi bi-people" style="color:var(--color-texto); font-size:16px;"></i>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between mb-1"><span style="color:var(--color-texto);">Asistencia: ${confs}/${total}</span><span style="font-weight:600;">${pct}%</span></div>
+                                <div class="progress" style="height:6px; background-color:var(--color-fondo-formularios);"><div class="progress-bar bg-success" style="width: ${pct}%"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="app.toggleAgenda('${r.id}')">
+                                <i class="bi bi-chevron-down" id="icon-agenda-${r.id}"></i> Orden del día (${r.ordenDelDia.length} puntos)
+                            </button>
+                            <div id="agenda-${r.id}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                                <ul class="list-unstyled mb-0">${ordList}</ul>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3 pt-2">
+                            <button class="btn btn-sm text-white" style="background-color: var(--bs-primary); font-size:12px; flex-grow:1; max-width: 200px;" onclick="app.renderDetalle('${r.id}')">Ver detalle</button>
+                        </div>
                     </div>
-                    <div class="modal-body p-4">
-                        <form action="?route=reunion/crear" method="POST">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-dark">Tipo de Reunión <span class="text-danger">*</span></label>
-                                    <select name="tipo_reunion" class="form-select custom-input" required>
-                                        <option value="Ordinaria" selected>Junta Ordinaria</option>
-                                        <option value="Extraordinaria">Junta Extraordinaria</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-dark">Lugar <span class="text-danger">*</span></label>
-                                    <input type="text" name="lugar" class="form-control custom-input" placeholder="Ej: Sala Comunitaria" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-dark">Fecha <span class="text-danger">*</span></label>
-                                    <input type="date" name="fecha" class="form-control custom-input" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-dark">Hora <span class="text-danger">*</span></label>
-                                    <input type="time" name="hora" class="form-control custom-input" required>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold text-dark">Enlace Videollamada (Opcional)</label>
-                                    <input type="url" name="enlace" class="form-control custom-input" placeholder="https://zoom.us/...">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label small fw-semibold text-dark">Orden del Día <span class="text-danger">*</span></label>
-                                    <textarea name="orden_dia" class="form-control custom-input" rows="4" placeholder="Puntos a tratar..." required></textarea>
-                                </div>
+                </div>`;
+            }).join('');
+        document.getElementById('lista-proximas').innerHTML = proxHtml;
+
+        // Render Pasadas
+        const pasHtml = pasadas.length === 0 ? 
+            `<div class="text-center py-5 bg-white rounded-3 shadow-sm"><i class="bi bi-file-earmark-text text-muted" style="font-size: 48px;"></i><p class="mt-2 text-muted" style="font-size:14px;">No hay reuniones pasadas registradas</p></div>` : 
+            pasadas.map(r => {
+                const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
+                return `
+                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid #d1d5db !important; cursor:pointer;" onclick="app.renderDetalle('${r.id}')">
+                    <div class="card-body p-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                <span style="font-size:14px; font-weight:600; color:var(--bs-dark);">${r.titulo}</span>
+                                ${this.getBadgeEstado(r.estado)}
                             </div>
-                            <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
-                                <button type="button" class="btn btn-outline-secondary fw-semibold px-4 py-2 rounded-2 text-sm-custom" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-brand fw-semibold px-4 py-2 rounded-2 text-sm-custom">Publicar Convocatoria</button>
+                            <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
+                                <span><i class="bi bi-clock"></i> ${this.formatDateLong(r.fecha)}</span>
+                                <span><i class="bi bi-geo-alt"></i> ${r.lugar}</span>
+                                <span><i class="bi bi-people"></i> ${confs}/${r.asistencias.length} asistentes</span>
                             </div>
-                        </form>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        document.getElementById('lista-pasadas').innerHTML = pasHtml;
+
+        // Activar tab correcta visualmente al iniciar
+        this.switchTab('proximas');
+    },
+
+    toggleAgenda: function(id) {
+        const el = document.getElementById(`agenda-${id}`);
+        const icon = document.getElementById(`icon-agenda-${id}`);
+        if(el.classList.contains('d-none')) {
+            el.classList.remove('d-none');
+            icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+        } else {
+            el.classList.add('d-none');
+            icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+        }
+    },
+
+    renderDetalle: function(id) {
+        const r = reunionesDB.find(x => x.id == id);
+        if(!r) return;
+
+        const diasRestantes = Math.ceil((new Date(r.fecha) - new Date()) / (1000 * 60 * 60 * 24));
+        const total = r.asistencias.length;
+        const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
+        const rechs = r.asistencias.filter(a => a.confirmacion === 'rechazada').length;
+        const pends = r.asistencias.filter(a => a.confirmacion === 'pendiente').length;
+        
+        const ptConf = total>0 ? (confs/total)*100 : 0;
+        const ptRech = total>0 ? (rechs/total)*100 : 0;
+        const ptPend = total>0 ? (pends/total)*100 : 0;
+
+        const miAsistencia = r.asistencias.find(a => a.id_vivienda == userIdVivienda);
+
+        let panelVotoHtml = '';
+        if (r.estado !== 'finalizada') {
+            const txtEstado = (miAsistencia && miAsistencia.confirmacion === 'confirmada') ? '<span class="text-success fw-bold">Sí, asistiré</span>' : 
+                             ((miAsistencia && miAsistencia.confirmacion === 'rechazada') ? '<span class="text-danger fw-bold">No asistiré</span>' : '<span class="text-muted fw-bold">Pendiente de respuesta</span>');
+                             
+            panelVotoHtml = `
+            <div class="card shadow-sm border-0 mb-4" style="background-color: var(--bs-light); border-left: 4px solid var(--bs-primary) !important;">
+                <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                    <div>
+                        <h4 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700;">Tu asistencia</h4>
+                        <p class="mb-0 text-muted" style="font-size: 14px;">Estado actual: ${txtEstado}</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger" onclick="app.enviarAsistencia('${r.id}', 'rechazada')">No asistiré</button>
+                        <button class="btn btn-success text-white" onclick="app.enviarAsistencia('${r.id}', 'confirmada')">Sí, asistiré</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        const html = `
+        <div class="mb-4">
+            <h1 class="mb-2" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">${r.titulo}</h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                ${this.getBadgeEstado(r.estado)}
+                ${r.estado !== 'finalizada' ? `<span style="font-size:12px; color:var(--color-texto);"><i class="bi bi-clock"></i> Faltan ${diasRestantes} días</span>` : ''}
+            </div>
+        </div>
+        
+        ${panelVotoHtml}
+
+        <!-- INFO -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
+            <div class="card-body p-4">
+                <h3 class="mb-3" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Información de la Reunión</h3>
+                <p style="font-size: 14px; color: var(--color-texto); margin-bottom: 1rem;">${r.descripcion}</p>
+                
+                <div class="row row-cols-1 row-cols-sm-2 g-3">
+                    <div class="col d-flex gap-2 align-items-center">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-calendar3" style="color:var(--bs-primary);font-size:14px;"></i></div>
+                        <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Fecha</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${new Date(r.fecha).toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div></div>
+                    </div>
+                    <div class="col d-flex gap-2 align-items-center">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-clock" style="color:var(--bs-primary);font-size:14px;"></i></div>
+                        <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Hora</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${r.hora}h</div></div>
+                    </div>
+                    <div class="col d-flex gap-2 align-items-center">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-geo-alt" style="color:var(--bs-primary);font-size:14px;"></i></div>
+                        <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Lugar</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${r.lugar}</div></div>
                     </div>
                 </div>
             </div>
         </div>
-        <?php endif; ?>
 
-        <!-- ======================================================= -->
-        <!-- MODAL: DETALLE / ORDEN DEL DÍA / ACTA                   -->
-        <!-- ======================================================= -->
-        <div class="modal fade" id="modalDetalleReunion" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow" style="background-color: var(--bs-light);">
-                    <div class="modal-header border-bottom-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-start">
-                        <div>
-                            <h2 class="modal-title fw-bold text-dark mb-2" id="detalleTitulo" style="font-family: var(--fuente-titulos);">Título de la Reunión</h2>
-                            <span class="badge bg-warning px-3 py-1 rounded-2 shadow-sm text-dark fw-bold" id="detalleEstado">Estado</span>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        
-                        <!-- Info Grid -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <div class="card bg-light border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3 rounded-3 h-100">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
-                                        <i class="fa-regular fa-clock fs-5 text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-dark mb-1 small text-uppercase">Cuándo</h6>
-                                        <p class="text-muted mb-0 fw-semibold text-sm-custom" id="detalleFechaHora">Fecha y Hora</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card bg-light border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3 rounded-3 h-100">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
-                                        <i class="fa-solid fa-location-dot fs-5 text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-dark mb-1 small text-uppercase">Dónde</h6>
-                                        <p class="text-muted mb-0 fw-semibold text-sm-custom" id="detalleLugar">Lugar</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- ORDEN DEL DIA -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
+            <div class="card-body p-4">
+                <h3 class="mb-3 d-flex align-items-center gap-2" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Orden del Día <span style="font-size:12px; font-weight:400; color:var(--color-texto);">${r.ordenDelDia.length} puntos</span></h3>
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                    ${r.ordenDelDia.map((o,i) => `
+                        <li class="d-flex gap-2 align-items-start">
+                            <div class="rounded-circle text-white d-flex justify-content-center align-items-center flex-shrink-0" style="width:24px; height:24px; background-color:var(--bs-primary); font-size:12px; font-family:var(--fuente-titulos); font-weight:700;">${i+1}</div>
+                            <div style="font-size:14px; color:var(--bs-dark); padding-top:2px;">${o}</div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
 
-                        <!-- Orden del Día -->
-                        <div class="card border-0 shadow-sm border-start border-4 border-primary mb-0" style="background-color: var(--bs-info);">
-                            <div class="card-body p-4">
-                                <h5 class="fw-bold text-dark mb-3" style="font-family: var(--fuente-titulos);">Orden del Día / Temas</h5>
-                                <p class="text-muted mb-0 fw-medium" id="detalleOrden" style="white-space: pre-wrap; line-height: 1.6;">Aquí va el orden del día...</p>
-                            </div>
-                        </div>
-
-                    </div>
-                    <!-- El footer del modal cambia según los permisos y el estado, en el futuro se manejará dinámicamente -->
-                    <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-secondary text-sm-custom fw-semibold" data-bs-dismiss="modal">Cerrar</button>
-                        
-                        <div id="accionesPresidente" class="d-none gap-2">
-                            <button class="btn btn-brand text-sm-custom fw-semibold"><i class="fa-solid fa-pen-to-square me-2"></i> Redactar Acta</button>
-                        </div>
+        <!-- ASISTENCIAS -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between flex-wrap gap-2 mb-4">
+                    <div>
+                        <h3 class="mb-0" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Confirmación de Asistencia</h3>
+                        <span style="font-size:12px; color:var(--color-texto);">${total} viviendas convocadas</span>
                     </div>
                 </div>
+
+                <!-- Barra tricolor -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:12px; color:var(--color-texto);">
+                        <span><strong style="color:var(--bs-dark);">${Math.round(ptConf)}%</strong> confirmado</span>
+                        <span>${confs}/${total} viviendas</span>
+                    </div>
+                    <div class="progress" style="height:12px; border-radius:10px; background-color:var(--color-fondo-formularios);">
+                        <div class="progress-bar bg-success" style="width: ${ptConf}%"></div>
+                        <div class="progress-bar bg-danger" style="width: ${ptRech}%"></div>
+                        <div class="progress-bar bg-secondary" style="width: ${ptPend}%"></div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:12px; color:var(--color-texto);">
+                        <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-success" style="width:10px;height:10px;"></span> Confirmadas (${confs})</div>
+                        <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-danger" style="width:10px;height:10px;"></span> No asisten (${rechs})</div>
+                        <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-secondary" style="width:10px;height:10px;"></span> Pendientes (${pends})</div>
+                    </div>
+                </div>
+
+                <!-- Tabla Listado -->
+                <div class="border rounded-2 overflow-hidden">
+                    <div class="d-flex p-2" style="background-color: var(--color-fondo-formularios); font-size:12px; font-weight:600; color:var(--color-texto);">
+                        <div class="flex-grow-1 px-2">Vivienda</div>
+                        <div class="text-center px-2" style="width:80px;">Estado</div>
+                        <div class="text-end px-2" style="width:90px;">Respuesta</div>
+                    </div>
+                    ${r.asistencias.map((a, i) => {
+                        let icon = '', bg = '', txtC = '', strEst = '', bcolor = '';
+                        if(a.confirmacion === 'confirmada') { icon='bi-person-check'; bg='rgba(92,178,68,0.1)'; txtC='var(--bs-success)'; strEst='Asiste'; bcolor='var(--bs-success)';}
+                        else if(a.confirmacion === 'rechazada') { icon='bi-person-x'; bg='rgba(164,30,52,0.1)'; txtC='var(--bs-danger)'; strEst='No asiste'; bcolor='var(--bs-danger)';}
+                        else { icon='bi-person-dash'; bg='var(--color-fondo-formularios)'; txtC='var(--color-texto)'; strEst='Pendiente'; bcolor='var(--color-texto)';}
+                        
+                        const rowBg = i%2!==0 ? 'bg-white' : 'var(--bs-secondary)';
+                        const fresp = a.fechaRespuesta ? a.fechaRespuesta.split('-').slice(1).reverse().join('/') : '-';
+
+                        return `
+                        <div class="d-flex align-items-center p-2 border-top" style="background-color:${rowBg};">
+                            <div class="flex-grow-1 px-2 d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width:28px; height:28px; background-color:${bg}; color:${txtC};"><i class="bi ${icon}"></i></div>
+                                <div class="lh-1">
+                                    <div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${a.piso}</div>
+                                </div>
+                            </div>
+                            <div class="text-center px-2" style="width:80px;">
+                                <span style="background-color:${bg}; color:${bcolor}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:500;">${strEst}</span>
+                            </div>
+                            <div class="text-end px-2" style="width:90px; font-size:12px; color:var(--color-texto);">${fresp}</div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                ${userRol === 'presidente' ? `
+                <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                    <button class="btn btn-outline-primary flex-grow-1 fw-semibold" onclick="app.abrirFormularioEditar('${r.id}')"><i class="bi bi-pencil"></i> Editar</button>
+                    <button class="btn btn-outline-danger flex-grow-1 fw-semibold" onclick="app.eliminarReunion('${r.id}')"><i class="bi bi-trash"></i> Eliminar</button>
+                </div>
+                ` : ''}
             </div>
-    </div>
-</div>
-<!-- ======================================================= -->
-<!-- SCRIPT PARA PASAR DATOS DE LA TARJETA AL MODAL          -->
-<!-- ======================================================= -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const detalleModal = document.getElementById('modalDetalleReunion');
-    if(detalleModal) {
-        detalleModal.addEventListener('show.bs.modal', event => {
-            // Botón que disparó el modal
-            const button = event.relatedTarget;
+        </div>
+        `;
+
+        document.getElementById('detalle-content').innerHTML = html;
+        this.showView('vista-detalle');
+    },
+
+    // 🟢 FUNCIONES AJAX (CONEXIÓN AL CONTROLADOR) 🟢
+    crearReunion: async function(e) {
+        e.preventDefault();
+        
+        const id_reunion = document.getElementById('form-id').value;
+        const titulo = document.getElementById('form-titulo').value;
+        const desc = document.getElementById('form-desc').value;
+        const fecha = document.getElementById('form-fecha').value;
+        const hora = document.getElementById('form-hora').value;
+        const lugar = document.getElementById('form-lugar').value;
+        const orden = document.getElementById('form-orden').value.split('\n').filter(o => o.trim()!=='');
+        
+        const formData = new FormData();
+        formData.append('titulo', titulo);
+        formData.append('descripcion', desc);
+        formData.append('fecha', fecha);
+        formData.append('hora', hora);
+        formData.append('lugar', lugar);
+        formData.append('orden_del_dia', JSON.stringify(orden));
+        if (id_reunion) formData.append('id_reunion', id_reunion);
+
+        const endPoint = id_reunion ? 'index.php?route=reunion/editarReunionAction' : 'index.php?route=reunion/crearReunionAction';
+
+        try {
+            const response = await fetch(endPoint, {
+                method: 'POST',
+                body: formData
+            });
             
-            // Extraer info de los data-attributes
-            const titulo = button.getAttribute('data-titulo');
-            const fecha = button.getAttribute('data-fecha');
-            const hora = button.getAttribute('data-hora');
-            const lugar = button.getAttribute('data-lugar');
-            const estado = button.getAttribute('data-estado');
-            const orden = button.getAttribute('data-orden');
-            
-            // Actualizar el contenido del modal
-            document.getElementById('detalleTitulo').textContent = titulo;
-            document.getElementById('detalleFechaHora').textContent = fecha + ' a las ' + hora + 'h';
-            document.getElementById('detalleLugar').textContent = lugar;
-            document.getElementById('detalleOrden').textContent = orden;
-            
-            const badgeEstado = document.getElementById('detalleEstado');
-            badgeEstado.textContent = estado;
-            
-            // Cambiar el color del badge del estado según si está finalizada o pendiente
-            if(estado === 'Finalizada') {
-                badgeEstado.className = 'badge bg-success px-3 py-1 rounded-2 shadow-sm text-white fw-bold';
-            } else {
-                badgeEstado.className = 'badge bg-warning px-3 py-1 rounded-2 shadow-sm fw-bold';
-                badgeEstado.style.color = '#000'; // Fix para el texto negro en fondo amarillo
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error("El servidor no devolvió JSON. Respuesta íntegra de PHP:", responseText);
+                this.showToast('Error del servidor. Pulsa F12 y revisa la pestaña Consola', 'danger');
+                return;
             }
 
-            // Mostrar acciones de presidente solo si está pendiente (Opcional visual)
-            const acciones = document.getElementById('accionesPresidente');
-            <?php if ($rol === 'presidente'): ?>
-                if(estado === 'Pendiente') {
-                    acciones.classList.remove('d-none');
-                    acciones.classList.add('d-flex');
-                } else {
-                    acciones.classList.add('d-none');
-                    acciones.classList.remove('d-flex');
-                }
-            <?php endif; ?>
-        });
+            if (data.success) {
+                this.showToast(id_reunion ? 'Reunión actualizada' : 'Reunión convocada correctamente', 'success');
+                setTimeout(() => window.location.reload(), 1000); // Recargamos para traer datos frescos del servidor
+            } else {
+                this.showToast(data.message || 'Error en la operación', 'danger');
+            }
+        } catch (error) {
+            this.showToast('Error de conexión con el servidor', 'danger');
+        }
+    },
+
+    eliminarReunion: async function(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar esta reunión de forma permanente? Se borrarán también todas las asistencias registradas.')) return;
+        
+        const formData = new FormData();
+        formData.append('id_reunion', id);
+
+        try {
+            const response = await fetch('index.php?route=reunion/eliminarReunionAction', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const responseText = await response.text();
+            const data = JSON.parse(responseText);
+            
+            if (data.success) {
+                this.showToast('Reunión eliminada', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                this.showToast('Error al eliminar', 'danger');
+            }
+        } catch (error) {
+            this.showToast('Error de conexión', 'danger');
+        }
+    },
+
+    enviarAsistencia: async function(idReunion, confirmacion) {
+        const formData = new FormData();
+        formData.append('id_reunion', idReunion);
+        formData.append('confirmacion', confirmacion);
+
+        try {
+            const response = await fetch('index.php?route=reunion/confirmarAsistenciaAction', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const responseText = await response.text();
+            const data = JSON.parse(responseText);
+            
+            if (data.success) {
+                this.showToast('Asistencia actualizada', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                this.showToast(data.message || 'Error al actualizar', 'danger');
+            }
+        } catch (error) {
+            this.showToast('Error de conexión', 'danger');
+        }
     }
-});
+};
+
+// Arrancamos la lógica al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => app.init());
 </script>

@@ -1,6 +1,7 @@
 <?php
 // Extraemos los datos de la sesión (se guardaron en el AuthController al hacer login)
-$rol = $_SESSION['vivienda']['rol'] ?? 'vecino';
+$rolReal = $_SESSION['vivienda']['rol'] ?? 'vecino';
+$rol = $_SESSION['modo_vista'] ?? $rolReal;
 $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
 $nombreVivienda = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
 
@@ -17,7 +18,7 @@ $badgeClass = ($rol === 'presidente') ? 'bg-success' : 'bg-secondary';
             </button>
 
             <div class="d-flex align-items-center gap-2">
-                <img src="public/assets/img/logo2.png" alt="Logo" style="width: 40px; height: 40px; object-fit: cover; filter: brightness(0) invert(1);">
+                <img src="public/assets/img/logo2.png" alt="Logo" style="width:40px; height: 40px; object-fit: cover; filter: brightness(0) invert(1);">
                 <span class="fs-5 fw-bold text-white" style="font-family: var(--fuente-titulos);">GestFincas</span>
 
                 <span class="badge <?= $badgeClass ?> text-white text-uppercase ms-1 d-none d-sm-inline-block" style="font-size: 0.65rem; padding: 0.4em 0.8em; letter-spacing: 0.5px;">
