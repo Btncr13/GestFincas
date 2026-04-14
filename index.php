@@ -1,5 +1,6 @@
 <?php
 // /index.php (EN LA RAÍZ DEL PROYECTO)
+//http://localhost/proyectos/repogestfincas/JR_M26_ComunidadVecinos/index.php
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -28,3 +29,4 @@ runRouter($config);
 require_once "src/views/components/footer.php";
 
 ob_end_flush();
+?>

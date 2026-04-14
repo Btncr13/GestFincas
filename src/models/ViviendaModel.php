@@ -1,12 +1,10 @@
 <?php
 
-require_once "../../config/BaseModel.php";
+require_once "config/BaseModel.php";
 
 class ViviendaModel extends BaseModel
 {
-    /**
-     * Obtener información de una vivienda y su comunidad
-     */
+    // ----------------------------------------------- OBTENER DETALLE DE LAS VIVIENDAS
     public function getViviendaDetalle($id_vivienda)
     {
         try {

@@ -106,3 +106,4 @@ class UsuarioModel extends BaseModel
         return $stmt->fetch() !== false;
     }
 }
+?>

@@ -1,5 +1,6 @@
 <?php
-require_once 'BaseModel.php';
+
+require_once "config/BaseModel.php";
 
 class EspacioModel extends BaseModel {
 
@@ -87,3 +88,4 @@ class EspacioModel extends BaseModel {
         }
     }
 }
+?>

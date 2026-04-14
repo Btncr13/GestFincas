@@ -11,7 +11,7 @@ class ReservaController {
         // Verificación estricta de sesión (Seguridad Básica)
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['id_usuario'])) {
-            header("Location: /auth/login"); // Redirigir si no está autenticado
+            header("Location: index.php?route=auth/login"); // Redirigir si no está autenticado
             exit();
         }
     }
@@ -24,7 +24,7 @@ class ReservaController {
         $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
         $misReservas = $this->reservaModel->getReservasUsuario($id_usuario);
 
-        require_once __DIR__ . '/../views/reservas/mis_reservas.php';
+        require_once __DIR__ . '/../views/reservas/vecino.php';
     }
 
     // ----------------------------------------- API: CREAR RESERVA SE RECOGEN DATOS DE VENTANA MODAL

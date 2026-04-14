@@ -1,8 +1,11 @@
 <?php
-require_once 'BaseModel.php';
+
+require_once "config/BaseModel.php";
 
 class ReservaModel extends BaseModel {
 
+
+    // ---------------------------------------------------- OBTENER ESPACIOS DISPONIBLES
     public function getEspaciosDisponibles($id_comunidad) {
         try {
             $sql = "SELECT e.id_espacio, e.nombre, e.descripcion, ec.id_espacios_comunidad
@@ -21,6 +24,7 @@ class ReservaModel extends BaseModel {
         }
     }
 
+    // ----------------------------------------------------- OBTENER NORMAS ESPACIOS
     public function getNormasByEspacio($id_espacios_comunidad) {
         try {
             $sql = "SELECT descripcion FROM espacios_normas 
@@ -37,6 +41,7 @@ class ReservaModel extends BaseModel {
         }
     }
 
+    // ----------------------------------------------------- VERIFICAR LIMITE DE USO EN ESPACIOS
     public function verificarCuotas($id_usuario, $fecha) {
         try {
             // Regla: 1 al día
@@ -71,7 +76,8 @@ class ReservaModel extends BaseModel {
             return ['status' => false, 'msg' => 'Error interno al validar las cuotas. Inténtelo más tarde.'];
         }
     }
-
+    
+    // ------------------------------------------------------------ CREAR RESERVA
     public function crearReserva($data) {
         try {
             $sql = "INSERT INTO reservas (id_usuario, id_espacio, fecha, hora_inicio, hora_fin) 
@@ -93,6 +99,7 @@ class ReservaModel extends BaseModel {
         }
     }
 
+    // --------------------------------------------------------------- OBTENER RESERVAS DEL USUARIO
     public function getReservasUsuario($id_usuario) {
         try {
             $sql = "SELECT r.id_reserva, r.fecha, r.hora_inicio, r.hora_fin, e.nombre as espacio_nombre 
@@ -111,6 +118,8 @@ class ReservaModel extends BaseModel {
             return [];
         }
     }
+
+    // ---------------------------------------------------------------- ELIMINAR RESERVA
     public function eliminarReserva($id_reserva, $id_usuario) {
         try {
             // El WHERE id_usuario = :id_usuario es crucial para RBAC (el vecino solo borra lo suyo)
@@ -135,6 +144,7 @@ class ReservaModel extends BaseModel {
         }
     }
 
+    // ----------------------------------------------------------------- MODIFICAR RESERVA
     public function modificarReserva($data) {
         try {
             // Actualizamos los datos siempre y cuando la reserva pertenezca al usuario
@@ -162,8 +172,13 @@ class ReservaModel extends BaseModel {
             return false;
         }
     }
+
+
 //___________ MÉTODOS PARA PANEL DE PRESIDENTE (GESTIÓN DE RESERVAS) __________
 
+
+
+   // ----------------------------------------------------------- OBTENER TODAS LAS RESERVAS DE LA COMUNIDAD
    public function getTodasLasReservasComunidad($id_comunidad) {
         try {
             // Obtenemos los datos del vecino y calculamos si es Activa/Inactiva dinámicamente
@@ -188,3 +203,4 @@ class ReservaModel extends BaseModel {
         }
     }
 }
+?>
