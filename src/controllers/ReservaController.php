@@ -4,9 +4,9 @@ require_once __DIR__ . '/../models/ReservaModel.php';
 class ReservaController {
     private $reservaModel;
 
-    public function __construct() {
-        // En un framework real se inyectaría por dependencias, aquí lo instanciamos
-        $this->reservaModel = new ReservaModel();
+    public function __construct($pdo) {
+
+        $this->reservaModel = new ReservaModel($pdo);
         
         // Verificación estricta de sesión (Seguridad Básica)
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -16,19 +16,18 @@ class ReservaController {
         }
     }
 
-    // Vista Principal del Vecino
+    // --------------------------------------- VISTA GENERAL DE LAS RESERVAS VECINO
     public function index() {
         $id_usuario = $_SESSION['id_usuario'];
         $id_comunidad = $_SESSION['id_comunidad']; // Asumimos que al loguearse se guardó su comunidad
         
         $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
         $misReservas = $this->reservaModel->getReservasUsuario($id_usuario);
-        
-        // Cargamos la vista, pasándole las variables necesarias
+
         require_once __DIR__ . '/../views/reservas/mis_reservas.php';
     }
 
-    // API: Crear Reserva
+    // ----------------------------------------- API: CREAR RESERVA SE RECOGEN DATOS DE VENTANA MODAL
     public function store() {
         header('Content-Type: application/json');
         
@@ -62,7 +61,7 @@ class ReservaController {
         }
     }
 
-    // API: Eliminar Reserva
+    // -------------------------------------------------------- API: ELIMINAR LA RESERVA
     public function destroy() {
         header('Content-Type: application/json');
         $id_reserva = $_POST['id_reserva'] ?? null;
@@ -76,7 +75,7 @@ class ReservaController {
         }
     }
 
-    // API: Obtener Normas para el Card dinámico
+    // --------------------------------------------------------- API: NORMAS PARA CARD DINÁMICO
     public function getNormas($id_espacios_comunidad) {
         header('Content-Type: application/json');
         $normas = $this->reservaModel->getNormasByEspacio($id_espacios_comunidad);

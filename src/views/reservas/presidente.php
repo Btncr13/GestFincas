@@ -1,10 +1,4 @@
-<?php 
-// Simulación de validación de sesión (Debe venir del controlador)
-// require_once __DIR__ . '/../../controllers/AuthController.php';
-// AuthController::verificarRol('PRESIDENTE');
-
-include __DIR__ . '/../components/head.php'; 
-?>
+<?php include 'src/views/components/topbar.php'; ?>
 
 <main class="container py-5">
     <div class="row justify-content-center">
@@ -115,5 +109,3 @@ include __DIR__ . '/../components/head.php';
         </div>
     </div>
 </main>
-
-<?php include __DIR__ . '/../components/footer.php'; ?>

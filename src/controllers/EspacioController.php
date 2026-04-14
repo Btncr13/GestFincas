@@ -6,20 +6,20 @@ class EspacioController {
     private $espacioModel;
     private $reservaModel;
 
-    public function __construct() {
-        $this->espacioModel = new EspacioModel();
-        $this->reservaModel = new ReservaModel();
+    public function __construct($pdo) {
+        $this->espacioModel = new EspacioModel($pdo);
+        $this->reservaModel = new ReservaModel($pdo);
         
         if (session_status() === PHP_SESSION_NONE) session_start();
         
-        // RBAC: Validar que sea Presidente (ej. rol_id = 2) o Admin (rol_id = 1)
-        if (!isset($_SESSION['id_usuario']) || !in_array($_SESSION['rol_id'],)) {
+        //Validar que sea Presidente 
+       if (!isset($_SESSION['id_usuario']) || !isset($_SESSION['rol']) ||
+            $_SESSION['rol'] !== 'presidente') {
             header("HTTP/1.1 403 Forbidden");
-            exit('Acceso denegado. Se requiere perfil de Presidente o Administrador.');
-        }
+            exit('Acceso denegado. Solo el Presidente puede acceder a esta sección.');}
     }
 
-    // Vista Principal del Presidente con gestión de espacios y reservas
+    // --------------------------------------------- VISTA GENERAL GESTION DE RESERVAS PRESIDENTE
     public function index() {
         $id_comunidad = $_SESSION['id_comunidad'];
         
@@ -30,7 +30,7 @@ class EspacioController {
         require_once __DIR__ . '/../views/reservas/presidente.php';
     }
 
-    // API: Bloquear/Desbloquear un espacio
+    // ---------------------------------------------- API: BLOQUEAR/DESBLOQUEAR UN ESPACIO
     public function toggleEstado() {
         header('Content-Type: application/json');
         
