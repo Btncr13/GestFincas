@@ -274,3 +274,19 @@
 [data-theme="dark"] .logo-adaptable {
     filter: brightness(0) invert(1);
 }
+
+/* Arreglo para las Pestañas (Tabs) en Modo Oscuro */
+[data-theme="dark"] .nav-tabs .nav-link.active {
+    background-color: var(--bs-light) !important; /* Usa el fondo oscuro de las tarjetas */
+    color: var(--bs-dark) !important; /* Texto claro azulado */
+    border-color: var(--color-borde) var(--color-borde) var(--bs-light) !important;
+}
+
+[data-theme="dark"] .nav-tabs {
+    border-bottom-color: var(--color-borde) !important;
+}
+
+[data-theme="dark"] .nav-tabs .nav-link:not(.active):hover {
+    border-color: var(--color-borde) var(--color-borde) transparent !important;
+    color: #FFFFFF !important;
+}

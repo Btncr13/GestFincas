@@ -79,35 +79,29 @@
 
 /* ---------------------------------- PANEL VIVIENDA*/
 
-/* ---------------------------------- PANEL PRESIDENTE ---------------------------------- */
 
-/* Tarjetas de métricas superiores */
-.metric-card {
-    border-radius: var(--radio-lg);
-    border: 1px solid var(--color-borde);
-    background-color: var(--bs-light);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Hover fluido para tarjetas de módulos del Dashboard */
+.module-card {
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
 }
 
-.metric-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--sombra-suave);
+.module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--sombra-media) !important;
 }
 
-.metric-value {
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: var(--fuente-titulos);
+/* Efecto de navegación en el menú lateral (Sidebar) */
+.sidebar-link {
+    transition: all 0.2s ease-in-out !important;
 }
 
-.metric-icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radio-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+.sidebar-link:not(.active):hover {
+    background-color: var(--color--hover) !important;
+    transform: translateX(4px);
+}
+
+[data-theme="dark"] .sidebar-link:not(.active):hover {
+    color: #FFFFFF !important;
 }
 
 /* Sección de Acciones Pendientes */
@@ -182,3 +176,4 @@
     color: white;
     margin-bottom: var(--espacio-md);
 }
+
