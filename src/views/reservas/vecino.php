@@ -112,5 +112,8 @@
 
             </div>
         </main>
+        <!-- Aquí se incluye el modal para crear la reserva -->
+        <?php include 'src/views/components/reservas/modalCrear.php'; ?>
     </div>
 </div>
+<script src="/public/js/reservas/modalCrear.js"></script>
