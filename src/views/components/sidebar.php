@@ -72,7 +72,7 @@ $dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ?
 
             <li class="nav-item">
                 <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/reservas') ? 'active fw-bold' : '' ?>"
-                    href="#"
+                    href="index.php?route=reserva/index"
                     style="background-color: <?= ($ruta_actual == 'auth/reservas') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'auth/reservas') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-calendar-check me-2"></i> Reservas

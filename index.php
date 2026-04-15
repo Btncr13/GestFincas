@@ -1,7 +1,7 @@
 <?php
 // /index.php (EN LA RAÍZ DEL PROYECTO)
 //http://localhost/proyectos/repogestfincas/JR_M26_ComunidadVecinos/index.php
-
+//http://localhost/JR_M26_ComunidadVecinos/index.php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

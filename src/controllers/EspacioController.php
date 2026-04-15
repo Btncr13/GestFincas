@@ -12,19 +12,23 @@ class EspacioController {
         
         if (session_status() === PHP_SESSION_NONE) session_start();
         
-        //Validar que sea Presidente 
-       if (!isset($_SESSION['id_usuario']) || !isset($_SESSION['rol']) ||
-            $_SESSION['rol'] !== 'presidente') {
+        // CORRECCIÓN 1: Validar que sea Presidente leyendo del array 'vivienda'
+       if (!isset($_SESSION['vivienda']['id_usuario']) || !isset($_SESSION['vivienda']['rol']) ||
+            $_SESSION['vivienda']['rol'] !== 'presidente') {
             header("HTTP/1.1 403 Forbidden");
-            exit('Acceso denegado. Solo el Presidente puede acceder a esta sección.');}
+            exit('Acceso denegado. Solo el Presidente puede acceder a esta sección.');
+       }
     }
 
     // --------------------------------------------- VISTA GENERAL GESTION DE RESERVAS PRESIDENTE
     public function index() {
-        $id_comunidad = $_SESSION['id_comunidad'];
+        // CORRECCIÓN 2: Extraer id_comunidad desde el array 'vivienda'
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
         
-        // Obtenemos los datos para nutrir la vista
-        $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
+        // CORRECCIÓN 3: Usar EspacioModel para traer los espacios (incluyendo el estado)
+        $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
+        
+        // La tabla de auditoría sí se trae desde ReservaModel
         $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
         
         require_once __DIR__ . '/../views/reservas/presidente.php';

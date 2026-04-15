@@ -4,34 +4,34 @@ require_once __DIR__ . '/../models/ReservaModel.php';
 class ReservaController {
     private $reservaModel;
 
-    public function __construct($pdo) {
-
+ public function __construct($pdo) {
         $this->reservaModel = new ReservaModel($pdo);
         
-        // Verificación estricta de sesión (Seguridad Básica)
         if (session_status() === PHP_SESSION_NONE) session_start();
-        if (!isset($_SESSION['id_usuario'])) {
-            header("Location: index.php?route=auth/login"); // Redirigir si no está autenticado
+        
+        // CORRECCIÓN: Comprobamos el array correcto
+        if (!isset($_SESSION['vivienda'])) {
+            header("Location: index.php?route=auth/login");
             exit();
         }
     }
 
-    // --------------------------------------- VISTA GENERAL DE LAS RESERVAS VECINO
     public function index() {
-        $id_usuario = $_SESSION['id_usuario'];
-        $id_comunidad = $_SESSION['id_comunidad']; // Asumimos que al loguearse se guardó su comunidad
+        // CORRECCIÓN: Extraemos los IDs desde dentro de 'vivienda'
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad']; 
         
         $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
         $misReservas = $this->reservaModel->getReservasUsuario($id_usuario);
 
         require_once __DIR__ . '/../views/reservas/vecino.php';
     }
-
     // ----------------------------------------- API: CREAR RESERVA SE RECOGEN DATOS DE VENTANA MODAL
     public function store() {
         header('Content-Type: application/json');
         
-        $id_usuario = $_SESSION['id_usuario'];
+        
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
         $data = [
             'id_usuario'  => $id_usuario,
             'id_espacio'  => $_POST['id_espacio'] ?? null,
@@ -47,12 +47,6 @@ class ReservaController {
             return;
         }
 
-        // 2. Proactivo: Validación de solapamiento (Lógica a implementar en el modelo)
-        // if ($this->reservaModel->existeSolapamiento($data['id_espacio'], $data['fecha'], $data['hora_inicio'], $data['hora_fin'])) {
-        //     echo json_encode(['success' => false, 'message' => 'El espacio ya está reservado en ese horario.']);
-        //     return;
-        // }
-
         if ($this->reservaModel->crearReserva($data)) {
             echo json_encode(['success' => true, 'message' => 'Reserva confirmada.']);
         } else {
@@ -65,7 +59,9 @@ class ReservaController {
     public function destroy() {
         header('Content-Type: application/json');
         $id_reserva = $_POST['id_reserva'] ?? null;
-        $id_usuario = $_SESSION['id_usuario'];
+        
+        // CORRECCIÓN: Extraer el ID de usuario desde el array 'vivienda'
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
 
         if ($this->reservaModel->eliminarReserva($id_reserva, $id_usuario)) {
             echo json_encode(['success' => true, 'message' => 'Reserva eliminada con éxito.']);

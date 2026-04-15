@@ -60,14 +60,13 @@ class UsuarioModel extends BaseModel
     {
         try {
             // Añadimos el JOIN con direccion para sacar la calle y el número
-            $sql = "SELECT u.*, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad, 
+            $sql = "SELECT u.*, c.id_comunidad, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad, 
                            d.calle, d.numero
                     FROM usuario u
                     JOIN vivienda v ON u.id_vivienda = v.id_vivienda
                     JOIN comunidad c ON v.id_comunidad = c.id_comunidad
                     JOIN direccion d ON c.id_direccion = d.id_direccion
                     WHERE u.email = :email AND v.nombre = :nombre_vivienda LIMIT 1";
-
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 'email' => trim($email),
