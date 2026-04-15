@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-04-2026 a las 16:16:29
+-- Tiempo de generación: 15-04-2026 a las 15:53:32
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -95,38 +95,16 @@ INSERT INTO `direccion` (`id_direccion`, `tipo`, `calle`, `numero`, `edificio`, 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `espacios`
---
-
-CREATE TABLE `espacios` (
-  `id_espacio` int(10) UNSIGNED NOT NULL,
-  `nombre_espacio` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `espacios`
---
-
-INSERT INTO `espacios` (`id_espacio`, `nombre_espacio`) VALUES
-(1, 'Pista fútbol 1'),
-(2, 'Pista fútbol 2'),
-(3, 'Pista pádel 1'),
-(4, 'Pista pádel 2'),
-(5, 'Gimnasio'),
-(6, 'Sala polivalente'),
-(8, 'Solarium'),
-(9, 'Sauna');
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `espacios_comunidad`
 --
 
 CREATE TABLE `espacios_comunidad` (
   `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
   `id_comunidad` int(10) UNSIGNED NOT NULL,
-  `id_espacio` int(10) UNSIGNED NOT NULL,
+  `nombre_espacio` varchar(100) NOT NULL,
+  `max_personas` int(4) UNSIGNED NOT NULL,
+  `hora_apertura` time NOT NULL,
+  `hora_cierre` time NOT NULL,
   `duracion_uso` int(10) UNSIGNED NOT NULL,
   `bloqueado` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
   `motivo` varchar(255) DEFAULT NULL,
@@ -166,7 +144,7 @@ CREATE TABLE `mancomunidad` (
 CREATE TABLE `reservas` (
   `id_reservas` int(10) UNSIGNED NOT NULL,
   `id_usuario` int(10) UNSIGNED NOT NULL,
-  `id_espacio` int(10) UNSIGNED NOT NULL,
+  `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
   `fecha_reserva` date NOT NULL,
   `hora_inicio` time NOT NULL,
   `hora_fin` time NOT NULL,
@@ -246,18 +224,11 @@ ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
 
 --
--- Indices de la tabla `espacios`
---
-ALTER TABLE `espacios`
-  ADD PRIMARY KEY (`id_espacio`);
-
---
 -- Indices de la tabla `espacios_comunidad`
 --
 ALTER TABLE `espacios_comunidad`
   ADD PRIMARY KEY (`id_espacios_comunidad`),
-  ADD KEY `id_comunidad` (`id_comunidad`),
-  ADD KEY `id_espacio` (`id_espacio`);
+  ADD KEY `id_comunidad` (`id_comunidad`);
 
 --
 -- Indices de la tabla `espacios_normas`
@@ -279,7 +250,7 @@ ALTER TABLE `mancomunidad`
 ALTER TABLE `reservas`
   ADD PRIMARY KEY (`id_reservas`),
   ADD KEY `id_usuario` (`id_usuario`),
-  ADD KEY `id_espacio` (`id_espacio`);
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
 
 --
 -- Indices de la tabla `usuario`
@@ -317,12 +288,6 @@ ALTER TABLE `comunidad`
 --
 ALTER TABLE `direccion`
   MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT de la tabla `espacios`
---
-ALTER TABLE `espacios`
-  MODIFY `id_espacio` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `espacios_comunidad`
@@ -381,8 +346,7 @@ ALTER TABLE `comunidad`
 -- Filtros para la tabla `espacios_comunidad`
 --
 ALTER TABLE `espacios_comunidad`
-  ADD CONSTRAINT `fk_ce_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_ce_espacio` FOREIGN KEY (`id_espacio`) REFERENCES `espacios` (`id_espacio`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_ce_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `espacios_normas`
@@ -400,7 +364,7 @@ ALTER TABLE `mancomunidad`
 -- Filtros para la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  ADD CONSTRAINT `fk_reservas_espacio` FOREIGN KEY (`id_espacio`) REFERENCES `espacios` (`id_espacio`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_reserva_espacio` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
