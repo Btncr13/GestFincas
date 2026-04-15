@@ -260,7 +260,7 @@ const app = {
 
         // Render Próximas
         const proxHtml = proximas.length === 0 ? 
-             `<div class="text-center py-5 bg-white rounded-3 shadow-sm">
+             `<div class="text-center py-5 rounded-3 shadow-sm style="background-color: var(--bs-light);">
                 <i class="bi bi-calendar-check text-muted" style="font-size: 48px;"></i>
                 <p class="mt-2 mb-1 text-muted" style="font-size:14px;">No hay reuniones próximas convocadas</p>
                 <small class="text-muted d-block" style="font-size: 11px;">Comunidad actual ID: ${<?= json_encode($id_comunidad ?? 'Nulo') ?>}</small>
@@ -319,7 +319,7 @@ const app = {
 
         // Render Pasadas
         const pasHtml = pasadas.length === 0 ? 
-            `<div class="text-center py-5 bg-white rounded-3 shadow-sm"><i class="bi bi-file-earmark-text text-muted" style="font-size: 48px;"></i><p class="mt-2 text-muted" style="font-size:14px;">No hay reuniones pasadas registradas</p></div>` : 
+            `<div class="text-center py-5 rounded-3 style="background-color: var(--bs-light); shadow-sm"><i class="bi bi-file-earmark-text text-muted" style="font-size: 48px;"></i><p class="mt-2 text-muted" style="font-size:14px;">No hay reuniones pasadas registradas</p></div>` : 
             pasadas.map(r => {
                 const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
                 return `
@@ -487,7 +487,7 @@ const app = {
                         else if(a.confirmacion === 'rechazada') { icon='bi-person-x'; bg='rgba(164,30,52,0.1)'; txtC='var(--bs-danger)'; strEst='No asiste'; bcolor='var(--bs-danger)';}
                         else { icon='bi-person-dash'; bg='var(--color-fondo-formularios)'; txtC='var(--color-texto)'; strEst='Pendiente'; bcolor='var(--color-texto)';}
                         
-                        const rowBg = i%2!==0 ? 'bg-white' : 'var(--bs-secondary)';
+                        const rowBg = i%2!==0 ? 'var(--bs-light)' : 'var(--bs-secondary)';
                         const fresp = a.fechaRespuesta ? a.fechaRespuesta.split('-').slice(1).reverse().join('/') : '-';
 
                         return `

@@ -101,20 +101,20 @@ class UsuarioModel extends BaseModel
     public function refrescarSesion($id_usuario)
     {
         try {
-            $sql = "SELECT u.*, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad, c.id_comunidad,
-                           d.calle, d.numero
+            $sql = "SELECT u.*, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad, 
+                    c.id_comunidad, d.calle, d.numero
                     FROM usuario u
                     JOIN vivienda v ON u.id_vivienda = v.id_vivienda
                     JOIN comunidad c ON v.id_comunidad = c.id_comunidad
                     JOIN direccion d ON c.id_direccion = d.id_direccion
                     WHERE u.id_usuario = :id_usuario LIMIT 1";
-
+                    
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id_usuario' => $id_usuario]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
+            
             if ($usuario) {
-                unset($usuario['password']); // Limpiar datos sensibles
+                unset($usuario['password']); // Limpiamos la contraseña por seguridad
                 return $usuario;
             }
             return false;
