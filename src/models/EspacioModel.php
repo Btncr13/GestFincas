@@ -1,68 +1,50 @@
 <?php
-
-require_once "config/BaseModel.php";
+// Asegúrate de que la ruta a BaseModel sea la correcta en tu proyecto
+require_once __DIR__ . '/../../config/BaseModel.php'; 
 
 class EspacioModel extends BaseModel {
 
-    public function crearEspacio($id_comunidad, $nombre, $descripcion) {
+    public function __construct($pdo) {
+        parent::__construct($pdo);
+    }
+
+    // El presidente crea un espacio directamente en su comunidad
+    public function crearEspacio($data) {
         try {
-            // Iniciamos la transacción para asegurar consistencia
-            $this->db->beginTransaction();
-
-            // 1. Insertamos en el catálogo de espacios
-            $sqlEspacio = "INSERT INTO espacios (nombre, descripcion) VALUES (:nombre, :descripcion)";
-            $stmt = $this->db->prepare($sqlEspacio);
-            $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
-            $stmt->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
-            $stmt->execute();
+            $sql = "INSERT INTO espacios_comunidad 
+                    (id_comunidad, nombre_espacio, max_personas, hora_apertura, hora_cierre, duracion_uso, bloqueado) 
+                    VALUES (:id_comunidad, :nombre_espacio, :max_personas, :hora_apertura, :hora_cierre, :duracion_uso, 0)";
             
-            // Obtenemos el ID generado
-            $id_espacio = $this->db->lastInsertId();
-
-            // 2. Vinculamos el espacio a la comunidad específica del Presidente
-            // Asumimos que por defecto se crea con estado activo (1)
-            $sqlComunidad = "INSERT INTO espacios_comunidad (id_comunidad, id_espacio, estado) 
-                             VALUES (:id_comunidad, :id_espacio, 1)";
-            $stmtCom = $this->db->prepare($sqlComunidad);
-            $stmtCom->bindParam(':id_comunidad', $id_comunidad, PDO::PARAM_INT);
-            $stmtCom->bindParam(':id_espacio', $id_espacio, PDO::PARAM_INT);
-            $stmtCom->execute();
-
-            $this->db->commit();
-            return true;
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id_comunidad', $data['id_comunidad'], PDO::PARAM_INT);
+            $stmt->bindParam(':nombre_espacio', $data['nombre_espacio'], PDO::PARAM_STR);
+            $stmt->bindParam(':max_personas', $data['max_personas'], PDO::PARAM_INT);
+            $stmt->bindParam(':hora_apertura', $data['hora_apertura'], PDO::PARAM_STR);
+            $stmt->bindParam(':hora_cierre', $data['hora_cierre'], PDO::PARAM_STR);
+            $stmt->bindParam(':duracion_uso', $data['duracion_uso'], PDO::PARAM_INT);
+            
+            return $stmt->execute();
         } catch (PDOException $e) {
-            $this->db->rollBack();
             error_log("Error en crearEspacio: " . $e->getMessage());
             return false;
         }
     }
-    public function getEspaciosByComunidad($id_comunidad) {
-        try {
-            $sql = "SELECT e.id_espacio, e.nombre, e.descripcion, ec.id_espacios_comunidad, ec.estado
-                    FROM espacios e
-                    JOIN espacios_comunidad ec ON e.id_espacio = ec.id_espacio
-                    WHERE ec.id_comunidad = :id_comunidad";
-            
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id_comunidad', $id_comunidad, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Error en getEspaciosByComunidad: " . $e->getMessage());
-            return [];
-        }
-    }
 
-    public function modificarEspacio($id_espacio, $nombre, $descripcion) {
+    public function modificarEspacio($data) {
         try {
-            $sql = "UPDATE espacios 
-                    SET nombre = :nombre, descripcion = :descripcion 
-                    WHERE id_espacio = :id_espacio";
+            $sql = "UPDATE espacios_comunidad 
+                    SET nombre_espacio = :nombre_espacio, max_personas = :max_personas, 
+                        hora_apertura = :hora_apertura, hora_cierre = :hora_cierre, duracion_uso = :duracion_uso 
+                    WHERE id_espacios_comunidad = :id_espacios_comunidad AND id_comunidad = :id_comunidad";
+            
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
-            $stmt->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
-            $stmt->bindParam(':id_espacio', $id_espacio, PDO::PARAM_INT);
+            $stmt->bindParam(':nombre_espacio', $data['nombre_espacio'], PDO::PARAM_STR);
+            $stmt->bindParam(':max_personas', $data['max_personas'], PDO::PARAM_INT);
+            $stmt->bindParam(':hora_apertura', $data['hora_apertura'], PDO::PARAM_STR);
+            $stmt->bindParam(':hora_cierre', $data['hora_cierre'], PDO::PARAM_STR);
+            $stmt->bindParam(':duracion_uso', $data['duracion_uso'], PDO::PARAM_INT);
+            $stmt->bindParam(':id_espacios_comunidad', $data['id_espacios_comunidad'], PDO::PARAM_INT);
+            $stmt->bindParam(':id_comunidad', $data['id_comunidad'], PDO::PARAM_INT); // Seguridad RBAC
             
             return $stmt->execute() && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -71,14 +53,15 @@ class EspacioModel extends BaseModel {
         }
     }
 
-    // Borrado lógico o bloqueo de la instalación por mantenimiento o sanción
-    public function bloquearEspacio($id_espacios_comunidad, $estado) {
+    // 0 = Activo/Operativo, 1 = Bloqueado
+    public function bloquearEspacio($id_espacios_comunidad, $bloqueado, $motivo = null) {
         try {
             $sql = "UPDATE espacios_comunidad 
-                    SET estado = :estado 
+                    SET bloqueado = :bloqueado, motivo = :motivo 
                     WHERE id_espacios_comunidad = :id_espacios_comunidad";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':estado', $estado, PDO::PARAM_INT); // 0 = Inactivo, 1 = Activo
+            $stmt->bindParam(':bloqueado', $bloqueado, PDO::PARAM_INT);
+            $stmt->bindParam(':motivo', $motivo, PDO::PARAM_STR);
             $stmt->bindParam(':id_espacios_comunidad', $id_espacios_comunidad, PDO::PARAM_INT);
             
             return $stmt->execute() && $stmt->rowCount() > 0;
@@ -87,5 +70,17 @@ class EspacioModel extends BaseModel {
             return false;
         }
     }
+
+    public function getEspaciosByComunidad($id_comunidad) {
+        try {
+            $sql = "SELECT * FROM espacios_comunidad WHERE id_comunidad = :id_comunidad";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id_comunidad', $id_comunidad, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error en getEspaciosByComunidad: " . $e->getMessage());
+            return [];
+        }
+    }
 }
-?>

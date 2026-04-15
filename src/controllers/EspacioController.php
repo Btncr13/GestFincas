@@ -12,37 +12,79 @@ class EspacioController {
         
         if (session_status() === PHP_SESSION_NONE) session_start();
         
-        // CORRECCIÓN 1: Validar que sea Presidente leyendo del array 'vivienda'
-       if (!isset($_SESSION['vivienda']['id_usuario']) || !isset($_SESSION['vivienda']['rol']) ||
+        // RBAC: Validar que sea Presidente
+        if (!isset($_SESSION['vivienda']['id_usuario']) || !isset($_SESSION['vivienda']['rol']) ||
             $_SESSION['vivienda']['rol'] !== 'presidente') {
             header("HTTP/1.1 403 Forbidden");
             exit('Acceso denegado. Solo el Presidente puede acceder a esta sección.');
-       }
+        }
     }
 
-    // --------------------------------------------- VISTA GENERAL GESTION DE RESERVAS PRESIDENTE
     public function index() {
-        // CORRECCIÓN 2: Extraer id_comunidad desde el array 'vivienda'
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
         
-        // CORRECCIÓN 3: Usar EspacioModel para traer los espacios (incluyendo el estado)
         $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
-        
-        // La tabla de auditoría sí se trae desde ReservaModel
         $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
         
         require_once __DIR__ . '/../views/reservas/presidente.php';
     }
 
-    // ---------------------------------------------- API: BLOQUEAR/DESBLOQUEAR UN ESPACIO
+    // API: CREAR ESPACIO
+    public function store() {
+        header('Content-Type: application/json');
+        
+        $data = [
+            'id_comunidad'   => $_SESSION['vivienda']['id_comunidad'],
+            'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
+            'max_personas'   => (int)($_POST['max_personas'] ?? 1),
+            'hora_apertura'  => $_POST['hora_apertura'] ?? '08:00:00',
+            'hora_cierre'    => $_POST['hora_cierre'] ?? '22:00:00',
+            'duracion_uso'   => (int)($_POST['duracion_uso'] ?? 60) // Ej: 60 minutos
+        ];
+
+        if ($this->espacioModel->crearEspacio($data)) {
+            echo json_encode(['success' => true, 'message' => 'Espacio creado con éxito.']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error al guardar el espacio.']);
+        }
+    }
+
+    // API: MODIFICAR ESPACIO
+    public function update() {
+        header('Content-Type: application/json');
+        
+        $data = [
+            'id_espacios_comunidad' => $_POST['id_espacios_comunidad'] ?? null,
+            'id_comunidad'          => $_SESSION['vivienda']['id_comunidad'], // Seguridad
+            'nombre_espacio'        => $_POST['nombre_espacio'] ?? '',
+            'max_personas'          => (int)($_POST['max_personas'] ?? 1),
+            'hora_apertura'         => $_POST['hora_apertura'] ?? '08:00:00',
+            'hora_cierre'           => $_POST['hora_cierre'] ?? '22:00:00',
+            'duracion_uso'          => (int)($_POST['duracion_uso'] ?? 60)
+        ];
+
+        if ($this->espacioModel->modificarEspacio($data)) {
+            echo json_encode(['success' => true, 'message' => 'Espacio actualizado con éxito.']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error al modificar el espacio.']);
+        }
+    }
+
+    // API: BLOQUEAR/DESBLOQUEAR (Soft Delete / Inactivar)
     public function toggleEstado() {
         header('Content-Type: application/json');
         
         $id_espacios_comunidad = $_POST['id_espacios_comunidad'] ?? null;
-        $nuevo_estado = $_POST['estado'] ?? null; // 0 = Inactivo, 1 = Activo
+        
+        // En frontend probablemente enviabas estado: 0 o 1, pero ahora nuestro campo 
+        // en la BD se llama 'bloqueado' donde 1 es Bloqueado y 0 es Activo.
+        $bloqueado = $_POST['bloqueado'] ?? 0; 
+        $motivo = $_POST['motivo'] ?? null;
 
-        if ($this->espacioModel->bloquearEspacio($id_espacios_comunidad, $nuevo_estado)) {
-            $msg = $nuevo_estado == 1 ? 'Espacio activado.' : 'Espacio bloqueado.';
+        if ($this->espacioModel->bloquearEspacio($id_espacios_comunidad, $bloqueado, $motivo)) {
+            $msg = $bloqueado == 1 ? 'Espacio bloqueado temporalmente.' : 'Espacio desbloqueado y operativo.';
             echo json_encode(['success' => true, 'message' => $msg]);
         } else {
             http_response_code(500);

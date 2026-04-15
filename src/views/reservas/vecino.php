@@ -25,7 +25,7 @@
                     <li>Respeta los horarios establecidos.</li>
                     <li>Deja el espacio limpio y recogido.</li>
                     <li>Cancela tu reserva si no vas a asistir (recuerda: máx. 1 al día y 3 a la semana).</li>
-                    <li>Evita ruidos excesivos en zonas comunes.</li>
+                    <li>Respeta el aforo máximo permitido en cada instalación.</li>
                 </ul>
             </div>
 
@@ -59,15 +59,19 @@
                                                     <div class="mb-1"><i class="fa-regular fa-calendar me-2 text-success"></i><?= htmlspecialchars($reserva['fecha']) ?></div>
                                                     <div>
                                                         <i class="fa-regular fa-clock me-2 text-success"></i>
-                                                        <?= htmlspecialchars($reserva['hora_inicio'] ?? $reserva['hora']) ?> h
+                                                        <?= htmlspecialchars($reserva['hora_inicio']) ?> - <?= htmlspecialchars($reserva['hora_fin']) ?>
                                                     </div>
                                                 </div>
                                                 <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white fw-bold">Activa</span>
                                             </div>
                                             
                                             <h3 class="fs-5 fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);">
-                                                <?= htmlspecialchars($reserva['espacio_nombre'] ?? $reserva['espacio']) ?>
+                                                <?= htmlspecialchars($reserva['nombre_espacio']) ?>
                                             </h3>
+                                            
+                                            <div class="mb-3 small text-muted">
+                                                <i class="fa-solid fa-users me-2"></i>Asistentes: <?= htmlspecialchars($reserva['asistentes']) ?>
+                                            </div>
                                             
                                             <div class="mt-auto d-flex justify-content-end border-top pt-3">
                                                 <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
@@ -93,10 +97,15 @@
                                             <i class="fa-solid fa-building fs-4 text-primary"></i>
                                         </div>
                                         
-                                        <h3 class="fs-5 fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);">
-                                            <?= htmlspecialchars($espacio['nombre']) ?>
+                                        <h3 class="fs-5 fw-bold text-dark mb-3" style="font-family: var(--fuente-titulos);">
+                                            <?= htmlspecialchars($espacio['nombre_espacio']) ?>
                                         </h3>
-                                        <p class="text-muted small mb-4"><?= htmlspecialchars($espacio['descripcion']) ?></p>
+                                        
+                                        <div class="text-muted small mb-4 text-start bg-light p-3 rounded w-100">
+                                            <div class="mb-2"><i class="fa-solid fa-users me-2 text-primary"></i><strong>Aforo:</strong> <?= htmlspecialchars($espacio['max_personas']) ?> personas</div>
+                                            <div class="mb-2"><i class="fa-regular fa-clock me-2 text-primary"></i><strong>Horario:</strong> <?= htmlspecialchars($espacio['hora_apertura']) ?> a <?= htmlspecialchars($espacio['hora_cierre']) ?></div>
+                                            <div><i class="fa-solid fa-stopwatch me-2 text-primary"></i><strong>Duración máx:</strong> <?= htmlspecialchars($espacio['duracion_uso']) ?> min</div>
+                                        </div>
                                         
                                         <div class="mt-auto border-top w-100 pt-3">
                                             <button type="button" class="btn btn-outline-primary btn-sm fw-semibold w-100" data-bs-toggle="modal" data-bs-target="#modalReserva">
@@ -112,8 +121,7 @@
 
             </div>
         </main>
-        <!-- Aquí se incluye el modal para crear la reserva -->
+        
         <?php include 'src/views/components/reservas/modalCrear.php'; ?>
     </div>
 </div>
-<script src="/public/js/reservas/modalCrear.js"></script>
