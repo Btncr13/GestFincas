@@ -1,19 +1,8 @@
 <?php
-// Obtenemos la ruta actual del enrutador para marcar el menú activo
-$ruta_actual = $_GET['route'] ?? 'auth/panelpresi';
-
-// Extraemos los datos de la comunidad de la sesión
-$nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
-$calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
-$numero = $_SESSION['vivienda']['numero'] ?? '';
-$rol = $_SESSION['vivienda']['rol'] ?? 'vecino';
-
-// Unimos la calle y el número
-$direccionCompleta = trim($calle . ' ' . $numero);
-
-// Validamos si estamos en alguno de los dos dashboards para marcarlo activo
+// 🟢 LÓGICA DE RUTAS Y MENÚ ACTIVO 🟢
+$dashboardUrl = ($rol === 'presidente') ? 'auth/panelpresi' : 'auth/panelvecino';
+$ruta_actual = $_GET['route'] ?? $dashboardUrl;
 $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
-$dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ? 'auth/panelpresi' : 'auth/panelvecino';
 ?>
 
 <div class="sidebar offcanvas-md offcanvas-start col-md-3 col-lg-2 p-0 shadow-sm border-end" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel" style="background-color: var(--bs-light); min-height: calc(100vh - 76px);">
@@ -32,7 +21,7 @@ $dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ?
                 </div>
                 <div class="overflow-hidden">
                     <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.85rem; font-family: var(--fuente-titulos); color: var(--bs-dark);"><?= htmlspecialchars($nombreComunidad) ?></h6>
-                    <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;"><?= htmlspecialchars($direccionCompleta) ?></small>
+                    <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;"><?= htmlspecialchars($direccion) ?></small>
                 </div>
             </div>
         </div>
@@ -83,7 +72,7 @@ $dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ?
                 <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'reunion/reuniones') ? 'active fw-bold' : '' ?>"
                     href="index.php?route=reunion/reuniones"
                     style="background-color: <?= ($ruta_actual == 'reunion/reuniones') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                        color: <?= ($ruta_actual == 'reunion/reuniones') ? 'white' : 'var(--color-texto)' ?>;">
+                          color: <?= ($ruta_actual == 'reunion/reuniones') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-people-group me-2"></i> Reuniones
                 </a>
             </li>
@@ -100,10 +89,10 @@ $dashboardUrl = ($rol === 'presidente' && $ruta_actual !== 'auth/panelvecino') ?
         </ul>
 
         <!-- Botón de cambio de rol anclado al fondo -->
-        <?php if ($rol === 'presidente'): ?>
+        <?php if ($rolReal === 'presidente'): ?>
             <div class="px-3 mt-auto mb-4">
                 <hr class="dropdown-divider mb-3" style="border-color: var(--color-borde);">
-                <?php if ($ruta_actual === 'auth/panelvecino'): ?>
+                <?php if ($rol === 'vecino'): ?>
                     <a href="index.php?route=auth/panelpresi" class="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-3 py-2 fw-bold text-white shadow-sm" style="background-color: var(--bs-primary); font-size: 0.85rem;">
                         <i class="fa-solid fa-user-tie"></i> Cambiar a Presidente
                     </a>

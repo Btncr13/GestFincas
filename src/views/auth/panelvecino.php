@@ -1,8 +1,4 @@
-<?php
-$titulo_pagina = "Panel del Vecino";
-?>
-
-<?php include 'src/views/components/topbarv.php'; ?>
+<?php include 'src/views/components/topbar.php'; ?>
 
 <div class="container-fluid p-0">
     <div class="row flex-nowrap m-0">
@@ -43,11 +39,11 @@ $titulo_pagina = "Panel del Vecino";
                                 <i class="bi bi-calendar-event-fill text-warning fs-4"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Próxima Reunión: Junta Ordinaria</h6>
-                                <p class="text-muted small mb-0"><i class="bi bi-clock me-1"></i> Jueves, 25 de Mayo - 19:00h <span class="ms-2 d-none d-sm-inline"><i class="bi bi-geo-alt me-1"></i> Sala Comunitaria</span></p>
+                                <h6 class="fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Reuniones y Juntas</h6>
+                                <p class="text-muted small mb-0">Gestiona tu asistencia a las convocatorias activas</p>
                             </div>
                         </div>
-                        <a href="#" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold text-nowrap shadow-sm">Ver convocatoria</a>
+                        <a href="index.php?route=reunion/reuniones" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold text-nowrap shadow-sm">Ir a Reuniones</a>
                     </div>
                 </div>
 
@@ -86,7 +82,7 @@ $titulo_pagina = "Panel del Vecino";
 
                     <!-- Tarjeta 3 - Reuniones -->
                     <div class="col">
-                        <a href="#" class="text-decoration-none h-100 d-block">
+                        <a href="index.php?route=reunion/reuniones" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(219, 145, 47, 0.1);">
