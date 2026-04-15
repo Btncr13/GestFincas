@@ -38,7 +38,7 @@
                     </div>
 
                     <!-- Resumen (Cards) -->
-                    <div class="row row-cols-2 row-cols-sm-4 g-2 mb-4" id="cards-resumen">
+                    <div class="row row-cols-2 g-2 mb-4" id="cards-resumen">
                     </div>
 
                     <!-- Tabs -->
@@ -213,15 +213,28 @@ const app = {
         return new Date(d).toLocaleDateString('es-ES', opt);
     },
     
-    getBadgeEstado: function(estado) {
-        if(estado==='convocada') return `<span class="badge" style="background-color: var(--bs-warning); font-size:12px;">Convocada</span>`;
-        if(estado==='en_curso') return `<span class="badge" style="background-color: var(--bs-success); font-size:12px;">En Curso</span>`;
-        return `<span class="badge border text-muted bg-transparent" style="font-size:12px;">Finalizada</span>`;
+    getBadgeEstado: function(r) {
+        const ahora = new Date();
+        const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
+        
+        if(r.estado === 'finalizada' || fechaHora < ahora) {
+            return `<span class="badge border text-muted bg-transparent" style="font-size:12px;">Realizada</span>`;
+        }
+        if(r.estado === 'en_curso') return `<span class="badge" style="background-color: var(--bs-success); font-size:12px;">En Curso</span>`;
+        return `<span class="badge" style="background-color: var(--bs-warning); font-size:12px;">Convocada</span>`;
     },
 
     renderAll: function() {
-        const proximas = reunionesDB.filter(r => r.estado !== 'finalizada').sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
-        const pasadas = reunionesDB.filter(r => r.estado === 'finalizada').sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+        const ahora = new Date();
+        const proximas = reunionesDB.filter(r => {
+            const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
+            return r.estado !== 'finalizada' && fechaHora >= ahora;
+        }).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+        
+        const pasadas = reunionesDB.filter(r => {
+            const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
+            return r.estado === 'finalizada' || fechaHora < ahora;
+        }).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
         
         // Actualizar nombres tabs
         document.getElementById('btn-tab-proximas').innerText = `Próximas (${proximas.length})`;
@@ -235,14 +248,6 @@ const app = {
         }
 
         document.getElementById('cards-resumen').innerHTML = `
-            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
-                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(219,145,47,0.1);"><i class="bi bi-calendar-check" style="color: var(--bs-warning); font-size:20px;"></i></div>
-                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${proximas.length}</div><small style="font-size:10px; color:var(--color-texto);">Próximas</small></div>
-            </div></div></div>
-            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
-                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: var(--color-fondo-formularios);"><i class="bi bi-file-earmark-text text-secondary" style="font-size:20px;"></i></div>
-                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${pasadas.length}</div><small style="font-size:10px; color:var(--color-texto);">Realizadas</small></div>
-            </div></div></div>
             <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
                 <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(92,178,68,0.1);"><i class="bi bi-check-circle" style="color: var(--bs-success); font-size:20px;"></i></div>
                 <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${conf}</div><small style="font-size:10px; color:var(--color-texto);">Confirmadas</small></div>
@@ -277,7 +282,7 @@ const app = {
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                     <span style="font-size:14px; font-weight:600; color:var(--bs-dark);">${r.titulo}</span>
-                                    ${this.getBadgeEstado(r.estado)}
+                                    ${this.getBadgeEstado(r)}
                                 </div>
                                 <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
                                     <span><i class="bi bi-clock"></i> ${this.formatDateLong(r.fecha)} a las ${r.hora}</span>
@@ -323,7 +328,7 @@ const app = {
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                 <span style="font-size:14px; font-weight:600; color:var(--bs-dark);">${r.titulo}</span>
-                                ${this.getBadgeEstado(r.estado)}
+                                ${this.getBadgeEstado(r)}
                             </div>
                             <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
                                 <span><i class="bi bi-clock"></i> ${this.formatDateLong(r.fecha)}</span>
@@ -366,10 +371,14 @@ const app = {
         const ptRech = total>0 ? (rechs/total)*100 : 0;
         const ptPend = total>0 ? (pends/total)*100 : 0;
 
+        const ahora = new Date();
+        const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
+        const isPasada = (r.estado === 'finalizada' || fechaHora < ahora);
+
         const miAsistencia = r.asistencias.find(a => a.id_vivienda == userIdVivienda);
 
         let panelVotoHtml = '';
-        if (r.estado !== 'finalizada') {
+        if (!isPasada) {
             const txtEstado = (miAsistencia && miAsistencia.confirmacion === 'confirmada') ? '<span class="text-success fw-bold">Sí, asistiré</span>' : 
                              ((miAsistencia && miAsistencia.confirmacion === 'rechazada') ? '<span class="text-danger fw-bold">No asistiré</span>' : '<span class="text-muted fw-bold">Pendiente de respuesta</span>');
                              
@@ -392,8 +401,8 @@ const app = {
         <div class="mb-4">
             <h1 class="mb-2" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">${r.titulo}</h1>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                ${this.getBadgeEstado(r.estado)}
-                ${r.estado !== 'finalizada' ? `<span style="font-size:12px; color:var(--color-texto);"><i class="bi bi-clock"></i> Faltan ${diasRestantes} días</span>` : ''}
+                ${this.getBadgeEstado(r)}
+                ${!isPasada ? `<span style="font-size:12px; color:var(--color-texto);"><i class="bi bi-clock"></i> Faltan ${diasRestantes} días</span>` : ''}
             </div>
         </div>
         
