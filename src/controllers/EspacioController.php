@@ -2,37 +2,43 @@
 require_once __DIR__ . '/../models/EspacioModel.php';
 require_once __DIR__ . '/../models/ReservaModel.php';
 
-class EspacioController {
+class EspacioController
+{
     private $espacioModel;
     private $reservaModel;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->espacioModel = new EspacioModel($pdo);
         $this->reservaModel = new ReservaModel($pdo);
-        
+
         if (session_status() === PHP_SESSION_NONE) session_start();
-        
+
         // RBAC: Validar que sea Presidente
-        if (!isset($_SESSION['vivienda']['id_usuario']) || !isset($_SESSION['vivienda']['rol']) ||
-            $_SESSION['vivienda']['rol'] !== 'presidente') {
+        if (
+            !isset($_SESSION['vivienda']['id_usuario']) || !isset($_SESSION['vivienda']['rol']) ||
+            $_SESSION['vivienda']['rol'] !== 'presidente'
+        ) {
             header("HTTP/1.1 403 Forbidden");
             exit('Acceso denegado. Solo el Presidente puede acceder a esta sección.');
         }
     }
 
-    public function index() {
+    public function index()
+    {
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
-        
+
         $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
         $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
-        
+
         require_once __DIR__ . '/../views/reservas/presidente.php';
     }
 
     // API: CREAR ESPACIO
-    public function store() {
+    public function store()
+    {
         header('Content-Type: application/json');
-        
+
         $data = [
             'id_comunidad'   => $_SESSION['vivienda']['id_comunidad'],
             'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
@@ -51,9 +57,10 @@ class EspacioController {
     }
 
     // API: MODIFICAR ESPACIO
-    public function update() {
+    public function update()
+    {
         header('Content-Type: application/json');
-        
+
         $data = [
             'id_espacios_comunidad' => $_POST['id_espacios_comunidad'] ?? null,
             'id_comunidad'          => $_SESSION['vivienda']['id_comunidad'], // Seguridad
@@ -73,14 +80,15 @@ class EspacioController {
     }
 
     // API: BLOQUEAR/DESBLOQUEAR (Soft Delete / Inactivar)
-    public function toggleEstado() {
+    public function toggleEstado()
+    {
         header('Content-Type: application/json');
-        
+
         $id_espacios_comunidad = $_POST['id_espacios_comunidad'] ?? null;
-        
+
         // En frontend probablemente enviabas estado: 0 o 1, pero ahora nuestro campo 
         // en la BD se llama 'bloqueado' donde 1 es Bloqueado y 0 es Activo.
-        $bloqueado = $_POST['bloqueado'] ?? 0; 
+        $bloqueado = $_POST['bloqueado'] ?? 0;
         $motivo = $_POST['motivo'] ?? null;
 
         if ($this->espacioModel->bloquearEspacio($id_espacios_comunidad, $bloqueado, $motivo)) {

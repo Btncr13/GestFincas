@@ -16,14 +16,14 @@
                 </h1>
 
                 <button type="button" class="btn btn-brand fw-semibold shadow-sm"
-                        data-bs-toggle="modal" data-bs-target="#modalReserva">
+                    data-bs-toggle="modal" data-bs-target="#modalReserva">
                     <i class="fa-solid fa-plus me-2"></i> Nueva Reserva
                 </button>
             </div>
 
             <!-- Normas -->
             <div class="alert alert-warning border-0 border-start border-4 border-warning shadow-sm mb-4"
-                 style="background-color: var(--bs-light);">
+                style="background-color: var(--bs-light);">
                 <h5 class="fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);">
                     <i class="fa-solid fa-circle-info me-2 text-warning"></i>Normas y Recomendaciones
                 </h5>
@@ -39,21 +39,21 @@
             <ul class="nav nav-tabs mb-4" id="reservasTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-bold"
-                            id="mis-reservas-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#mis-reservas"
-                            type="button" role="tab"
-                            style="color: var(--bs-dark);">
+                        id="mis-reservas-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#mis-reservas"
+                        type="button" role="tab"
+                        style="color: var(--bs-dark);">
                         Mis Reservas
                     </button>
                 </li>
 
                 <li class="nav-item ms-2" role="presentation">
                     <button class="nav-link fw-semibold text-muted"
-                            id="espacios-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#espacios"
-                            type="button" role="tab">
+                        id="espacios-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#espacios"
+                        type="button" role="tab">
                         Espacios Disponibles
                     </button>
                 </li>
@@ -67,11 +67,11 @@
 
                     <!-- Contenedor donde JS insertará nuevas reservas -->
                     <div id="contenedorReservas"
-                         class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
                         <?php if (!empty($misReservas)): ?>
                             <?php foreach ($misReservas as $reserva): ?>
-                                <div class="col">
+                                <div class="col" id="reserva-<?= $reserva['id_reserva'] ?>">
                                     <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-success">
                                         <div class="card-body p-4 d-flex flex-column">
 
@@ -113,8 +113,8 @@
 
                                             <div class="mt-auto d-flex justify-content-end border-top pt-3">
                                                 <button type="button"
-                                                        class="btn btn-sm btn-outline-danger fw-semibold"
-                                                        onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
+                                                    class="btn btn-sm btn-outline-danger fw-semibold"
+                                                    onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
                                                     <i class="fa-solid fa-trash me-2"></i>Cancelar
                                                 </button>
                                             </div>
@@ -148,7 +148,7 @@
                                     <div class="card-body p-4 d-flex flex-column align-items-center text-center">
 
                                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm mb-3"
-                                             style="width: 64px; height: 64px;">
+                                            style="width: 64px; height: 64px;">
                                             <i class="fa-solid fa-building fs-4 text-primary"></i>
                                         </div>
 
@@ -179,8 +179,8 @@
 
                                         <div class="mt-auto border-top w-100 pt-3">
                                             <button type="button"
-                                                    class="btn btn-outline-primary btn-sm fw-semibold w-100"
-                                                    data-bs-toggle="modal" data-bs-target="#modalReserva">
+                                                class="btn btn-outline-primary btn-sm fw-semibold w-100"
+                                                data-bs-toggle="modal" data-bs-target="#modalReserva">
                                                 <i class="fa-solid fa-calendar-check me-2"></i>Reservar
                                             </button>
                                         </div>
