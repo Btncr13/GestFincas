@@ -56,3 +56,4 @@ function runRouter($config)
     // Ejecutar método dinámicamente
     $controller->$methodName();
 }
+?>

@@ -1,3 +1,44 @@
+// ELIMINAR RESERVA
+
+   function eliminarReserva(idReserva) {
+
+    if (!confirm("¿Seguro que deseas cancelar esta reserva?")) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('id_reserva', idReserva);
+
+    fetch('index.php?route=reserva/destroy', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (!data.success) {
+            alert(data.message);
+            return;
+        }
+
+        // Eliminar la tarjeta del DOM
+        const card = document.getElementById(`reserva-${idReserva}`);
+        if (card) {
+            card.remove();
+        }
+
+        // Si ya no quedan reservas, mostrar mensaje
+        const contenedor = document.getElementById('contenedorReservas');
+        if (contenedor && contenedor.children.length === 0) {
+            const mensaje = document.getElementById('mensajeSinReservas');
+            if (mensaje) mensaje.style.display = 'block';
+        }
+    })
+    .catch(err => console.error("Error al eliminar reserva:", err));
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const selectEspacio = document.getElementById('selectEspacio');
@@ -96,52 +137,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------
     function insertarReservaEnVista(reserva) {
 
-        const contenedor = document.getElementById('contenedorReservas');
+    const contenedor = document.getElementById('contenedorReservas');
 
-        const card = document.createElement('div');
-        card.className = "card shadow-sm mb-3 border-0";
+    const card = document.createElement('div');
+    card.className = "card shadow-sm mb-3 border-0";
+    card.id = `reserva-${reserva.id_reservas}`; // ← NECESARIO PARA ELIMINAR
 
-        card.innerHTML = `
-            <div class="card-body">
+    card.innerHTML = `
+        <div class="card-body">
 
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0 fw-bold">${reserva.espacio}</h5>
-                </div>
-
-                <p class="mb-1 text-muted">
-                    <i class="fa-solid fa-calendar-day me-2"></i>
-                    ${reserva.fecha_reserva}
-                </p>
-
-                <p class="mb-1 text-muted">
-                    <i class="fa-solid fa-clock me-2"></i>
-                    ${reserva.hora_inicio} - ${reserva.hora_fin}
-                </p>
-
-                <p class="mb-3 text-muted">
-                    <i class="fa-solid fa-users me-2"></i>
-                    ${reserva.asistentes} asistentes
-                </p>
-
-                <div class="mb-3">
-                    <strong>Normas:</strong>
-                    <ul class="mt-2">
-                        ${reserva.normas.map(n => `<li>${n}</li>`).join('')}
-                    </ul>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <button class="btn btn-outline-danger btn-sm" onclick="eliminarReserva(${reserva.id_reservas})">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0 fw-bold">${reserva.espacio}</h5>
             </div>
-        `;
 
-        contenedor.prepend(card);
-    }
+            <p class="mb-1 text-muted">
+                <i class="fa-solid fa-calendar-day me-2"></i>
+                ${reserva.fecha_reserva}
+            </p>
 
+            <p class="mb-1 text-muted">
+                <i class="fa-solid fa-clock me-2"></i>
+                ${reserva.hora_inicio} - ${reserva.hora_fin}
+            </p>
+
+            <p class="mb-3 text-muted">
+                <i class="fa-solid fa-users me-2"></i>
+                ${reserva.asistentes} asistentes
+            </p>
+
+            <div class="mb-3">
+                <strong>Normas:</strong>
+                <ul class="mt-2">
+                    ${reserva.normas.map(n => `<li>${n}</li>`).join('')}
+                </ul>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-outline-danger btn-sm" onclick="eliminarReserva(${reserva.id_reservas})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+
+        </div>
+    `;
+
+    contenedor.prepend(card);
+   }
+
+   
     // -----------------------------------
     // FUNCIONES AUXILIARES 
     // -----------------------------------

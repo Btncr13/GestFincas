@@ -89,7 +89,7 @@
                                                     </div>
                                                 </div>
 
-                                                <?php if ($reserva['estado_reserva'] === 'inactiva'): ?>
+                                                <?php if ($reserva['estado_reserva'] === 'inactivo'): ?>
                                                     <span class="badge bg-secondary px-2 py-1 rounded-2 shadow-sm text-white fw-bold">
                                                         Inactiva
                                                     </span>

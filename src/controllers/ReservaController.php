@@ -114,22 +114,29 @@ class ReservaController {
             'normas'         => $normas
         ]
     ]);
+    exit;
   }
 
    
 
     // API: ELIMINAR RESERVA
     public function destroy() {
-        header('Content-Type: application/json');
+        
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+          header('Content-Type: application/json');
+       }
         // El frontend probablemente siga enviando 'id_reserva'
         $id_reservas = $_POST['id_reserva'] ?? null; 
         $id_usuario = $_SESSION['vivienda']['id_usuario'];
 
         if ($this->reservaModel->eliminarReserva($id_reservas, $id_usuario)) {
             echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
+            exit;
         } else {
             http_response_code(403);
             echo json_encode(['success' => false, 'message' => 'No autorizado o reserva no encontrada.']);
+            exit;
         }
     }
 
