@@ -31,10 +31,12 @@ class VotacionController
     {
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
         $id_usuario = $_SESSION['vivienda']['id_usuario'];
-        $rol = $_SESSION['vivienda']['rol'];
         
+        // Corregimos la asignación del rol para que soporte el "Modo Vista" (Cambiar a vecino)
+        $rol = $_SESSION['modo_vista'] ?? ($_SESSION['vivienda']['rol'] ?? 'vecino');
+
         $votaciones = $this->votacionModel->getVotacionesActivas($id_comunidad);
-        
+
         // Enriquecer datos con si el usuario ya votó y resultados
         foreach ($votaciones as &$v) {
             $v['ha_votado'] = false; // Valor por defecto
@@ -43,6 +45,16 @@ class VotacionController
             $v['opciones'] = $this->votacionModel->getOpciones($v['id_votacion']);
         }
         unset($v); // IMPORTANTE: Rompe la referencia para evitar duplicados en la vista
+
+        // ======== VARIABLES FALTANTES PARA TOPBAR Y SIDEBAR ========
+        $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
+        $numero = $_SESSION['vivienda']['numero'] ?? '';
+
+        $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
+        $nombreVivienda  = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
+        $direccion       = trim($calle . ' ' . $numero);
+        $rolReal         = $_SESSION['vivienda']['rol'] ?? 'vecino';
+        // ===========================================================
 
         require "src/views/votaciones/index.php";
     }
