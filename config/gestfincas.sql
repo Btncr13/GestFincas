@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-04-2026 a las 15:53:32
+-- Tiempo de generación: 16-04-2026 a las 10:15:47
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -145,6 +145,7 @@ CREATE TABLE `reservas` (
   `id_reservas` int(10) UNSIGNED NOT NULL,
   `id_usuario` int(10) UNSIGNED NOT NULL,
   `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
+  `asistentes` int(4) UNSIGNED NOT NULL DEFAULT 1,
   `fecha_reserva` date NOT NULL,
   `hora_inicio` time NOT NULL,
   `hora_fin` time NOT NULL,

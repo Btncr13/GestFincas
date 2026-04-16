@@ -19,13 +19,25 @@
                     <label class="form-label fw-semibold text-dark">Espacio</label>
                     <select id="selectEspacio" class="form-select shadow-sm">
                         <option value="">Selecciona un espacio...</option>
+                        <?php foreach ($espacios as $espacio): ?>
+                          <option value="<?= $espacio['id_espacios_comunidad'] ?>">
+                           <?= htmlspecialchars($espacio['nombre_espacio']) ?>
+                          </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
+
+                <!-- Fecha de la reserva -->
+                <div class="mb-3">
+                      <label class="form-label fw-semibold text-dark">Fecha</label>
+                      <input type="date" id="inputFecha" class="form-control shadow-sm">
+                </div>
+
 
                 <!-- Tramo horario -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Tramo horario</label>
-                    <select id="selectTramo" class="form-select shadow-sm" disabled>
+                    <select id="selectTramo" class="form-select shadow-sm">
                         <option value="">Selecciona un tramo...</option>
                     </select>
                 </div>
@@ -33,21 +45,10 @@
                 <!-- Número de personas -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Número de personas</label>
-                    <select id="selectPersonas" class="form-select shadow-sm" disabled>
+                    <select id="selectPersonas" class="form-select shadow-sm">
                         <option value="">Selecciona cantidad...</option>
                     </select>
                 </div>
-
-                <!-- Normas -->
-                <div class="mt-4 p-3 rounded shadow-sm" style="background-color: var(--bs-light);">
-                    <h6 class="fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);">
-                        <i class="fa-solid fa-circle-info me-2 text-primary"></i>Normas del espacio
-                    </h6>
-                    <div id="normas" class="text-muted small">
-                        <p class="mb-0">Selecciona un espacio para ver sus normas.</p>
-                    </div>
-                </div>
-
             </div>
 
             <!-- Footer -->

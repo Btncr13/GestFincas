@@ -81,25 +81,43 @@ class ReservaModel extends BaseModel {
     }
 
     public function crearReserva($data) {
-        try {
-            // Asumimos que al crear, el estado_reserva es 'activo' (Enum)
-            $sql = "INSERT INTO reservas (id_usuario, id_espacios_comunidad, fecha_reserva, hora_inicio, hora_fin, estado_reserva, asistentes) 
-                    VALUES (:id_usuario, :id_espacios_comunidad, :fecha_reserva, :hora_inicio, :hora_fin, 'activo', :asistentes)";
-            
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id_usuario', $data['id_usuario'], PDO::PARAM_INT);
-            $stmt->bindParam(':id_espacios_comunidad', $data['id_espacios_comunidad'], PDO::PARAM_INT);
-            $stmt->bindParam(':fecha_reserva', $data['fecha_reserva'], PDO::PARAM_STR);
-            $stmt->bindParam(':hora_inicio', $data['hora_inicio'], PDO::PARAM_STR);
-            $stmt->bindParam(':hora_fin', $data['hora_fin'], PDO::PARAM_STR);
-            $stmt->bindParam(':asistentes', $data['asistentes'], PDO::PARAM_INT);
-            
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Error en crearReserva: " . $e->getMessage());
-            return false;
+    try {
+        $sql = "INSERT INTO reservas (id_usuario, id_espacios_comunidad, fecha_reserva, hora_inicio, hora_fin, estado_reserva, asistentes) 
+                VALUES (:id_usuario, :id_espacios_comunidad, :fecha_reserva, :hora_inicio, :hora_fin, 'activo', :asistentes)";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id_usuario', $data['id_usuario'], PDO::PARAM_INT);
+        $stmt->bindParam(':id_espacios_comunidad', $data['id_espacios_comunidad'], PDO::PARAM_INT);
+        $stmt->bindParam(':fecha_reserva', $data['fecha_reserva'], PDO::PARAM_STR);
+        $stmt->bindParam(':hora_inicio', $data['hora_inicio'], PDO::PARAM_STR);
+        $stmt->bindParam(':hora_fin', $data['hora_fin'], PDO::PARAM_STR);
+        $stmt->bindParam(':asistentes', $data['asistentes'], PDO::PARAM_INT);
+        
+        if ($stmt->execute()) {
+            return $this->db->lastInsertId(); // ← AQUÍ EL CAMBIO IMPORTANTE
         }
+
+        return false;
+
+    } catch (PDOException $e) {
+        error_log("Error en crearReserva: " . $e->getMessage());
+        return false;
     }
+  }
+
+      public function getReservaById($id) {
+            $sql = "SELECT r.*, ec.nombre_espacio
+            FROM reservas r
+            JOIN espacios_comunidad ec 
+                ON ec.id_espacios_comunidad = r.id_espacios_comunidad
+            WHERE r.id_reservas = ?";
+    
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+             return $stmt->fetch(PDO::FETCH_ASSOC);
+          }
+
+
 
     // Para la vista del vecino (Mis Reservas)
     public function getReservasUsuario($id_usuario) {
@@ -140,6 +158,27 @@ class ReservaModel extends BaseModel {
             return [];
         }
     }
+
+    public function actualizarReservasVencidas() {
+    try {
+        $ahora = date('Y-m-d H:i:s');
+
+        $sql = "UPDATE reservas 
+                SET estado_reserva = 'inactivo'
+                WHERE estado_reserva = 'activo'
+                AND CONCAT(fecha_reserva, ' ', hora_fin) < ?";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$ahora]);
+
+        return true;
+
+    } catch (PDOException $e) {
+        error_log("Error en actualizarReservasVencidas: " . $e->getMessage());
+        return false;
+    }
+ }
+
 
     public function eliminarReserva($id_reservas, $id_usuario) {
         try {
