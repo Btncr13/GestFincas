@@ -1,14 +1,17 @@
 <?php
 
 require_once "src/models/UsuarioModel.php";
+require_once "src/models/VotacionModel.php";
 
 class AuthController
 {
     private $usuarioModel;
+    private $votacionModel;
 
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
+        $this->votacionModel = new VotacionModel($pdo);
     }
 
     // --------------------------------------------------- FUNCIÓN QUE LLEVA A LOGIN/GET
@@ -160,6 +163,20 @@ class AuthController
             'prioridad' => 'importante' // Posibles: 'normal', 'importante', 'urgente'
         ];
 
+        // Obtener votaciones pendientes para el vecino
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+        $votaciones = $this->votacionModel->getVotacionesActivas($id_comunidad);
+        $votacionesPendientes = 0;
+        foreach ($votaciones as $v) {
+            // Solo contamos como pendiente si la votación no ha finalizado y el usuario no ha votado
+            $fecha_limite = !empty($v['fecha_limite']) ? strtotime($v['fecha_limite']) : null;
+            $esta_finalizada = $fecha_limite && $fecha_limite < time();
+            if (!$esta_finalizada && !$this->votacionModel->haVotado($v['id_votacion'], $id_usuario)) {
+                $votacionesPendientes++;
+            }
+        }
+
         require "src/views/auth/panelvecino.php";
     }
 
@@ -184,6 +201,20 @@ class AuthController
         $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
         $numero = $_SESSION['vivienda']['numero'] ?? '';
         $direccion = trim($calle . ' ' . $numero);
+
+        // Para el presidente, también calculamos las votaciones pendientes de su voto personal
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        $id_usuario = $_SESSION['vivienda']['id_usuario']; // El presidente también es un usuario
+        $votaciones = $this->votacionModel->getVotacionesActivas($id_comunidad);
+        $votacionesPendientes = 0;
+        foreach ($votaciones as $v) {
+            // Solo contamos como pendiente si la votación no ha finalizado y el usuario no ha votado
+            $fecha_limite = !empty($v['fecha_limite']) ? strtotime($v['fecha_limite']) : null;
+            $esta_finalizada = $fecha_limite && $fecha_limite < time();
+            if (!$esta_finalizada && !$this->votacionModel->haVotado($v['id_votacion'], $id_usuario)) {
+                $votacionesPendientes++;
+            }
+        }
 
         require "src/views/auth/panelpresi.php";
     }

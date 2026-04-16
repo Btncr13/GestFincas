@@ -60,7 +60,7 @@ class UsuarioModel extends BaseModel
     {
         try {
             // Añadimos el JOIN con direccion para sacar la calle y el número
-            $sql = "SELECT u.*, v.nombre as nombre_vivienda, c.nombre as nombre_comunidad, 
+            $sql = "SELECT u.*, v.nombre as nombre_vivienda, v.id_comunidad, c.nombre as nombre_comunidad, 
                            d.calle, d.numero
                     FROM usuario u
                     JOIN vivienda v ON u.id_vivienda = v.id_vivienda
