@@ -42,6 +42,33 @@
     --sombra-media: 0 4px 12px rgba(0,0,0,0.12);
 }
 
+/* =========================================
+   SOBREESCRITURA DEL COLOR AZUL DE BOOTSTRAP (PRIMARY)
+   Asegura que se use el color de la marca en todos los componentes
+   ========================================= */
+.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+.btn-primary {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    color: #FFFFFF !important;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #382f5c !important; /* Tono más claro para el hover */
+    border-color: #382f5c !important;
+}
+.btn-outline-primary {
+    color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+    background-color: var(--bs-primary) !important;
+    color: #FFFFFF !important;
+}
 
 /* Ajustes específicos para dispositivos ultra-estrechos (como el Fold plegado) */
 @media (max-width: 400px) {
@@ -75,6 +102,10 @@
    Se activa cuando <html> tiene data-theme="dark"
    ========================================= */
 [data-theme="dark"] {
+    /* Re-definimos las variables de Bootstrap para el modo oscuro.
+       Nota: No tocamos --bs-primary para que el Header (Topbar) 
+       mantenga su color original como solicitaste. */
+
     --bs-light: #1E1E2E;      /* Fondo de tarjetas y sidebar */
     --bs-secondary: #11111B;  /* Fondo general del body */
     --bs-dark: #CDD6F4;       /* Texto principal blanco/azulado */
@@ -89,7 +120,48 @@
     color: var(--bs-dark);
 }
 
-/* Obligamos a los textos grises y oscuros de Bootstrap a adaptarse */
+/* =========================================
+   ADAPTACIÓN DE COMPONENTES (MODO OSCURO)
+   ========================================= */
+
+/* Forzamos el fondo del body y main cuando usan la clase bg-light de Bootstrap */
+[data-theme="dark"] body.bg-light, 
+[data-theme="dark"] main.bg-light {
+    background-color: var(--bs-secondary) !important;
+}
+
+/* Aseguramos que los botones primarios sean visibles y contrasten en el Login */
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-brand {
+    background-color: #4c407a !important; /* Un tono ligeramente más vibrante */
+    color: #FFFFFF !important;
+    border: none;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-primary:focus {
+    background-color: #5d4f96 !important; /* Hover un poco más claro en oscuro */
+}
+
+[data-theme="dark"] .bg-primary {
+    background-color: #4c407a !important;
+}
+
+[data-theme="dark"] .text-primary {
+    color: #b5a8d5 !important; /* Morado claro para que resalte en el modal oscuro */
+}
+
+[data-theme="dark"] .btn-outline-primary {
+    color: #b5a8d5 !important;
+    border-color: #4c407a !important;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover,
+[data-theme="dark"] .btn-outline-primary:focus {
+    background-color: #4c407a !important;
+    color: #FFFFFF !important;
+}
+
 [data-theme="dark"] .text-muted {
     color: var(--color-texto) !important;
 }
@@ -106,7 +178,7 @@
     color: var(--bs-dark) !important;
 }
 
-/* MAGIA PARA EL LOGO: Convierte los pixeles oscuros a blancos */
+/* Filtro CSS para invertir el color del logo de oscuro a blanco */
 [data-theme="dark"] .logo-adaptable {
     filter: brightness(0) invert(1);
     transition: filter 0.3s ease;
@@ -157,7 +229,7 @@
     border-color: #FFFFFF !important; /* Iluminamos un poco el borde */
 }
 
-/* CORRECCIÓN: Hover especial de "Cerrar Sesión" (Peligro) en Modo Oscuro */
+/* Feedback visual para acciones destructivas en modo oscuro */
 [data-theme="dark"] .dropdown-item.text-danger:hover,
 [data-theme="dark"] .dropdown-item.text-danger:focus {
     background-color: rgba(164, 30, 52, 0.2) !important; /* Fondo rojizo muy oscuro y sutil */
@@ -178,14 +250,12 @@
     opacity: 1; /* Que brille un poco más al pasar el dedo/ratón */
 }
 
-/* 1. Estilo general para el separador (Modo Claro) */
 .dropdown-divider {
     opacity: 1 !important; /* Quitamos la transparencia de Bootstrap */
     border-top: 1px solid var(--color-borde) !important;
     margin: 0.5rem 0;
 }
 
-/* 2. Estilo específico para el Modo Oscuro */
 [data-theme="dark"] .dropdown-divider {
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important; /* Una línea sutil pero visible */
 }
@@ -200,7 +270,6 @@
     color: #A6ADC8 !important; /* Gris claro azulado para la descripción */
 }
 
-/* Arreglo para la tarjeta blanca interna que sale en la captura */
 [data-theme="dark"] .card {
     background-color: var(--bs-light) !important; /* Usa el fondo oscuro de tarjeta */
     border: 1px solid var(--color-borde) !important;
@@ -222,11 +291,6 @@
     color: #ff7383 !important;
 }
 
-[data-theme="dark"] body.bg-light, 
-[data-theme="dark"] main.bg-light {
-    background-color: var(--bs-secondary) !important;
-}
-
 [data-theme="dark"] .login-card-custom,
 [data-theme="dark"] .register-card-custom {
     background-color: var(--bs-light);
@@ -234,19 +298,9 @@
 }
 
 /* =========================================
-   MODO OSCURO (Dark Mode) - REFUERZO VISUAL
+   REFUERZO DE COMPONENTES ESPECÍFICOS
    ========================================= */
-[data-theme="dark"] {
-    --bs-light: #1E1E2E;      /* Fondo de tarjetas */
-    --bs-secondary: #11111B;  /* Fondo general */
-    --bs-dark: #CDD6F4;       /* Texto principal (ahora claro) */
-    
-    --color-fondo-formularios: #313244; 
-    --color-texto: #A6ADC8;             
-    --color-borde: #313244;             
-}
 
-/* 1. ARREGLO DE TEXTOS: Forzamos a que las clases de Bootstrap sean legibles */
 [data-theme="dark"] .text-dark, 
 [data-theme="dark"] .form-label,
 [data-theme="dark"] h1, 
@@ -254,39 +308,60 @@
     color: var(--bs-dark) !important;
 }
 
-/* 2. ARREGLO DE BOTONES: Aseguramos texto blanco en los botones de login y register */
-[data-theme="dark"] .btn-primary,
-[data-theme="dark"] .btn-brand {
-    color: #FFFFFF !important; /* Blanco puro siempre para el texto del botón */
-    background-color: #4c407a !important; /* Un morado un poco más vibrante para el fondo */
-}
-
-/* 3. ARREGLO DE INPUTS: Mejoramos el contraste del texto que escribe el usuario */
 [data-theme="dark"] .custom-input {
     color: #FFFFFF !important;
 }
 
-[data-theme="dark"] .custom-input::placeholder {
-    color: #6c7086 !important;
+/* =========================================
+   ADAPTACIÓN DE VOTACIONES Y ACORDEONES
+   ========================================= */
+[data-theme="dark"] .card-header.bg-white,
+[data-theme="dark"] .card-body {
+    background-color: var(--bs-light) !important;
+    color: var(--bs-dark) !important;
 }
 
-/* 4. LOGO: Invertimos el color del logo si es oscuro */
-[data-theme="dark"] .logo-adaptable {
-    filter: brightness(0) invert(1);
+[data-theme="dark"] .card-body.border-top {
+    border-top-color: var(--color-borde) !important;
 }
 
-/* Arreglo para las Pestañas (Tabs) en Modo Oscuro */
-[data-theme="dark"] .nav-tabs .nav-link.active {
-    background-color: var(--bs-light) !important; /* Usa el fondo oscuro de las tarjetas */
-    color: var(--bs-dark) !important; /* Texto claro azulado */
-    border-color: var(--color-borde) var(--color-borde) var(--bs-light) !important;
+/* Ajuste para el resumen de participación (el cuadro pequeño) */
+[data-theme="dark"] .bg-light.border.rounded-3.small {
+    background-color: var(--color-fondo-formularios) !important;
+    border-color: var(--color-borde) !important;
+    color: var(--bs-dark) !important;
 }
 
-[data-theme="dark"] .nav-tabs {
-    border-bottom-color: var(--color-borde) !important;
+/* Ajuste para Modales y Formularios en Modo Oscuro */
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    background-color: var(--bs-light) !important;
+    border-color: var(--color-borde) !important;
+    color: var(--bs-dark) !important;
 }
 
-[data-theme="dark"] .nav-tabs .nav-link:not(.active):hover {
-    border-color: var(--color-borde) var(--color-borde) transparent !important;
-    color: #FFFFFF !important;
+[data-theme="dark"] .form-control {
+    background-color: var(--color-fondo-formularios) !important;
+    border-color: var(--color-borde) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* =========================================
+   MEJORAS DE CONTRASTE PARA MENSAJES DE ESTADO
+   ========================================= */
+[data-theme="dark"] .badge.bg-info {
+    background-color: rgba(236, 236, 240, 0.1) !important; /* Usamos el color info con transparencia para que sea oscuro */
+    color: var(--bs-dark) !important; /* Texto claro */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .alert-warning {
+    background-color: rgba(219, 145, 47, 0.1) !important; /* Ajuste para el aviso de votación cerrada */
+    color: #ffb86c !important; /* Un tono naranja claro para legibilidad */
+    border-color: rgba(219, 145, 47, 0.2) !important;
 }

@@ -1,17 +1,6 @@
-# Archivos con credenciales
-config.local.php
-.env
+# Configuración local (Contiene contraseñas de BD)
+config/config.local.php
 
-# Dependencias
-vendor/
-
-# Archivos del sistema
-.DS_Store
-Thumbs.db
-
-# Logs
+# Archivos de sistema y logs
 *.log
-
-# Cachés
-cache/
-tmp/
+.DS_Store

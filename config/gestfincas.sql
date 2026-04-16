@@ -24,9 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 -- DESTRUCCIÓN Y CREACIÓN LIMPIA DE LA BASE DE DATOS
 -- --------------------------------------------------------
-DROP DATABASE IF EXISTS `gestfincas`;
-CREATE DATABASE `gestfincas` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `gestfincas`;
 
 -- --------------------------------------------------------
 
