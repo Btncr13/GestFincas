@@ -1,7 +1,3 @@
-<?php
-$titulo_pagina = "Panel del Presidente";
-?>
-
 <?php include 'src/views/components/topbar.php'; ?>
 
 <div class="container-fluid p-0">
@@ -140,7 +136,7 @@ $titulo_pagina = "Panel del Presidente";
 
                     <!-- Reuniones -->
                     <div class="col">
-                        <a href="#" class="text-decoration-none h-100 d-block">
+                        <a href="index.php?route=reunion/reuniones" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(219, 145, 47, 0.1);">
