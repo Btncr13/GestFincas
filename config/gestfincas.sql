@@ -180,9 +180,6 @@ CREATE TABLE `reservas` (
 -- Volcado de datos para la tabla `reservas`
 --
 
-INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `asistentes`, `fecha_reserva`, `hora_inicio`, `hora_fin`, `estado_reserva`) VALUES
-(7, 1, 2, 2, '2026-04-21', '11:00:00', '12:00:00', 'activo'),
-(8, 1, 2, 4, '2026-04-20', '19:00:00', '20:00:00', 'activo');
 
 
 --
@@ -567,7 +564,9 @@ ALTER TABLE `mancomunidad`
 --
 ALTER TABLE `reservas`
   ADD CONSTRAINT `fk_reserva_espacio` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_reserva_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
 -- Filtros para la tabla `reunion`
 --
 ALTER TABLE `reunion`
