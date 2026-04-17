@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-04-2026 a las 18:46:28
+-- Tiempo de generación: 16-04-2026 a las 15:24:30
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,10 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `gestfincas`
 --
-
--- --------------------------------------------------------
--- DESTRUCCIÓN Y CREACIÓN LIMPIA DE LA BASE DE DATOS
--- --------------------------------------------------------
 
 -- --------------------------------------------------------
 
@@ -201,6 +197,73 @@ INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 (2, 1, 'Planta 2-1B'),
 (4, 1, 'Planta 1 1ºC');
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votacion`
+--
+
+CREATE TABLE `votacion` (
+  `id_votacion` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `fecha_limite` datetime DEFAULT NULL,
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
+  `activa` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `votacion`
+--
+
+INSERT INTO `votacion` (`id_votacion`, `id_comunidad`, `titulo`, `descripcion`, `fecha_limite`, `fecha_creacion`, `activa`) VALUES
+(1, 1, 'Presidente de la Comunidad', 'Votos a favor de Antonio Recio presidente, viva el rey y viva España!!!', '2026-04-23 15:08:00', '2026-04-16 15:08:42', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votacion_opcion`
+--
+
+CREATE TABLE `votacion_opcion` (
+  `id_opcion` int(11) UNSIGNED NOT NULL,
+  `id_votacion` int(11) UNSIGNED NOT NULL,
+  `texto` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `votacion_opcion`
+--
+
+INSERT INTO `votacion_opcion` (`id_opcion`, `id_votacion`, `texto`) VALUES
+(1, 1, 'Antonio Recio'),
+(2, 1, 'Enrique Pastor'),
+(3, 2, 'asd'),
+(4, 2, 'dfg');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `voto`
+--
+
+CREATE TABLE `voto` (
+  `id_voto` int(11) UNSIGNED NOT NULL,
+  `id_votacion` int(11) UNSIGNED NOT NULL,
+  `id_usuario` int(11) UNSIGNED NOT NULL,
+  `id_opcion` int(11) UNSIGNED NOT NULL,
+  `fecha_voto` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `voto`
+--
+
+INSERT INTO `voto` (`id_voto`, `id_votacion`, `id_usuario`, `id_opcion`, `fecha_voto`) VALUES
+(1, 1, 3, 1, '2026-04-16 15:09:10'),
+(2, 1, 1, 1, '2026-04-16 15:09:52');
+
 --
 -- Índices para tablas volcadas
 --
@@ -264,6 +327,30 @@ ALTER TABLE `vivienda`
   ADD KEY `id_comunidad` (`id_comunidad`);
 
 --
+-- Indices de la tabla `votacion`
+--
+ALTER TABLE `votacion`
+  ADD PRIMARY KEY (`id_votacion`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `votacion_opcion`
+--
+ALTER TABLE `votacion_opcion`
+  ADD PRIMARY KEY (`id_opcion`),
+  ADD KEY `id_votacion` (`id_votacion`);
+
+--
+-- Indices de la tabla `voto`
+--
+ALTER TABLE `voto`
+  ADD PRIMARY KEY (`id_voto`),
+  ADD UNIQUE KEY `unique_voto_usuario` (`id_votacion`,`id_usuario`),
+  ADD KEY `id_votacion` (`id_votacion`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_opcion` (`id_opcion`);
+
+--
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
@@ -314,6 +401,24 @@ ALTER TABLE `usuario`
 --
 ALTER TABLE `vivienda`
   MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `votacion`
+--
+ALTER TABLE `votacion`
+  MODIFY `id_votacion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `votacion_opcion`
+--
+ALTER TABLE `votacion_opcion`
+  MODIFY `id_opcion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `voto`
+--
+ALTER TABLE `voto`
+  MODIFY `id_voto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
