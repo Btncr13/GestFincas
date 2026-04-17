@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-04-2026 a las 10:15:47
+-- Tiempo de generación: 16-04-2026 a las 15:24:30
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -24,6 +24,28 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `asistencia_reunion`
+--
+
+CREATE TABLE `asistencia_reunion` (
+  `id_asistencia` int(11) UNSIGNED NOT NULL,
+  `id_reunion` int(11) UNSIGNED NOT NULL,
+  `id_vivienda` int(10) UNSIGNED NOT NULL,
+  `confirmacion` enum('pendiente','confirmada','rechazada') NOT NULL DEFAULT 'pendiente',
+  `fecha_respuesta` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `asistencia_reunion`
+--
+
+INSERT INTO `asistencia_reunion` (`id_asistencia`, `id_reunion`, `id_vivienda`, `confirmacion`, `fecha_respuesta`) VALUES
+(29, 5, 2, 'rechazada', '2026-04-15'),
+(30, 5, 4, 'confirmada', '2026-04-15');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `codigo_validacion`
 --
 
@@ -31,7 +53,7 @@ CREATE TABLE `codigo_validacion` (
   `id_codigo` int(11) UNSIGNED NOT NULL,
   `id_vivienda` int(11) UNSIGNED NOT NULL,
   `codigo` varchar(10) NOT NULL,
-  `usado` tinyint(4) UNSIGNED NOT NULL DEFAULT 0,
+  `usado` tinyint(4) NOT NULL DEFAULT 0,
   `fecha_creacion` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -138,19 +160,28 @@ CREATE TABLE `mancomunidad` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `reservas`
+-- Estructura de tabla para la tabla `reunion`
 --
 
-CREATE TABLE `reservas` (
-  `id_reservas` int(10) UNSIGNED NOT NULL,
-  `id_usuario` int(10) UNSIGNED NOT NULL,
-  `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
-  `asistentes` int(4) UNSIGNED NOT NULL DEFAULT 1,
-  `fecha_reserva` date NOT NULL,
-  `hora_inicio` time NOT NULL,
-  `hora_fin` time NOT NULL,
-  `estado_reserva` enum('activo','inactivo') NOT NULL
+CREATE TABLE `reunion` (
+  `id_reunion` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `titulo` varchar(150) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `fecha` date NOT NULL,
+  `hora` time NOT NULL,
+  `lugar` varchar(100) NOT NULL,
+  `orden_del_dia` text NOT NULL,
+  `estado` enum('convocada','en_curso','finalizada') NOT NULL DEFAULT 'convocada',
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `reunion`
+--
+
+INSERT INTO `reunion` (`id_reunion`, `id_comunidad`, `titulo`, `descripcion`, `fecha`, `hora`, `lugar`, `orden_del_dia`, `estado`, `fecha_creacion`) VALUES
+(5, 1, 'ANTONIO RECIO PRESIDENTE', 'JUNTA URGENTE', '2026-07-24', '01:26:00', 'Casa de Antonio Recio', '[\"Punto del dia \",\"SOY PRESIDENTE DE LA COMUNIDAD\"]', 'convocada', '2026-04-15 02:22:07');
 
 -- --------------------------------------------------------
 
@@ -177,7 +208,7 @@ CREATE TABLE `usuario` (
 
 INSERT INTO `usuario` (`id_usuario`, `id_vivienda`, `nombre`, `apellidos`, `dni`, `email`, `password`, `fecha_registro`, `es_propietario`, `rol`) VALUES
 (1, 2, 'Maria', 'Pelaez', '42034567R', 'mariapelaez@gmail.com', '$2y$10$XyV7m6OAZ8IdECKxvEYEt.7Waw1b4VNY4fNWGfHb6/p4rwdzWDjmS', '2026-04-09 17:37:13', 1, 'vecino'),
-(2, 3, 'Ramona ', 'González Trueba', '43056798U', 'ramona.gt@gmail.com', '$2y$10$WyAUreeD.a9tHotfdjfWp..X0Rzeymre1JMb.UcIqMI1nnSRNkK4K', '2026-04-14 00:07:35', 1, 'vecino');
+(3, 4, 'pepe', 'perez', '28394873E', 'pepe@gmail.com', '$2y$10$qCYoCjYbtUazNP7W1pifwOFfHDJPT6A7bgGLqilyQ3STqWHwl1og.', '2026-04-15 02:18:47', 1, 'presidente');
 
 -- --------------------------------------------------------
 
@@ -197,11 +228,86 @@ CREATE TABLE `vivienda` (
 
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 (2, 1, 'Planta 2-1B'),
-(3, 1, 'Planta 3-1A');
+(4, 1, 'Planta 1 1ºC');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votacion`
+--
+
+CREATE TABLE `votacion` (
+  `id_votacion` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `fecha_limite` datetime DEFAULT NULL,
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
+  `activa` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `votacion`
+--
+
+INSERT INTO `votacion` (`id_votacion`, `id_comunidad`, `titulo`, `descripcion`, `fecha_limite`, `fecha_creacion`, `activa`) VALUES
+(1, 1, 'Presidente de la Comunidad', 'Votos a favor de Antonio Recio presidente, viva el rey y viva España!!!', '2026-04-23 15:08:00', '2026-04-16 15:08:42', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votacion_opcion`
+--
+
+CREATE TABLE `votacion_opcion` (
+  `id_opcion` int(11) UNSIGNED NOT NULL,
+  `id_votacion` int(11) UNSIGNED NOT NULL,
+  `texto` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `votacion_opcion`
+--
+
+INSERT INTO `votacion_opcion` (`id_opcion`, `id_votacion`, `texto`) VALUES
+(1, 1, 'Antonio Recio'),
+(2, 1, 'Enrique Pastor'),
+(3, 2, 'asd'),
+(4, 2, 'dfg');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `voto`
+--
+
+CREATE TABLE `voto` (
+  `id_voto` int(11) UNSIGNED NOT NULL,
+  `id_votacion` int(11) UNSIGNED NOT NULL,
+  `id_usuario` int(11) UNSIGNED NOT NULL,
+  `id_opcion` int(11) UNSIGNED NOT NULL,
+  `fecha_voto` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `voto`
+--
+
+INSERT INTO `voto` (`id_voto`, `id_votacion`, `id_usuario`, `id_opcion`, `fecha_voto`) VALUES
+(1, 1, 3, 1, '2026-04-16 15:09:10'),
+(2, 1, 1, 1, '2026-04-16 15:09:52');
 
 --
 -- Índices para tablas volcadas
 --
+
+--
+-- Indices de la tabla `asistencia_reunion`
+--
+ALTER TABLE `asistencia_reunion`
+  ADD PRIMARY KEY (`id_asistencia`),
+  ADD UNIQUE KEY `uq_reunion_vivienda` (`id_reunion`,`id_vivienda`),
+  ADD KEY `fk_asistencia_vivienda` (`id_vivienda`);
 
 --
 -- Indices de la tabla `codigo_validacion`
@@ -225,20 +331,6 @@ ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
 
 --
--- Indices de la tabla `espacios_comunidad`
---
-ALTER TABLE `espacios_comunidad`
-  ADD PRIMARY KEY (`id_espacios_comunidad`),
-  ADD KEY `id_comunidad` (`id_comunidad`);
-
---
--- Indices de la tabla `espacios_normas`
---
-ALTER TABLE `espacios_normas`
-  ADD PRIMARY KEY (`id_espacios_normas`),
-  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
-
---
 -- Indices de la tabla `mancomunidad`
 --
 ALTER TABLE `mancomunidad`
@@ -246,12 +338,11 @@ ALTER TABLE `mancomunidad`
   ADD KEY `id_direccion` (`id_direccion`);
 
 --
--- Indices de la tabla `reservas`
+-- Indices de la tabla `reunion`
 --
-ALTER TABLE `reservas`
-  ADD PRIMARY KEY (`id_reservas`),
-  ADD KEY `id_usuario` (`id_usuario`),
-  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
+ALTER TABLE `reunion`
+  ADD PRIMARY KEY (`id_reunion`),
+  ADD KEY `fk_reunion_comunidad` (`id_comunidad`);
 
 --
 -- Indices de la tabla `usuario`
@@ -269,8 +360,38 @@ ALTER TABLE `vivienda`
   ADD KEY `id_comunidad` (`id_comunidad`);
 
 --
+-- Indices de la tabla `votacion`
+--
+ALTER TABLE `votacion`
+  ADD PRIMARY KEY (`id_votacion`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `votacion_opcion`
+--
+ALTER TABLE `votacion_opcion`
+  ADD PRIMARY KEY (`id_opcion`),
+  ADD KEY `id_votacion` (`id_votacion`);
+
+--
+-- Indices de la tabla `voto`
+--
+ALTER TABLE `voto`
+  ADD PRIMARY KEY (`id_voto`),
+  ADD UNIQUE KEY `unique_voto_usuario` (`id_votacion`,`id_usuario`),
+  ADD KEY `id_votacion` (`id_votacion`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_opcion` (`id_opcion`);
+
+--
 -- AUTO_INCREMENT de las tablas volcadas
 --
+
+--
+-- AUTO_INCREMENT de la tabla `asistencia_reunion`
+--
+ALTER TABLE `asistencia_reunion`
+  MODIFY `id_asistencia` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `codigo_validacion`
@@ -282,25 +403,13 @@ ALTER TABLE `codigo_validacion`
 -- AUTO_INCREMENT de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
-  MODIFY `id_comunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_comunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `direccion`
 --
 ALTER TABLE `direccion`
-  MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT de la tabla `espacios_comunidad`
---
-ALTER TABLE `espacios_comunidad`
-  MODIFY `id_espacios_comunidad` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `espacios_normas`
---
-ALTER TABLE `espacios_normas`
-  MODIFY `id_espacios_normas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `mancomunidad`
@@ -309,26 +418,51 @@ ALTER TABLE `mancomunidad`
   MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `reservas`
+-- AUTO_INCREMENT de la tabla `reunion`
 --
-ALTER TABLE `reservas`
-  MODIFY `id_reservas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `reunion`
+  MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `votacion`
+--
+ALTER TABLE `votacion`
+  MODIFY `id_votacion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `votacion_opcion`
+--
+ALTER TABLE `votacion_opcion`
+  MODIFY `id_opcion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `voto`
+--
+ALTER TABLE `voto`
+  MODIFY `id_voto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `asistencia_reunion`
+--
+ALTER TABLE `asistencia_reunion`
+  ADD CONSTRAINT `fk_asistencia_reunion` FOREIGN KEY (`id_reunion`) REFERENCES `reunion` (`id_reunion`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_asistencia_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `codigo_validacion`
@@ -367,6 +501,10 @@ ALTER TABLE `mancomunidad`
 ALTER TABLE `reservas`
   ADD CONSTRAINT `fk_reserva_espacio` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- Filtros para la tabla `reunion`
+--
+ALTER TABLE `reunion`
+  ADD CONSTRAINT `fk_reunion_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `usuario`

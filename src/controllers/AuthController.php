@@ -1,23 +1,26 @@
 <?php
 
-require_once __DIR__ . '/../models/UsuarioModel.php';
+require_once "src/models/UsuarioModel.php";
+require_once "src/models/VotacionModel.php";
 
 class AuthController
 {
     private $usuarioModel;
+    private $votacionModel;
 
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
+        $this->votacionModel = new VotacionModel($pdo);
     }
 
-    // --------------------------------------------------- FUNCIÓN QUE LLEVA A LOGIN/GET
+    // 🟢 ENRUTAMIENTO INICIAL 🟢
     public function index()
     {
         return $this->login();
     }
 
-    // --------------------------------------------------  MOSTRAR FORMULARIO LOGIN/GET
+    // 🟢 VISTA: FORMULARIO DE LOGIN 🟢
     public function login()
     {
         $mensajeExito = null;
@@ -27,13 +30,13 @@ class AuthController
         require "src/views/auth/login.php";
     }
 
-    // --------------------------------------------------  MOSTRAR FORMULARIO REGISTRO/GET
+    // 🟢 VISTA: FORMULARIO DE REGISTRO 🟢
     public function register()
     {
         require "src/views/auth/register.php";
     }
 
-    // --------------------------------------------------- PROCESAR REGISTRO/POST
+    // 🟢  PROCESAR EL REGISTRO (POST) 🟢
     public function registerAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -56,7 +59,7 @@ class AuthController
             return;
         }
 
-        // 1. Validar si el código existe y es válido
+        // Validar si el código existe y es válido
         $codigoData = $this->usuarioModel->validarCodigo($codigo);
         if (!$codigoData) {
             $error = "El código de vivienda no es válido o ya ha sido utilizado.";
@@ -64,7 +67,7 @@ class AuthController
             return;
         }
 
-        // 2. Preparar datos para el modelo
+        // Preparar datos para el modelo
         $datos = [
             'id_vivienda' => $codigoData['id_vivienda'],
             'nombre'      => $nombre,
@@ -74,7 +77,7 @@ class AuthController
             'password'    => $password
         ];
 
-        // 3. Ejecutar el registro
+        // Ejecutar el registro
         $resultado = $this->usuarioModel->registrar($datos, $codigoData['id_codigo']);
 
         if ($resultado['success']) {
@@ -86,7 +89,7 @@ class AuthController
         }
     }
 
-    // ---------------------------------------------------	PROCESAR LOGIN/POST
+    // 🟢 PROCESAR EL INICIO DE SESIÓN (POST) 🟢
     public function loginAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -115,21 +118,25 @@ class AuthController
             return;
         }
 
-        // --- AQUÍ EMPIEZA LA MAGIA DE LOS ROLES ---
+        // Seguridad: Prevenir ataques de fijación de sesión regenerando el ID
+        session_regenerate_id(true);
+
+        // Los roles
         $_SESSION['vivienda'] = $resultado['data'];
+        $_SESSION['modo_vista'] = $_SESSION['vivienda']['rol'];
 
         // Comprobamos el rol que viene de la base de datos
         if ($_SESSION['vivienda']['rol'] === 'presidente') {
             // Si es presidente, lo mandamos a su panel
             header("Location: index.php?route=auth/panelpresi");
         } else {
-            // Si es vecino (o cualquier otro), lo mandamos al panel normal
+            // Si es vecino lo mandamos al panel normal
             header("Location: index.php?route=auth/panelvecino");
         }
         exit;
     }
 
-    // ------------------------------------------------------- FUNCION LOGOUT
+    // 🟢 CERRAR SESIÓN 🟢
     public function logout()
     {
         session_destroy();
@@ -137,7 +144,41 @@ class AuthController
         exit;
     }
 
-    // ------------------------------------------------------- FUNCIÓN DIRIGE A VISTAS DEL PANEL DE LA VIVIENDA
+    // 🟢 HELPER: DATOS COMUNES PARA VISTAS 🟢
+    private function getViewData()
+    {
+        // Auto-reparación de sesión global para todas las pantallas
+        if (isset($_SESSION['vivienda']['id_usuario'])) {
+            $sesionFresca = $this->usuarioModel->refrescarSesion($_SESSION['vivienda']['id_usuario']);
+            if ($sesionFresca) {
+                $_SESSION['vivienda'] = $sesionFresca;
+            }
+        }
+
+        $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
+        $numero = $_SESSION['vivienda']['numero'] ?? '';
+
+        return [
+            'nombreComunidad' => $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad',
+            'nombreVivienda'  => $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda',
+            'direccion'       => trim($calle . ' ' . $numero),
+            'id_comunidad'    => $_SESSION['vivienda']['id_comunidad'] ?? null,
+            'id_vivienda'     => $_SESSION['vivienda']['id_vivienda'] ?? null,
+            'rolReal'         => $_SESSION['vivienda']['rol'] ?? 'vecino',
+            'rol'             => $_SESSION['modo_vista'] ?? ($_SESSION['vivienda']['rol'] ?? 'vecino')
+        ];
+    }
+
+    // 🟢 HELPER: RESPUESTAS JSON PARA AJAX 🟢
+    private function jsonResponse($success, $message = null)
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        echo json_encode(['success' => $success, 'message' => $message]);
+        exit;
+    }
+
+    // 🟢 VISTA: PANEL DE VECINO 🟢
     public function panelvecino()
     {
         if (!isset($_SESSION['vivienda'])) {
@@ -145,14 +186,12 @@ class AuthController
             exit;
         }
 
-        // DATOS MOCK DEL DISEÑO DE FIGMA (Listos para conectar con BD en el futuro)
-        $nombreVivienda = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda 1º A';
-        $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Residencial Los Olivos';
-        $direccion = trim(($_SESSION['vivienda']['calle'] ?? 'Calle Mayor') . ' ' . ($_SESSION['vivienda']['numero'] ?? '45'));
-        if (empty(trim($direccion))) {
-            $direccion = 'Calle Mayor 45, 28001 Madrid';
-        }
+        $_SESSION['modo_vista'] = 'vecino';
 
+        // Extraemos automáticamente todas las variables comunes ($nombreComunidad, $direccion, etc.)
+        extract($this->getViewData());
+
+        // DATOS MOCK DE COMUNICACIONES
         $ultimoComunicado = [
             'titulo' => 'Corte de agua programado',
             'contenido' => 'Se informa que mañana día 22 de marzo habrá un corte de agua de 09:00 a 14:00 por trabajos de mantenimiento en la red general. Rogamos disculpen las molestias.',
@@ -160,30 +199,55 @@ class AuthController
             'prioridad' => 'importante' // Posibles: 'normal', 'importante', 'urgente'
         ];
 
+        // Obtener votaciones pendientes para el vecino
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+        $votaciones = $this->votacionModel->getVotacionesActivas($id_comunidad);
+        $votacionesPendientes = 0;
+        foreach ($votaciones as $v) {
+            // Solo contamos como pendiente si la votación no ha finalizado y el usuario no ha votado
+            $fecha_limite = !empty($v['fecha_limite']) ? strtotime($v['fecha_limite']) : null;
+            $esta_finalizada = $fecha_limite && $fecha_limite < time();
+            if (!$esta_finalizada && !$this->votacionModel->haVotado($v['id_votacion'], $id_usuario)) {
+                $votacionesPendientes++;
+            }
+        }
+
         require "src/views/auth/panelvecino.php";
     }
 
-    // ------------------------------------------------------- FUNCIÓN DIRIGE A VISTAS DEL PANEL DEL PRESIDENTE
+    // 🟢 VISTA: PANEL DE PRESIDENTE 🟢
     public function panelpresi()
     {
-        // 1. Verificamos que haya iniciado sesión
+        // Verificamos que haya iniciado sesión
         if (!isset($_SESSION['vivienda'])) {
             header("Location: index.php?route=auth/login");
             exit;
         }
 
-        // 2. SEGURIDAD: Verificamos que sea realmente presidente
-        // (Para evitar que un vecino listillo ponga "panelpresi" en la URL)
+        // Verificamos que sea realmente presidente
         if ($_SESSION['vivienda']['rol'] !== 'presidente') {
             header("Location: index.php?route=auth/panelvecino");
             exit;
         }
 
-        // Preparamos los datos para la vista
-        $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
-        $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
-        $numero = $_SESSION['vivienda']['numero'] ?? '';
-        $direccion = trim($calle . ' ' . $numero);
+        $_SESSION['modo_vista'] = 'presidente';
+
+        extract($this->getViewData());
+
+        // Para el presidente, también calculamos las votaciones pendientes de su voto personal
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        $id_usuario = $_SESSION['vivienda']['id_usuario']; // El presidente también es un usuario
+        $votaciones = $this->votacionModel->getVotacionesActivas($id_comunidad);
+        $votacionesPendientes = 0;
+        foreach ($votaciones as $v) {
+            // Solo contamos como pendiente si la votación no ha finalizado y el usuario no ha votado
+            $fecha_limite = !empty($v['fecha_limite']) ? strtotime($v['fecha_limite']) : null;
+            $esta_finalizada = $fecha_limite && $fecha_limite < time();
+            if (!$esta_finalizada && !$this->votacionModel->haVotado($v['id_votacion'], $id_usuario)) {
+                $votacionesPendientes++;
+            }
+        }
 
         require "src/views/auth/panelpresi.php";
     }

@@ -1,9 +1,4 @@
 <?php
-// Extraemos los datos de la sesión (se guardaron en el AuthController al hacer login)
-$rol = $_SESSION['vivienda']['rol'] ?? 'vecino';
-$nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
-$nombreVivienda = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
-
 // Si es presidente, la etiqueta será verde (success). Si no, gris.
 $badgeClass = ($rol === 'presidente') ? 'bg-success' : 'bg-secondary';
 ?>

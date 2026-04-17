@@ -1,7 +1,3 @@
-<?php
-$titulo_pagina = "Panel del Presidente";
-?>
-
 <?php include 'src/views/components/topbar.php'; ?>
 
 <div class="container-fluid p-0">
@@ -116,10 +112,31 @@ $titulo_pagina = "Panel del Presidente";
                             </div>
                         </a>
                     </div>
+                      <!-- Votaciones -->
+                    <div class="col">
+                        <a href="index.php?route=votacion/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
+                                <?php if ($votacionesPendientes > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                                        <?= $votacionesPendientes ?>
+                                        <span class="visually-hidden">votaciones pendientes</span>
+                                    </span>
+                                <?php endif; ?>
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(92, 178, 68, 0.1);">
+                                        <i class="fa-solid fa-check-to-slot text-success fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Votaciones</h5>
+                                    <p class="card-text text-muted small mb-0">Gestión de votos</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
 
                     <!-- Reuniones -->
                     <div class="col">
-                        <a href="#" class="text-decoration-none h-100 d-block">
+                        <a href="index.php?route=reunion/reuniones" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(219, 145, 47, 0.1);">
