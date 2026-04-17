@@ -21,7 +21,7 @@ Sigue estos pasos exactamente en orden para desplegar el proyecto en tu máquina
 1. Abre tu terminal o consola.
 2. Navega hasta la carpeta pública de tu servidor local (por ejemplo, `htdocs` en XAMPP o `www` en WAMP).
 3. Clona el repositorio ejecutando:
-   ```bash
+   ```bash esto es una prueba
    git clone [https://github.com/tu-usuario/JR_M26_ComunidadVecinos.git](https://github.com/tu-usuario/JR_M26_ComunidadVecinos.git)
 (Si no usas Git, simplemente descarga el ZIP del proyecto y descomprímelo en esa misma carpeta).
 
