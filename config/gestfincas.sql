@@ -116,6 +116,7 @@ INSERT INTO `direccion` (`id_direccion`, `tipo`, `calle`, `numero`, `edificio`, 
 
 -- --------------------------------------------------------
 
+
 --
 -- Estructura de tabla para la tabla `espacios_comunidad`
 --
@@ -124,6 +125,7 @@ CREATE TABLE `espacios_comunidad` (
   `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
   `id_comunidad` int(10) UNSIGNED NOT NULL,
   `nombre_espacio` varchar(100) NOT NULL,
+  `aforo` int(4) UNSIGNED NOT NULL,
   `max_personas` int(4) UNSIGNED NOT NULL,
   `hora_apertura` time NOT NULL,
   `hora_cierre` time NOT NULL,
@@ -158,6 +160,30 @@ CREATE TABLE `mancomunidad` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reservas`
+--
+
+CREATE TABLE `reservas` (
+  `id_reservas` int(10) UNSIGNED NOT NULL,
+  `id_usuario` int(10) UNSIGNED NOT NULL,
+  `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
+  `asistentes` int(4) UNSIGNED NOT NULL DEFAULT 1,
+  `fecha_reserva` date NOT NULL,
+  `hora_inicio` time NOT NULL,
+  `hora_fin` time NOT NULL,
+  `estado_reserva` enum('activo','inactivo') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `reservas`
+--
+
+INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `asistentes`, `fecha_reserva`, `hora_inicio`, `hora_fin`, `estado_reserva`) VALUES
+(7, 1, 2, 2, '2026-04-21', '11:00:00', '12:00:00', 'activo'),
+(8, 1, 2, 4, '2026-04-20', '19:00:00', '20:00:00', 'activo');
+
 
 --
 -- Estructura de tabla para la tabla `reunion`
@@ -228,7 +254,7 @@ CREATE TABLE `vivienda` (
 
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 (2, 1, 'Planta 2-1B'),
-(4, 1, 'Planta 1 1ºC');
+(4, 1, 'Planta 1-1C');
 
 -- --------------------------------------------------------
 
@@ -331,6 +357,21 @@ ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
 
 --
+-- Indices de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  ADD PRIMARY KEY (`id_espacios_comunidad`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  ADD PRIMARY KEY (`id_espacios_normas`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
+
+
+--
 -- Indices de la tabla `mancomunidad`
 --
 ALTER TABLE `mancomunidad`
@@ -343,6 +384,14 @@ ALTER TABLE `mancomunidad`
 ALTER TABLE `reunion`
   ADD PRIMARY KEY (`id_reunion`),
   ADD KEY `fk_reunion_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD PRIMARY KEY (`id_reservas`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
 
 --
 -- Indices de la tabla `usuario`
@@ -412,8 +461,21 @@ ALTER TABLE `direccion`
   MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  MODIFY `id_espacios_comunidad` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  MODIFY `id_espacios_normas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+--
 -- AUTO_INCREMENT de la tabla `mancomunidad`
 --
+
+
 ALTER TABLE `mancomunidad`
   MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
@@ -423,6 +485,11 @@ ALTER TABLE `mancomunidad`
 ALTER TABLE `reunion`
   MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
+--
+-- AUTO_INCREMENT de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  MODIFY `id_reservas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
