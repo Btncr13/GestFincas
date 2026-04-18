@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../models/ReservaModel.php';
-// IMPORTANTE: Requerimos el EspacioModel para poder cargar la vista del presidente
 require_once __DIR__ . '/../models/EspacioModel.php'; 
 
 class ReservaController {
@@ -50,51 +49,70 @@ class ReservaController {
             
             // --- Carga de datos para VECINO ---
             $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
-            $misReservas = $this->reservaModel->getReservasUsuario($id_usuario);
 
+           foreach ($espacios as &$espacio) {
+              $espacio['lleno'] = $this->reservaModel->espacioLleno(
+                $espacio['id_espacios_comunidad'],
+              date('Y-m-d'));
+             }
+           
             require_once __DIR__ . '/../views/reservas/vecino.php';
-            
         }
     }
 
-    // =========================================================================
-    // API: VECINOS (Crear, Eliminar, Ver Normas)
-    // =========================================================================
     
-    public function store() {
-        header('Content-Type: application/json');
-        
-        $id_usuario = $_SESSION['vivienda']['id_usuario'];
-        $data = [
-            'id_usuario'            => $id_usuario,
-            'id_espacios_comunidad' => $_POST['id_espacio'] ?? null,
-            'fecha_reserva'         => $_POST['fecha'] ?? null,
-            'hora_inicio'           => $_POST['hora_inicio'] ?? null,
-            'hora_fin'              => $_POST['hora_fin'] ?? null,
-            'asistentes'            => isset($_POST['asistentes']) ? (int)$_POST['asistentes'] : 1
-        ];
+    // ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
+    
+   public function store() {
+    header('Content-Type: application/json');
 
-        // Validar Aforo
-        $espacioInfo = $this->reservaModel->getEspacioById($data['id_espacios_comunidad']);
-        if (!$espacioInfo || $data['asistentes'] > $espacioInfo['max_personas']) {
-            echo json_encode(['success' => false, 'message' => 'Supera el aforo máximo.']);
-            return;
-        }
+    $id_usuario = $_SESSION['vivienda']['id_usuario'];
 
-        // Validar Cuotas (1 al día, 3 a la semana)
-        $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva']);
-        if (!$validacionCuota['status']) {
-            echo json_encode(['success' => false, 'message' => $validacionCuota['msg']]);
-            return;
-        }
+    // Recoger datos
+    $data = [
+        'id_usuario'            => $id_usuario,
+        'id_espacios_comunidad' => $_POST['id_espacio'] ?? null,
+        'fecha_reserva'         => $_POST['fecha'] ?? null,
+        'hora_inicio'           => $_POST['hora_inicio'] ?? null,
+        'hora_fin'              => $_POST['hora_fin'] ?? null,
+        'asistentes'            => isset($_POST['asistentes']) ? (int)$_POST['asistentes'] : 1
+    ];
 
-        if ($this->reservaModel->crearReserva($data)) {
-            echo json_encode(['success' => true, 'message' => 'Reserva confirmada.']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error al crear la reserva.']);
-        }
+    // 1. Validación de campos obligatorios
+    if (!$data['id_espacios_comunidad'] || !$data['fecha_reserva']) {
+        echo json_encode(['success' => false, 'message' => 'Faltan datos obligatorios.']);
+        exit;
     }
+
+    // 2. Validación de aforo (ANTES de crear la reserva)
+    if ($this->reservaModel->espacioLleno($data['id_espacios_comunidad'], $data['fecha_reserva'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'El aforo del espacio ya está completo para este día.'
+        ]);
+        exit;
+    }
+
+    // 3. Validación de cuotas
+    $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva']);
+    if (!$validacionCuota['status']) {
+        echo json_encode(['success' => false, 'message' => $validacionCuota['msg']]);
+        exit;
+    }
+
+    // 4. Crear reserva
+    if ($this->reservaModel->crearReserva($data)) {
+        echo json_encode(['success' => true, 'message' => 'Reserva confirmada.']);
+        exit;
+    }
+
+    // 5. Error inesperado
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Error al crear la reserva.']);
+    exit;
+  }
+
+  //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
 
     public function destroy() {
         header('Content-Type: application/json');

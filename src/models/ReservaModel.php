@@ -22,6 +22,30 @@ class ReservaModel extends BaseModel {
         }
     }
 
+    public function espacioLleno($id_espacios_comunidad, $fecha_reserva) {
+
+    // Obtener aforo del espacio
+    $sqlAforo = "SELECT aforo 
+                 FROM espacios_comunidad 
+                 WHERE id_espacios_comunidad = ?";
+    $stmt = $this->db->prepare($sqlAforo);
+    $stmt->execute([$id_espacios_comunidad]);
+    $aforo = $stmt->fetchColumn();
+
+    // Sumar asistentes ya reservados ese día
+    $sqlSuma = "SELECT SUM(asistentes) 
+                FROM reservas 
+                WHERE id_espacios_comunidad = ? 
+                AND fecha_reserva = ?";
+    $stmt = $this->db->prepare($sqlSuma);
+    $stmt->execute([$id_espacios_comunidad, $fecha_reserva]);
+    $asistentes_actuales = $stmt->fetchColumn() ?? 0;
+
+    return $asistentes_actuales >= $aforo;
+}
+
+
+
     public function getEspacioById($id_espacios_comunidad) {
         try {
             $sql = "SELECT * FROM espacios_comunidad WHERE id_espacios_comunidad = :id";
@@ -79,6 +103,10 @@ class ReservaModel extends BaseModel {
             return ['status' => false, 'msg' => 'Error interno al validar las cuotas.'];
         }
     }
+
+
+ // ------------------------------------- GESTIÓN RESERVAS
+
 
     public function crearReserva($data) {
     try {

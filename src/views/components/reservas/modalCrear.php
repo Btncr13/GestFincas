@@ -17,14 +17,19 @@
                 <!-- Espacio -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Espacio</label>
-                    <select id="selectEspacio" class="form-select shadow-sm">
-                        <option value="">Selecciona un espacio...</option>
-                        <?php foreach ($espacios as $espacio): ?>
-                          <option value="<?= $espacio['id_espacios_comunidad'] ?>">
-                           <?= htmlspecialchars($espacio['nombre_espacio']) ?>
-                          </option>
-                        <?php endforeach; ?>
-                    </select>
+                        <select name="id_espacio" id="id_espacio" class="form-select">
+    <?php foreach ($espacios as $espacio): ?>
+        <option 
+            value="<?= $espacio['id_espacios_comunidad'] ?>"
+            <?= $espacio['lleno'] ? 'disabled' : '' ?>
+            class="<?= $espacio['lleno'] ? 'text-muted' : '' ?>"
+        >
+            <?= $espacio['nombre_espacio'] ?>
+            <?= $espacio['lleno'] ? ' (Aforo completo)' : '' ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+
                 </div>
 
                 <!-- Fecha de la reserva -->
@@ -46,7 +51,7 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Número de personas</label>
                     <select id="selectPersonas" class="form-select shadow-sm">
-                        <option value="">Selecciona cantidad...</option>
+                        <option value="">Números asistentes...</option>
                     </select>
                 </div>
             </div>

@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 1; i <= max; i++) {
       const option = document.createElement("option");
       option.value = i;
-      option.textContent = i === 1 ? "1 persona" : `${i} personas`;
+      option.textContent = i === 1 ? "1 persona" : `${i}`;
       selectPersonas.appendChild(option);
     }
     selectPersonas.disabled = false;
