@@ -115,7 +115,7 @@
                                                 <button type="button"
                                                     class="btn btn-sm btn-outline-danger fw-semibold"
                                                     onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
-                                                    <i class="fa-solid fa-trash me-2"></i>Cancelar
+                                                    <i class="fa-solid fa-trash me-2"></i>Eliminar
                                                 </button>
                                             </div>
 

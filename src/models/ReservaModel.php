@@ -22,16 +22,16 @@ class ReservaModel extends BaseModel {
         }
     }
 
-    public function espacioLleno($id_espacio, $fecha, $hora_inicio, $hora_fin) {
+    public function hayCapacidad($id_espacios_comunidad, $fecha, $hora_inicio, $hora_fin, $nuevos_asistentes = 1) {
 
-    // 1. Obtener aforo real del espacio
+    // 1. Obtener aforo
     $sql = "SELECT aforo FROM espacios_comunidad WHERE id_espacios_comunidad = ?";
     $stmt = $this->db->prepare($sql);
-    $stmt->execute([$id_espacio]);
+    $stmt->execute([$id_espacios_comunidad]);
     $aforo = $stmt->fetchColumn();
 
-    // 2. Sumar asistentes en reservas SOLAPADAS
-    $sql = "SELECT SUM(asistentes) as total
+    // 2. Ocupación actual
+    $sql = "SELECT COALESCE(SUM(asistentes), 0)
             FROM reservas
             WHERE id_espacios_comunidad = ?
             AND fecha_reserva = ?
@@ -39,12 +39,18 @@ class ReservaModel extends BaseModel {
             AND (hora_inicio < ? AND hora_fin > ?)";
 
     $stmt = $this->db->prepare($sql);
-    $stmt->execute([$id_espacio, $fecha, $hora_fin, $hora_inicio]);
+    $stmt->execute([
+        $id_espacios_comunidad,
+        $fecha,
+        $hora_fin,
+        $hora_inicio
+    ]);
 
-    $total = $stmt->fetchColumn() ?? 0;
+    $ocupacion = $stmt->fetchColumn();
 
-    return $total >= $aforo;
-  }
+    // 3. Validación real
+    return ($ocupacion + $nuevos_asistentes) <= $aforo;
+}
 
 
     public function getEspacioById($id_espacios_comunidad) {
@@ -106,33 +112,101 @@ class ReservaModel extends BaseModel {
     }
 
 
- // ------------------------------------- GESTIÓN RESERVAS
+ // ------------------------------------- -------------------------------------------------------GESTIÓN RESERVAS
 
-
+    // --------------------------------------------------- CREAR RESERVA
     public function crearReserva($data) {
+
     try {
-        $sql = "INSERT INTO reservas (id_usuario, id_espacios_comunidad, fecha_reserva, hora_inicio, hora_fin, estado_reserva, asistentes) 
-                VALUES (:id_usuario, :id_espacios_comunidad, :fecha_reserva, :hora_inicio, :hora_fin, 'activo', :asistentes)";
-        
+        // 1. INICIAR TRANSACCIÓN
+        $this->db->beginTransaction();
+
+        // 2. BLOQUEO/REVALIDACIÓN FINAL DE AFORO
+        $sqlCheck = "SELECT SUM(asistentes) 
+                    FROM reservas
+                    WHERE id_espacios_comunidad = ?
+                    AND fecha_reserva = ?
+                    AND hora_inicio < ?
+                    AND hora_fin > ?
+                    AND estado_reserva = 'activo'
+                    FOR UPDATE";
+
+        $stmt = $this->db->prepare($sqlCheck);
+        $stmt->execute([
+            $data['id_espacios_comunidad'],
+            $data['fecha_reserva'],
+            $data['hora_fin'],
+            $data['hora_inicio']
+        ]);
+
+        $ocupado = $stmt->fetchColumn() ?? 0;
+
+        // 3. OBTENER AFORO DEL ESPACIO
+        $sqlAforo = "SELECT aforo 
+                     FROM espacios_comunidad 
+                     WHERE id_espacios_comunidad = ? 
+                     FOR UPDATE";
+
+        $stmt = $this->db->prepare($sqlAforo);
+        $stmt->execute([$data['id_espacios_comunidad']]);
+        $aforo = $stmt->fetchColumn();
+
+        // 4. VALIDACIÓN FINAL
+        if (($ocupado + $data['asistentes']) > $aforo) {
+            $this->db->rollBack();
+            return false;
+        }
+
+        // 5. INSERT RESERVA
+        $sql = "INSERT INTO reservas (
+                    id_usuario,
+                    id_espacios_comunidad,
+                    fecha_reserva,
+                    hora_inicio,
+                    hora_fin,
+                    estado_reserva,
+                    asistentes
+                ) VALUES (
+                    :id_usuario,
+                    :id_espacios_comunidad,
+                    :fecha_reserva,
+                    :hora_inicio,
+                    :hora_fin,
+                    'activo',
+                    :asistentes
+                )";
+
         $stmt = $this->db->prepare($sql);
+
         $stmt->bindParam(':id_usuario', $data['id_usuario'], PDO::PARAM_INT);
         $stmt->bindParam(':id_espacios_comunidad', $data['id_espacios_comunidad'], PDO::PARAM_INT);
         $stmt->bindParam(':fecha_reserva', $data['fecha_reserva'], PDO::PARAM_STR);
         $stmt->bindParam(':hora_inicio', $data['hora_inicio'], PDO::PARAM_STR);
         $stmt->bindParam(':hora_fin', $data['hora_fin'], PDO::PARAM_STR);
         $stmt->bindParam(':asistentes', $data['asistentes'], PDO::PARAM_INT);
-        
-        if ($stmt->execute()) {
-            return $this->db->lastInsertId(); // ← AQUÍ EL CAMBIO IMPORTANTE
-        }
 
-        return false;
+        $stmt->execute();
+
+        $idReserva = $this->db->lastInsertId();
+
+        // 6. CONFIRMAR TRANSACCIÓN
+        $this->db->commit();
+
+        return $idReserva;
 
     } catch (PDOException $e) {
+
+        // 7. ROLLBACK EN CASO DE ERROR
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
+
         error_log("Error en crearReserva: " . $e->getMessage());
         return false;
     }
-  }
+   }
+
+// --------------------------------------------------- LEER RESERVAS POR ID_RESERVAS
 
       public function getReservaById($id) {
             $sql = "SELECT r.*, ec.nombre_espacio
@@ -147,8 +221,7 @@ class ReservaModel extends BaseModel {
           }
 
 
-
-    // Para la vista del vecino (Mis Reservas)
+    // --------------------------------------------------- LEER RESERVAS POR ID_USUARIO
     public function getReservasUsuario($id_usuario) {
         try {
             $sql = "SELECT r.id_reservas as id_reserva, r.fecha_reserva as fecha, r.hora_inicio, r.hora_fin, r.estado_reserva, r.asistentes, 
@@ -167,7 +240,7 @@ class ReservaModel extends BaseModel {
         }
     }
 
-    // Para la vista de auditoría del Presidente
+    // --------------------------------------------------- LEER TODAS LAS RESERVAS DE LA COMUNIDAD
     public function getTodasLasReservasComunidad($id_comunidad) {
         try {
             $sql = "SELECT r.id_reservas as id_reserva, r.fecha_reserva as fecha, r.hora_inicio, r.hora_fin, r.estado_reserva, r.asistentes,
@@ -188,6 +261,7 @@ class ReservaModel extends BaseModel {
         }
     }
 
+    // --------------------------------------------------- ACTUALIZAR RESERVAS VENCIDAS
     public function actualizarReservasVencidas() {
     try {
         $ahora = date('Y-m-d H:i:s');
@@ -208,7 +282,7 @@ class ReservaModel extends BaseModel {
     }
  }
 
-
+    //  --------------------------------------------------- ELIMINAR RESERVA
     public function eliminarReserva($id_reservas, $id_usuario) {
         try {
             // Utilizamos id_reservas en lugar de id_reserva
@@ -223,3 +297,4 @@ class ReservaModel extends BaseModel {
         }
     }
 }
+?>

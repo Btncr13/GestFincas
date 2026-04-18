@@ -44,9 +44,9 @@
 
                 <!-- Número de personas -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-dark">Número de personas</label>
+                    <label class="form-label fw-semibold text-dark">Asistentes</label>
                     <select id="selectPersonas" class="form-select shadow-sm">
-                        <option value="">Números asistentes...</option>
+                        <option value="">Máximo asistentes...</option>
                     </select>
                 </div>
             </div>

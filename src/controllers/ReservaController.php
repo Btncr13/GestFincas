@@ -49,6 +49,7 @@ class ReservaController {
             
             // --- Carga de datos para VECINO ---
             $espaciosDisponibles = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
+            $misReservas = $this->reservaModel->getReservasUsuario($id_usuario);
            
             require_once __DIR__ . '/../views/reservas/vecino.php';
         }
@@ -57,25 +58,27 @@ class ReservaController {
     
 // ----------------------------------------------------------- ENDPOINT PARA COMPROBAR DISPONIBILIDAD ESPACIO POR TRAMO HORARIO 
 
-    public function comprobarDisponibilidad() {
+    
+ public function comprobarDisponibilidad() {
     header('Content-Type: application/json');
 
-    $fecha = $_POST['fecha'];
-    $hora_inicio = $_POST['hora_inicio'];
-    $hora_fin = $_POST['hora_fin'];
-
     $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+    $fecha = $_POST['fecha_reserva'];
+    $hora_inicio = $_POST['hora_inicio'] ?? null;
+    $hora_fin = $_POST['hora_fin'] ?? null;
 
     $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
 
     $resultado = [];
 
     foreach ($espacios as $espacio) {
-        $lleno = $this->reservaModel->espacioLleno(
+
+        $lleno = !$this->reservaModel->hayCapacidad(
             $espacio['id_espacios_comunidad'],
             $fecha,
             $hora_inicio,
-            $hora_fin
+            $hora_fin,
+            1
         );
 
         $resultado[] = [
@@ -85,7 +88,7 @@ class ReservaController {
     }
 
     echo json_encode($resultado);
-}
+ }
     
 // ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
    public function store() {
@@ -96,24 +99,41 @@ class ReservaController {
     // Recoger datos
     $data = [
         'id_usuario'            => $id_usuario,
-        'id_espacios_comunidad' => $_POST['id_espacio'] ?? null,
-        'fecha_reserva'         => $_POST['fecha'] ?? null,
+        'id_espacios_comunidad' => $_POST['id_espacios_comunidad'] ?? null,
+        'fecha_reserva'         => $_POST['fecha_reserva'] ?? null,
         'hora_inicio'           => $_POST['hora_inicio'] ?? null,
         'hora_fin'              => $_POST['hora_fin'] ?? null,
         'asistentes'            => isset($_POST['asistentes']) ? (int)$_POST['asistentes'] : 1
     ];
 
     // 1. Validación de campos obligatorios
-    if (!$data['id_espacios_comunidad'] || !$data['fecha_reserva']) {
-        echo json_encode(['success' => false, 'message' => 'Faltan datos obligatorios.']);
-        exit;
-    }
+   if (
+    empty($data['id_espacios_comunidad']) ||
+    empty($data['fecha_reserva']) ||
+    empty($data['hora_inicio']) ||
+    empty($data['hora_fin']) ||
+    empty($data['asistentes']))
+    
+    {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Todos los campos son obligatorios.'
+    ]);
+    exit;
+   }
 
     // 2. Validación de aforo (ANTES de crear la reserva)
-    if ($this->reservaModel->espacioLleno($data['id_espacios_comunidad'], $data['fecha_reserva'])) {
+    if (!$this->reservaModel->hayCapacidad(
+    $data['id_espacios_comunidad'],
+    $data['fecha_reserva'],
+    $data['hora_inicio'],
+    $data['hora_fin'],
+    $data['asistentes']))
+    
+    {
         echo json_encode([
             'success' => false,
-            'message' => 'El aforo del espacio ya está completo para este día.'
+            'message' => 'Aforo completo'
         ]);
         exit;
     }
@@ -126,16 +146,45 @@ class ReservaController {
     }
 
     // 4. Crear reserva
-    if ($this->reservaModel->crearReserva($data)) {
-        echo json_encode(['success' => true, 'message' => 'Reserva confirmada.']);
-        exit;
-    }
+   $id = $this->reservaModel->crearReserva($data);
 
-    // 5. Error inesperado
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Error al crear la reserva.']);
+   if ($id) {
+
+    $reserva = $this->reservaModel->getReservaById($id);
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Reserva confirmada.',
+        'reserva' => $reserva
+    ]);
+    exit;
+   }
+
+     http_response_code(500);
+     echo json_encode([
+    'success' => false,
+    'message' => 'Error al crear la reserva.'
+     ]);
+      exit;
+ }
+  
+  // -------------------------------------------------------------------- ENDPOINT RECUPERAR RESERVAS DE MANERA DINAMICA
+
+  public function getMisReservasAjax() {
+
+    header('Content-Type: application/json');
+
+    $id_usuario = $_SESSION['vivienda']['id_usuario'];
+
+    $reservas = $this->reservaModel->getReservasUsuario($id_usuario);
+
+    echo json_encode([
+        'success' => true,
+        'reservas' => $reservas
+    ]);
     exit;
   }
+
 
   //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
 
