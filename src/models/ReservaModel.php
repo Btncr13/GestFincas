@@ -22,28 +22,29 @@ class ReservaModel extends BaseModel {
         }
     }
 
-    public function espacioLleno($id_espacios_comunidad, $fecha_reserva) {
+    public function espacioLleno($id_espacio, $fecha, $hora_inicio, $hora_fin) {
 
-    // Obtener aforo del espacio
-    $sqlAforo = "SELECT aforo 
-                 FROM espacios_comunidad 
-                 WHERE id_espacios_comunidad = ?";
-    $stmt = $this->db->prepare($sqlAforo);
-    $stmt->execute([$id_espacios_comunidad]);
+    // 1. Obtener aforo real del espacio
+    $sql = "SELECT aforo FROM espacios_comunidad WHERE id_espacios_comunidad = ?";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$id_espacio]);
     $aforo = $stmt->fetchColumn();
 
-    // Sumar asistentes ya reservados ese día
-    $sqlSuma = "SELECT SUM(asistentes) 
-                FROM reservas 
-                WHERE id_espacios_comunidad = ? 
-                AND fecha_reserva = ?";
-    $stmt = $this->db->prepare($sqlSuma);
-    $stmt->execute([$id_espacios_comunidad, $fecha_reserva]);
-    $asistentes_actuales = $stmt->fetchColumn() ?? 0;
+    // 2. Sumar asistentes en reservas SOLAPADAS
+    $sql = "SELECT SUM(asistentes) as total
+            FROM reservas
+            WHERE id_espacios_comunidad = ?
+            AND fecha_reserva = ?
+            AND estado_reserva = 'activo'
+            AND (hora_inicio < ? AND hora_fin > ?)";
 
-    return $asistentes_actuales >= $aforo;
-}
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$id_espacio, $fecha, $hora_fin, $hora_inicio]);
 
+    $total = $stmt->fetchColumn() ?? 0;
+
+    return $total >= $aforo;
+  }
 
 
     public function getEspacioById($id_espacios_comunidad) {

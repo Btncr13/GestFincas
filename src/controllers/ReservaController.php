@@ -40,7 +40,7 @@ class ReservaController {
         if ($rol === 'presidente') {
             
             // --- Carga de datos para PRESIDENTE ---
-            $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
+            $espaciosComunidad = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
             $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
             
             require_once __DIR__ . '/../views/reservas/presidente.php';
@@ -48,21 +48,46 @@ class ReservaController {
         } else {
             
             // --- Carga de datos para VECINO ---
-            $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
-
-           foreach ($espacios as &$espacio) {
-              $espacio['lleno'] = $this->reservaModel->espacioLleno(
-                $espacio['id_espacios_comunidad'],
-              date('Y-m-d'));
-             }
+            $espaciosDisponibles = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
            
             require_once __DIR__ . '/../views/reservas/vecino.php';
         }
     }
 
     
-    // ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
+// ----------------------------------------------------------- ENDPOINT PARA COMPROBAR DISPONIBILIDAD ESPACIO POR TRAMO HORARIO 
+
+    public function comprobarDisponibilidad() {
+    header('Content-Type: application/json');
+
+    $fecha = $_POST['fecha'];
+    $hora_inicio = $_POST['hora_inicio'];
+    $hora_fin = $_POST['hora_fin'];
+
+    $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+
+    $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
+
+    $resultado = [];
+
+    foreach ($espacios as $espacio) {
+        $lleno = $this->reservaModel->espacioLleno(
+            $espacio['id_espacios_comunidad'],
+            $fecha,
+            $hora_inicio,
+            $hora_fin
+        );
+
+        $resultado[] = [
+            'id' => $espacio['id_espacios_comunidad'],
+            'lleno' => $lleno
+        ];
+    }
+
+    echo json_encode($resultado);
+}
     
+// ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
    public function store() {
     header('Content-Type: application/json');
 

@@ -1,18 +1,10 @@
 // ELIMINAR RESERVA
-
 function eliminarReserva(idReserva) {
-  if (!confirm("¿Seguro que deseas cancelar esta reserva?")) {
-    return;
-  }
+  if (!confirm("¿Seguro que deseas cancelar esta reserva?")) return;
 
-  // --- ELIMINACIÓN OPTIMISTA (DE INMEDIATO) ---
-  // Buscamos la tarjeta y la eliminamos de la vista antes de esperar al servidor
   const card = document.getElementById(`reserva-${idReserva}`);
-  if (card) {
-    card.remove();
-  }
+  if (card) card.remove();
 
-  // Si tras borrarla ya no quedan tarjetas, mostramos el mensaje de "No hay reservas"
   const contenedor = document.getElementById("contenedorReservas");
   if (contenedor && contenedor.querySelectorAll(".card").length === 0) {
     const mensaje = document.getElementById("mensajeSinReservas");
@@ -30,21 +22,15 @@ function eliminarReserva(idReserva) {
     .then((res) => res.json())
     .then((data) => {
       if (!data.success) {
-        // Si el servidor dice que NO se pudo borrar, avisamos y refrescamos
-        // para que la reserva "reaparezca" y la vista sea veraz.
         alert("Error al cancelar: " + data.message);
         location.reload();
       }
     })
-    .catch((err) => {
-      console.error("Error en la red:", err);
-      // En caso de error de conexión, también refrescamos para sincronizar
-      location.reload();
-    });
+    .catch(() => location.reload());
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const selectEspacio = document.getElementById("selectEspacio");
+  const selectEspacio = document.getElementById("id_espacio");
   const inputFecha = document.getElementById("inputFecha");
   const selectTramo = document.getElementById("selectTramo");
   const selectPersonas = document.getElementById("selectPersonas");
@@ -63,10 +49,25 @@ document.addEventListener("DOMContentLoaded", () => {
   inputFecha.max = formato(max);
 
   // -----------------------------------
+  // RESETEAR MODAL AL ABRIRLO
+  // -----------------------------------
+  document.getElementById("modalReserva").addEventListener("show.bs.modal", () => {
+    resetSelect(selectTramo, "Selecciona un tramo...");
+    resetSelect(selectPersonas, "Selecciona cantidad...");
+    selectEspacio.value = "";
+    inputFecha.value = "";
+    btnCrear.disabled = true;
+  });
+
+  // -----------------------------------
   // EVENTO: CAMBIO DE ESPACIO
   // -----------------------------------
   selectEspacio.addEventListener("change", (e) => {
     const idEspacio = e.target.value;
+
+    [inputFecha, selectTramo, selectPersonas].forEach(el => {
+      el.addEventListener("change", comprobarDisponibilidad);
+    });
 
     resetSelect(selectPersonas, "Selecciona cantidad...");
     resetSelect(selectTramo, "Selecciona un tramo...");
@@ -75,15 +76,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!idEspacio) return;
 
     const espacio = espaciosDisponibles.find(
-      (esp) => esp.id_espacios_comunidad == idEspacio,
+      (esp) => esp.id_espacios_comunidad == idEspacio
     );
+
     if (!espacio) return;
 
     generarPersonas(espacio.max_personas);
     generarTramos(
       espacio.hora_apertura,
       espacio.hora_cierre,
-      espacio.duracion_uso,
+      espacio.duracion_uso
     );
 
     btnCrear.disabled = false;
@@ -94,9 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // -----------------------------------
   btnCrear.addEventListener("click", crearReserva);
 
-  // -----------------------------------
-  // FUNCIÓN: ENVIAR RESERVA AL BACKEND
-  // -----------------------------------
   function crearReserva() {
     const idEspacio = selectEspacio.value;
     const fecha = inputFecha.value;
@@ -129,78 +128,62 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        insertarReservaEnVista(data.reserva);
-        const mensajeSinReservas =
-          document.getElementById("mensajeSinReservas");
-        if (mensajeSinReservas) mensajeSinReservas.style.display = "none";
-
         const modal = bootstrap.Modal.getInstance(
-          document.getElementById("modalReserva"),
+          document.getElementById("modalReserva")
         );
         modal.hide();
       })
       .catch((err) => console.error("Error en la petición:", err));
   }
 
-  // -----------------------------------
-  // FUNCIÓN: PINTAR TARJETA EN LA VISTA
-  // -----------------------------------
-  function insertarReservaEnVista(reserva) {
-    const contenedor = document.getElementById("contenedorReservas");
+  function comprobarDisponibilidad() {
+  const fecha = inputFecha.value;
+  const tramo = selectTramo.value;
 
-    // Creamos el contenedor 'col' para que la rejilla no se rompa
-    const col = document.createElement("div");
-    col.className = "col";
-    col.id = `reserva-${reserva.id_reservas}`; 
+  if (!fecha || !tramo) return;
 
-    col.innerHTML = `
-        <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-success">
-            <div class="card-body p-4 d-flex flex-column">
+  const [hora_inicio, hora_fin] = tramo.split("-");
 
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div class="text-muted small">
-                        <div class="mb-1">
-                            <i class="fa-regular fa-calendar me-2 text-success"></i>
-                            ${reserva.fecha_reserva}
-                        </div>
-                        <div>
-                            <i class="fa-regular fa-clock me-2 text-success"></i>
-                            ${reserva.hora_inicio} - ${reserva.hora_fin}
-                        </div>
-                    </div>
-                    <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white fw-bold">
-                        Activa
-                    </span>
-                </div>
+  const formData = new FormData();
+  formData.append("fecha", fecha);
+  formData.append("hora_inicio", hora_inicio);
+  formData.append("hora_fin", hora_fin);
 
-                <h3 class="fs-5 fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);">
-                    ${reserva.espacio}
-                </h3>
+  fetch("index.php?route=reserva/comprobarDisponibilidad", {
+    method: "POST",
+    body: formData,
+  })
+    .then(res => res.json())
+    .then(data => {
+      actualizarSelectEspacios(data);
+    })
+    .catch(err => console.error("Error comprobando disponibilidad:", err));
+}
 
-                <div class="mb-3 small text-muted">
-                    <i class="fa-solid fa-users me-2"></i>
-                    Asistentes: ${reserva.asistentes}
-                </div>
 
-                <!-- Aquí insertamos las normas que vienen del JSON -->
-                <div class="mb-3 pt-2 border-top">
-                    <small class="text-dark fw-bold d-block mb-1">Normas del espacio:</small>
-                    <ul class="text-muted small mb-0 ps-3">
-                        ${reserva.normas.map(n => `<li>${n.descripcion}</li>`).join('')}
-                    </ul>
-                </div>
+function actualizarSelectEspacios(disponibilidad) {
 
-                <div class="mt-auto d-flex justify-content-end border-top pt-3">
-                    <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="eliminarReserva(${reserva.id_reservas})">
-                        <i class="fa-solid fa-trash me-2"></i>Cancelar
-                    </button>
-                </div>
+  Array.from(selectEspacio.options).forEach(option => {
+    const id = option.value;
 
-            </div>
-        </div>
-    `;
-    contenedor.prepend(col);
-  }
+    if (!id) return;
+
+    const espacio = disponibilidad.find(e => e.id == id);
+
+    if (!espacio) return;
+
+    // Limpiar texto previo
+    option.textContent = option.textContent.replace(" (Completo)", "");
+
+    if (espacio.lleno) {
+      option.disabled = true;
+      option.textContent += " (Completo)";
+    } else {
+      option.disabled = false;
+    }
+  });
+}
+
 
   // -----------------------------------
   // FUNCIONES AUXILIARES
@@ -243,9 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatearHora(minutos) {
-    const h = Math.floor(minutos / 60)
-      .toString()
-      .padStart(2, "0");
+    const h = Math.floor(minutos / 60).toString().padStart(2, "0");
     const m = (minutos % 60).toString().padStart(2, "0");
     return `${h}:${m}`;
   }
