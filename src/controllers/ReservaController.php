@@ -72,13 +72,16 @@ class ReservaController
         $hora_inicio = $_POST['hora_inicio'] ?? null;
         $hora_fin = $_POST['hora_fin'] ?? null;
 
+        // Validamos si el tiempo solicitado es válido (futuro + margen)
+        $esTiempoValido = $this->validarMargenTiempo($fecha, $hora_inicio);
+
         $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
 
         $resultado = [];
 
         foreach ($espacios as $espacio) {
-
-            $lleno = !$this->reservaModel->hayCapacidad(
+            // Si el tiempo no es válido, marcamos como "lleno" para deshabilitar la opción en el UI
+            $lleno = !$esTiempoValido || !$this->reservaModel->hayCapacidad(
                 $espacio['id_espacios_comunidad'],
                 $fecha,
                 $hora_inicio,
@@ -128,11 +131,11 @@ class ReservaController
         }
 
         // 1.1 Validación: No permitir reservas en el pasado para el día de hoy
-        // Se añade un margen de 15 minutos de antelación mínima para evitar conflictos
-        $hoy = date('Y-m-d');
-        $horaLimite = date('H:i', strtotime('+15 minutes'));
-        if ($data['fecha_reserva'] === $hoy && $data['hora_inicio'] < $horaLimite) {
-            echo json_encode(['success' => false, 'message' => 'Las reservas deben realizarse con al menos 15 minutos de antelación.']);
+        if (!$this->validarMargenTiempo($data['fecha_reserva'], $data['hora_inicio'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No es posible reservar en el pasado. Las reservas para hoy requieren 15 min de antelación.'
+            ]);
             exit;
         }
 
@@ -220,5 +223,26 @@ class ReservaController
     {
         header('Content-Type: application/json');
         echo json_encode(['success' => true, 'data' => $this->reservaModel->getNormasByEspacio($id_espacios_comunidad)]);
+    }
+
+    /**
+     * Valida que la fecha y hora de la reserva no sean pasadas 
+     * y respeten el margen de cortesía de 15 minutos.
+     */
+    private function validarMargenTiempo($fecha, $horaInicio)
+    {
+        $hoy = date('Y-m-d');
+
+        // 1. Bloquear cualquier fecha anterior a hoy
+        if ($fecha < $hoy) return false;
+
+        // 2. Si es hoy, validar el margen de 15 minutos
+        if ($fecha === $hoy && $horaInicio) {
+            $horaLimite = date('H:i', strtotime('+15 minutes'));
+            // Si la hora de inicio es menor a la hora actual + 15 min, es inválido
+            return $horaInicio >= $horaLimite;
+        }
+
+        return true;
     }
 }

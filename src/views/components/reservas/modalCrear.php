@@ -1,5 +1,5 @@
 <div class="modal fade" id="modalReserva" tabindex="-1" aria-labelledby="modalReservaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg"> 
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
 
             <!-- Header -->
@@ -14,23 +14,26 @@
             <!-- Body -->
             <div class="modal-body">
 
+                <!-- Contenedor de errores específico del modal -->
+                <div id="modalErrorAlert" class="alert alert-danger d-none mb-3 py-2 small" role="alert"></div>
+
                 <!-- Espacio -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Espacio</label>
-                        <select name="id_espacio" id="id_espacio" class="form-select">
-                             <option value="">Selecciona un espacio</option>
-                            <?php foreach ($espaciosDisponibles as $espacio): ?>
-                             <option value="<?= $espacio['id_espacios_comunidad'] ?>">
-                             <?= $espacio['nombre_espacio'] ?>
+                    <select name="id_espacio" id="id_espacio" class="form-select">
+                        <option value="">Selecciona un espacio</option>
+                        <?php foreach ($espaciosDisponibles as $espacio): ?>
+                            <option value="<?= $espacio['id_espacios_comunidad'] ?>">
+                                <?= $espacio['nombre_espacio'] ?>
                             </option>
-                            <?php endforeach; ?>
-                        </select>
-               </div>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
                 <!-- Fecha de la reserva -->
                 <div class="mb-3">
-                      <label class="form-label fw-semibold text-dark">Fecha</label>
-                      <input type="date" id="inputFecha" class="form-control shadow-sm">
+                    <label class="form-label fw-semibold text-dark">Fecha</label>
+                    <input type="date" id="inputFecha" class="form-control shadow-sm">
                 </div>
 
 

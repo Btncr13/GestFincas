@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectTramo = document.getElementById("selectTramo");
   const selectPersonas = document.getElementById("selectPersonas");
   const btnCrear = document.getElementById("btnCrearReserva");
+  const modalReservaEl = document.getElementById("modalReserva");
+  const alertError = document.getElementById("modalErrorAlert");
 
   // =====================================================
   // 🧠 2. ESTADO CENTRAL (CLAVE)
@@ -17,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tramo: null,
     personas: null,
     espacioData: null,
+    refreshInterval: null,
   };
 
   // =====================================================
@@ -34,9 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${year}-${month}-${day}`;
   };
 
-  inputFecha.min = formato(hoy);
+  const fechaHoyStr = formato(hoy);
+  inputFecha.min = fechaHoyStr;
+  inputFecha.value = fechaHoyStr; // Establecemos hoy por defecto en el UI
   inputFecha.max = formato(max);
-  state.fecha = inputFecha.value || null; // Sincronizar estado inicial si el input tiene valor
+  state.fecha = fechaHoyStr; // Sincronizamos el estado inicial
 
   btnCrear.disabled = true;
 
@@ -46,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   selectEspacio.addEventListener("change", (e) => {
     state.espacio = e.target.value;
+    limpiarErrorModal();
 
     resetSelect(selectTramo, "Selecciona un tramo...");
     resetSelect(selectPersonas, "Selecciona cantidad...");
@@ -77,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   inputFecha.addEventListener("change", (e) => {
     state.fecha = e.target.value;
+    limpiarErrorModal();
 
     // Al cambiar la fecha, los tramos disponibles pueden variar (especialmente si es hoy)
     // Si ya tenemos los datos del espacio, regeneramos el selector de tramos para aplicar el filtro de tiempo
@@ -95,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   selectTramo.addEventListener("change", (e) => {
     state.tramo = e.target.value;
+    limpiarErrorModal();
     comprobarDisponibilidad();
     actualizarBoton();
   });
@@ -106,9 +114,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnCrear.addEventListener("click", crearReserva);
 
+  // Sincronización automática cada minuto mientras el modal está abierto
+  modalReservaEl.addEventListener("shown.bs.modal", () => {
+    state.refreshInterval = setInterval(() => {
+      const { esHoy } = getFiltroTiempo();
+
+      // Solo refrescamos si es "hoy" y hay un espacio seleccionado
+      if (state.espacioData && esHoy) {
+        const tramoSeleccionadoPrevio = state.tramo;
+
+        generarTramos(
+          state.espacioData.hora_apertura,
+          state.espacioData.hora_cierre,
+          state.espacioData.duracion_uso,
+        );
+
+        // Intentamos mantener la selección del usuario si el tramo sigue siendo válido
+        selectTramo.value = tramoSeleccionadoPrevio;
+        state.tramo = selectTramo.value || null;
+        actualizarBoton();
+      }
+    }, 60000); // 60 segundos
+  });
+
+  modalReservaEl.addEventListener("hidden.bs.modal", () => {
+    clearInterval(state.refreshInterval);
+    limpiarErrorModal();
+  });
+
   // =====================================================
   // 🧠 5. CONTROL CENTRAL BOTÓN
   // =====================================================
+  function limpiarErrorModal() {
+    if (alertError) {
+      alertError.textContent = "";
+      alertError.classList.add("d-none");
+    }
+  }
+
   function actualizarBoton() {
     const valido =
       state.espacio && state.fecha && state.tramo && state.personas;
@@ -188,12 +231,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const inicio = convertirHora(horaApertura);
     const fin = convertirHora(horaCierre);
 
-    // Obtener hora actual en minutos si la fecha es hoy
-    const hoyStr = formato(new Date());
-    const esHoy = state.fecha === hoyStr;
-    const ahora = new Date();
-    // Calculamos el límite añadiendo 15 minutos de antelación mínima
-    const minutosLimite = ahora.getHours() * 60 + ahora.getMinutes() + 15;
+    // Obtenemos la lógica de tiempo centralizada
+    const { esHoy, minutosLimite } = getFiltroTiempo();
 
     for (let h = inicio; h + duracion <= fin; h += duracion) {
       // Si es hoy, saltamos los tramos que comiencen antes del margen de antelación
@@ -221,6 +260,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetSelect(select, placeholder) {
     select.innerHTML = `<option value="">${placeholder}</option>`;
     select.disabled = false;
+  }
+
+  /**
+   * Centraliza el cálculo del tiempo actual y la comparación con la fecha seleccionada.
+   * @returns {Object} { esHoy: boolean, minutosLimite: number }
+   */
+  function getFiltroTiempo() {
+    const ahora = new Date();
+    return {
+      // Compara la fecha del estado con la fecha de "ahora" formateada
+      esHoy: state.fecha === formato(ahora),
+      // Hora actual convertida a minutos + margen de cortesía (15 min)
+      minutosLimite: ahora.getHours() * 60 + ahora.getMinutes() + 15,
+    };
   }
 
   function convertirHora(hora) {
@@ -256,7 +309,12 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => res.json())
       .then((data) => {
         if (!data.success) {
-          showToast(data.message, "error");
+          // Mostrar error específico dentro del modal
+          if (alertError) {
+            alertError.textContent = data.message;
+            alertError.classList.remove("d-none");
+          }
+          btnCrear.disabled = false;
           return;
         }
 
@@ -306,6 +364,11 @@ document.addEventListener("DOMContentLoaded", () => {
           .getElementById("contenedorReservas")
           .insertAdjacentHTML("afterbegin", html);
 
+        // Eliminar el mensaje de "No hay reservas" si existe
+        const mensajeSinReservas =
+          document.getElementById("mensajeSinReservas");
+        if (mensajeSinReservas) mensajeSinReservas.remove();
+
         bootstrap.Modal.getInstance(
           document.getElementById("modalReserva"),
         ).hide();
@@ -322,10 +385,7 @@ function cargarReservas() {
   fetch("index.php?route=reserva/getMisReservasAjax")
     .then((res) => res.json())
     .then((data) => {
-      const contenedor = document.getElementById("contenedorReservas");
-      contenedor.innerHTML = ""; // 👈 IMPORTANTE
-
-      data.reservas.forEach(renderReservas);
+      renderReservas(data.reservas);
     });
 }
 
@@ -335,6 +395,17 @@ function renderReservas(reservas) {
   const contenedor = document.getElementById("contenedorReservas");
 
   contenedor.innerHTML = "";
+
+  // Si no hay reservas, inyectamos el mensaje de "Empty State"
+  if (reservas.length === 0) {
+    contenedor.innerHTML = `
+      <div id="mensajeSinReservas" class="text-center py-5 w-100">
+          <i class="fa-regular fa-calendar-xmark fs-1 text-muted mb-3"></i>
+          <h5 class="fw-bold text-muted">No tienes reservas activas</h5>
+          <p class="text-muted small">Haz clic en "Nueva Reserva" para empezar.</p>
+      </div>`;
+    return;
+  }
 
   reservas.forEach((r) => {
     const html = `
