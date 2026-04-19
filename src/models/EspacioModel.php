@@ -9,27 +9,30 @@ class EspacioModel extends BaseModel {
     }
 
     // El presidente crea un espacio directamente en su comunidad
-    public function crearEspacio($data) {
+    public function crearEspacioCompleto($datos) {
         try {
-            $sql = "INSERT INTO espacios_comunidad 
-                    (id_comunidad, nombre_espacio, max_personas, hora_apertura, hora_cierre, duracion_uso, bloqueado) 
-                    VALUES (:id_comunidad, :nombre_espacio, :max_personas, :hora_apertura, :hora_cierre, :duracion_uso, 0)";
-            
+            $this->db->beginTransaction();
+            $sql = "INSERT INTO espacios_comunidad (id_comunidad, nombre_espacio, aforo, max_personas, hora_apertura, hora_cierre, duracion_uso, bloqueado) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id_comunidad', $data['id_comunidad'], PDO::PARAM_INT);
-            $stmt->bindParam(':nombre_espacio', $data['nombre_espacio'], PDO::PARAM_STR);
-            $stmt->bindParam(':max_personas', $data['max_personas'], PDO::PARAM_INT);
-            $stmt->bindParam(':hora_apertura', $data['hora_apertura'], PDO::PARAM_STR);
-            $stmt->bindParam(':hora_cierre', $data['hora_cierre'], PDO::PARAM_STR);
-            $stmt->bindParam(':duracion_uso', $data['duracion_uso'], PDO::PARAM_INT);
-            
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Error en crearEspacio: " . $e->getMessage());
+            $stmt->execute([
+                $datos['id_comunidad'], $datos['nombre_espacio'], $datos['aforo'],
+                $datos['max_personas'], $datos['hora_apertura'], $datos['hora_cierre'],
+                $datos['duracion_uso'], $datos['bloqueado']
+            ]);
+            $idEspacio = $this->db->lastInsertId();
+
+            if (!empty($datos['normas'])) {
+                $sqlNorma = "INSERT INTO espacios_normas (id_espacios_comunidad, norma) VALUES (?, ?)";
+                $this->db->prepare($sqlNorma)->execute([$idEspacio, $datos['normas']]);
+            }
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
             return false;
         }
     }
-
     public function modificarEspacio($data) {
         try {
             $sql = "UPDATE espacios_comunidad 

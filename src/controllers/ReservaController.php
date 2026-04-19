@@ -40,7 +40,7 @@ class ReservaController {
         if ($rol === 'presidente') {
             
             // --- Carga de datos para PRESIDENTE ---
-            $espaciosComunidad = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
+            $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
             $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
             
             require_once __DIR__ . '/../views/reservas/presidente.php';

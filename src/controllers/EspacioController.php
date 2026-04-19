@@ -26,27 +26,42 @@ class EspacioController
 
 
     // API: CREAR ESPACIO
-    public function store()
-    {
-        header('Content-Type: application/json');
+    public function store() {
+        // Solo permitimos POST
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            
+            // 1. Recoger datos del formulario
+            $datos = [
+                'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
+                'aforo'          => $_POST['aforo'] ?? 0,
+                'max_personas'   => $_POST['max_personas'] ?? 0, 
+                'hora_apertura'  => $_POST['hora_apertura'] ?? '',
+                'hora_cierre'    => $_POST['hora_cierre'] ?? '',
+                'duracion_uso'   => $_POST['duracion_uso'] ?? 0,
+                'bloqueado'      => isset($_POST['bloqueado']) ? (int)$_POST['bloqueado'] : 0,
+                'id_comunidad'   => $_SESSION['vivienda']['id_comunidad'], // Corregido el acceso a sesión
+                'normas'         => $_POST['normas_espacio'] ?? '' 
+            ];
 
-        $data = [
-            'id_comunidad'   => $_SESSION['vivienda']['id_comunidad'],
-            'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
-            'max_personas'   => (int)($_POST['max_personas'] ?? 1),
-            'hora_apertura'  => $_POST['hora_apertura'] ?? '08:00:00',
-            'hora_cierre'    => $_POST['hora_cierre'] ?? '22:00:00',
-            'duracion_uso'   => (int)($_POST['duracion_uso'] ?? 60) // Ej: 60 minutos
-        ];
+            // 2. Validación básica
+            if (empty($datos['nombre_espacio'])) {
+                echo json_encode(['status' => 'error', 'message' => 'El nombre es obligatorio']);
+                exit;
+            }
 
-        if ($this->espacioModel->crearEspacio($data)) {
-            echo json_encode(['success' => true, 'message' => 'Espacio creado con éxito.']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error al guardar el espacio.']);
+            // 3. Usar la instancia ya creada en el constructor ($this->espacioModel)
+            $resultado = $this->espacioModel->crearEspacioCompleto($datos);
+
+            if ($resultado) {
+                echo json_encode(['status' => 'success', 'message' => 'Espacio creado correctamente']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => 'Error al guardar en la base de datos']);
+            }
+            exit;
         }
     }
-
     // API: MODIFICAR ESPACIO
     public function update()
     {
