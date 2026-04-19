@@ -167,58 +167,46 @@ document.addEventListener('DOMContentLoaded', () => {
             : '<span class="badge bg-primary">Operativo</span>';
 
         const cardHTML = `
-            <div class="col" id="espacio-${data.id_espacios_comunidad}">
-                <div class="card shadow-sm module-card h-100 border-0 border-start border-4 ${colorClase}">
-                    <div class="card-body p-4 d-flex flex-column text-center">
+<div class="col" id="espacio-${data.id_espacios_comunidad}">
+  <div class="card shadow-sm h-100 border-0 border-start border-4 ${colorClase}">
+    <div class="card-body p-4 d-flex flex-column">
 
-                        <div class="d-flex justify-content-between align-items-start mb-3 w-100">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm" style="width: 48px; height: 48px;">
-                                <i class="fa-solid fa-building fs-5 text-secondary"></i>
-                            </div>
-                            ${badgeHTML}
-                        </div>
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="text-muted small">
+          <div>${data.hora_apertura} - ${data.hora_cierre}</div>
+        </div>
+        ${badgeHTML}
+      </div>
 
-                        <h3 class="fs-5 fw-bold text-dark mb-3" style="font-family: var(--fuente-titulos);">
-                            ${data.nombre_espacio}
-                        </h3>
+      <h3 class="fs-5 fw-bold">
+        ${data.nombre_espacio}
+      </h3>
 
-                        <div class="text-muted small mb-4 text-start bg-light p-3 rounded w-100">
-                            <div class="mb-2">
-                                <i class="fa-solid fa-users me-2 text-primary"></i>
-                                <strong>Aforo:</strong> ${data.aforo} personas
-                            </div>
-                            <div class="mb-2">
-                                <i class="fa-regular fa-clock me-2 text-primary"></i>
-                                <strong>Horario:</strong> ${data.hora_apertura} a ${data.hora_cierre}
-                            </div>
-                            <div>
-                                <i class="fa-solid fa-stopwatch me-2 text-primary"></i>
-                                <strong>Máx:</strong> ${data.duracion_uso} min por reserva
-                            </div>
-                        </div>
+      <div class="small text-muted mb-3">
+        Aforo: ${data.aforo} · Máx: ${data.duracion_uso} min
+      </div>
 
-                        <div class="mt-auto border-top w-100 pt-3 d-flex justify-content-between gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold flex-fill" 
-                                onclick='abrirModalEditar(${JSON.stringify(data)})'>
-                                <i class="fa-solid fa-pen"></i> Editar
-                            </button>
+      <div class="mt-auto d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm flex-fill"
+          onclick='abrirModalEditar(${JSON.stringify(data)})'>
+          Editar
+        </button>
 
-                            <button type="button" class="btn btn-sm ${isBloqueado ? 'btn-outline-success' : 'btn-outline-warning'} fw-semibold flex-fill" 
-                                onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
-                                <i class="fa-solid ${isBloqueado ? 'fa-lock-open' : 'fa-lock'}"></i> 
-                                ${isBloqueado ? 'Activar' : 'Bloquear'}
-                            </button>
+        <button class="btn btn-sm ${isBloqueado ? 'btn-outline-success' : 'btn-outline-warning'} flex-fill"
+          onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
+          ${isBloqueado ? 'Activar' : 'Bloquear'}
+        </button>
 
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" 
-                                onclick="eliminarEspacio(${data.id_espacios_comunidad})" title="Eliminar Espacio">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
+        <button class="btn btn-sm btn-outline-danger"
+          onclick="eliminarEspacio(${data.id_espacios_comunidad})">
+          🗑
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+`;
         // Eliminamos el mensaje de "No hay espacios" si existe
         const emptyMsg = document.getElementById('mensaje-vacio-espacios');
         if (emptyMsg) emptyMsg.remove();
