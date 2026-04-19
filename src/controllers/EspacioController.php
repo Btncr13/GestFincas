@@ -25,39 +25,64 @@ class EspacioController
     }
 
 
-    // API: CREAR ESPACIO
+// API: CREAR ESPACIO
     public function store() {
-        // Solo permitimos POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Limpiamos la salida para asegurar que solo enviamos JSON y evitar errores HTML
+            ob_clean(); 
             header('Content-Type: application/json');
             
-            // 1. Recoger datos del formulario
-            $datos = [
-                'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
-                'aforo'          => $_POST['aforo'] ?? 0,
-                'max_personas'   => $_POST['max_personas'] ?? 0, 
-                'hora_apertura'  => $_POST['hora_apertura'] ?? '',
-                'hora_cierre'    => $_POST['hora_cierre'] ?? '',
-                'duracion_uso'   => $_POST['duracion_uso'] ?? 0,
-                'bloqueado'      => isset($_POST['bloqueado']) ? (int)$_POST['bloqueado'] : 0,
-                'id_comunidad'   => $_SESSION['vivienda']['id_comunidad'], // Corregido el acceso a sesión
-                'normas'         => $_POST['normas_espacio'] ?? '' 
-            ];
+            try {
+                $id_comunidad = $_SESSION['vivienda']['id_comunidad'] ?? null;
+                if (!$id_comunidad) {
+                    throw new Exception('Sesión caducada. Vuelve a iniciar sesión.');
+                }
 
-            // 2. Validación básica
-            if (empty($datos['nombre_espacio'])) {
-                echo json_encode(['status' => 'error', 'message' => 'El nombre es obligatorio']);
-                exit;
-            }
+                // Lógica de negocio para "bloqueado" y "motivo"
+                $bloqueado = isset($_POST['bloqueado']) ? (int)$_POST['bloqueado'] : 0;
+                $motivo = ($bloqueado === 1 && !empty($_POST['motivo'])) ? trim($_POST['motivo']) : null;
 
-            // 3. Usar la instancia ya creada en el constructor ($this->espacioModel)
-            $resultado = $this->espacioModel->crearEspacioCompleto($datos);
+                // Empaquetamos los datos en un array para pasar al modelo
+                $datos = [
+                    'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
+                    'aforo'          => $_POST['aforo'] ?? 0,
+                    'max_personas'   => $_POST['max_personas'] ?? 0, 
+                    'hora_apertura'  => $_POST['hora_apertura'] ?? '',
+                    'hora_cierre'    => $_POST['hora_cierre'] ?? '',
+                    'duracion_uso'   => $_POST['duracion_uso'] ?? 0,
+                    'bloqueado'      => $bloqueado,
+                    'motivo'         => $motivo,
+                    'id_comunidad'   => $id_comunidad,
+                    'normas'         => $_POST['normas'] ?? '' 
+                ];
 
-            if ($resultado) {
-                echo json_encode(['status' => 'success', 'message' => 'Espacio creado correctamente']);
-            } else {
+                if (empty($datos['nombre_espacio'])) {
+                    throw new Exception('El nombre del espacio es obligatorio.');
+                }
+
+                // 1. Llamada a la función devolver el ID insertado
+                $idNuevoEspacio = $this->espacioModel->crearEspacioCompleto($datos);
+
+                if ($idNuevoEspacio) {
+                    
+                    // 2. Usamos tu función getEspacioById a través del reservaModel
+                    $espacioCreado = $this->reservaModel->getEspacioById($idNuevoEspacio);
+
+                    // 3. Devolvemos el éxito y pasamos los datos reales recién extraídos de la BD
+                    echo json_encode([
+                        'status' => 'success', 
+                        'message' => 'Espacio creado correctamente',
+                        'espacio' => $espacioCreado 
+                    ]);
+                    
+                } else {
+                    throw new Exception('Error al guardar en la base de datos. Verifica la inserción.');
+                }
+
+            } catch (Exception $e) {
+                // Si hay cualquier error de PHP o de negocio, devolvemos JSON limpio
                 http_response_code(500);
-                echo json_encode(['status' => 'error', 'message' => 'Error al guardar en la base de datos']);
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
             }
             exit;
         }
