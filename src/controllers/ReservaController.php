@@ -1,0 +1,224 @@
+<?php
+require_once __DIR__ . '/../models/ReservaModel.php';
+require_once __DIR__ . '/../models/EspacioModel.php';
+
+class ReservaController
+{
+    private $reservaModel;
+    private $espacioModel;
+
+    public function __construct($pdo)
+    {
+        $this->reservaModel = new ReservaModel($pdo);
+        $this->espacioModel = new EspacioModel($pdo);
+
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        if (!isset($_SESSION['vivienda'])) {
+            header("Location: index.php?route=auth/login");
+            exit();
+        }
+    }
+
+    // =========================================================================
+    // ENRUTADOR PRINCIPAL DE VISTAS (Basado en Modo Vista)
+    // =========================================================================
+    public function index()
+    {
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+
+        // 1. DUALIDAD DE ROLES: Soporte para "Modo Vista" 
+        $rol = $_SESSION['modo_vista'] ?? ($_SESSION['vivienda']['rol'] ?? 'vecino');
+
+        // 2. VARIABLES COMUNES PARA TOPBAR Y SIDEBAR (Igual que en Votaciones)
+        $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
+        $numero = $_SESSION['vivienda']['numero'] ?? '';
+        $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
+        $nombreVivienda  = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
+        $direccion       = trim($calle . ' ' . $numero);
+        $rolReal         = $_SESSION['vivienda']['rol'] ?? 'vecino';
+
+        // 3. DECISIÓN DE VISTA SEGÚN EL ROL ACTIVO
+        if ($rol === 'presidente') {
+
+            // --- Carga de datos para PRESIDENTE ---
+            $this->reservaModel->actualizarReservasVencidas();
+
+            $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
+            $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
+
+            require_once __DIR__ . '/../views/reservas/presidente.php';
+        } else {
+
+            // --- Carga de datos para VECINO ---
+            $espaciosDisponibles = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
+            $misReservas = $this->reservaModel->getReservasUsuario($id_usuario);
+
+            require_once __DIR__ . '/../views/reservas/vecino.php';
+        }
+    }
+
+
+    // ----------------------------------------------------------- ENDPOINT PARA COMPROBAR DISPONIBILIDAD ESPACIO POR TRAMO HORARIO 
+
+
+    public function comprobarDisponibilidad()
+    {
+        header('Content-Type: application/json');
+
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        $fecha = $_POST['fecha_reserva'];
+        $hora_inicio = $_POST['hora_inicio'] ?? null;
+        $hora_fin = $_POST['hora_fin'] ?? null;
+
+        $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
+
+        $resultado = [];
+
+        foreach ($espacios as $espacio) {
+
+            $lleno = !$this->reservaModel->hayCapacidad(
+                $espacio['id_espacios_comunidad'],
+                $fecha,
+                $hora_inicio,
+                $hora_fin,
+                1
+            );
+
+            $resultado[] = [
+                'id' => $espacio['id_espacios_comunidad'],
+                'lleno' => $lleno
+            ];
+        }
+
+        echo json_encode($resultado);
+    }
+
+    // ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
+    public function store()
+    {
+        header('Content-Type: application/json');
+
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+
+        // Recoger datos
+        $data = [
+            'id_usuario'            => $id_usuario,
+            'id_espacios_comunidad' => $_POST['id_espacios_comunidad'] ?? null,
+            'fecha_reserva'         => $_POST['fecha_reserva'] ?? null,
+            'hora_inicio'           => $_POST['hora_inicio'] ?? null,
+            'hora_fin'              => $_POST['hora_fin'] ?? null,
+            'asistentes'            => isset($_POST['asistentes']) ? (int)$_POST['asistentes'] : 1
+        ];
+
+        // 1. Validación de campos obligatorios
+        if (
+            empty($data['id_espacios_comunidad']) ||
+            empty($data['fecha_reserva']) ||
+            empty($data['hora_inicio']) ||
+            empty($data['hora_fin']) ||
+            empty($data['asistentes'])
+        ) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Todos los campos son obligatorios.'
+            ]);
+            exit;
+        }
+
+        // 1.1 Validación: No permitir reservas en el pasado para el día de hoy
+        // Se añade un margen de 15 minutos de antelación mínima para evitar conflictos
+        $hoy = date('Y-m-d');
+        $horaLimite = date('H:i', strtotime('+15 minutes'));
+        if ($data['fecha_reserva'] === $hoy && $data['hora_inicio'] < $horaLimite) {
+            echo json_encode(['success' => false, 'message' => 'Las reservas deben realizarse con al menos 15 minutos de antelación.']);
+            exit;
+        }
+
+        // 2. Validación de aforo (ANTES de crear la reserva)
+        if (!$this->reservaModel->hayCapacidad(
+            $data['id_espacios_comunidad'],
+            $data['fecha_reserva'],
+            $data['hora_inicio'],
+            $data['hora_fin'],
+            $data['asistentes']
+        )) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Aforo completo'
+            ]);
+            exit;
+        }
+
+        // 3. Validación de cuotas
+        $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva']);
+        if (!$validacionCuota['status']) {
+            echo json_encode(['success' => false, 'message' => $validacionCuota['msg']]);
+            exit;
+        }
+
+        // 4. Crear reserva
+        $id = $this->reservaModel->crearReserva($data);
+
+        if ($id) {
+
+            $reserva = $this->reservaModel->getReservaById($id);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Reserva confirmada.',
+                'reserva' => $reserva
+            ]);
+            exit;
+        }
+
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al crear la reserva.'
+        ]);
+        exit;
+    }
+
+    // -------------------------------------------------------------------- ENDPOINT RECUPERAR RESERVAS DE MANERA DINAMICA
+
+    public function getMisReservasAjax()
+    {
+
+        header('Content-Type: application/json');
+
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+
+        $reservas = $this->reservaModel->getReservasUsuario($id_usuario);
+
+        echo json_encode([
+            'success' => true,
+            'reservas' => $reservas
+        ]);
+        exit;
+    }
+
+
+    //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
+
+    public function destroy()
+    {
+        header('Content-Type: application/json');
+        $id_reservas = $_POST['id_reserva'] ?? null;
+        $id_usuario = $_SESSION['vivienda']['id_usuario'];
+
+        if ($this->reservaModel->eliminarReserva($id_reservas, $id_usuario)) {
+            echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
+        } else {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'No autorizado.']);
+        }
+    }
+
+    public function getNormas($id_espacios_comunidad)
+    {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'data' => $this->reservaModel->getNormasByEspacio($id_espacios_comunidad)]);
+    }
+}

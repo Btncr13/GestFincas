@@ -67,7 +67,6 @@ class UsuarioModel extends BaseModel
                     JOIN comunidad c ON v.id_comunidad = c.id_comunidad
                     JOIN direccion d ON c.id_direccion = d.id_direccion
                     WHERE u.email = :email AND v.nombre = :nombre_vivienda LIMIT 1";
-
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 'email' => trim($email),
@@ -133,3 +132,4 @@ class UsuarioModel extends BaseModel
         return $stmt->fetch() !== false;
     }
 }
+?>

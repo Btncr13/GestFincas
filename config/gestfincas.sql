@@ -83,7 +83,8 @@ CREATE TABLE `comunidad` (
 --
 
 INSERT INTO `comunidad` (`id_comunidad`, `id_mancomunidad`, `id_direccion`, `nombre`, `fecha_creacion`) VALUES
-(1, NULL, 1, 'Las Flores', '2026-04-09 17:30:25');
+(1, NULL, 1, 'Las Flores', '2026-04-09 17:30:25'),
+(2, NULL, 2, 'Gabriela Mistral', '2026-04-14 00:03:33');
 
 -- --------------------------------------------------------
 
@@ -110,7 +111,41 @@ CREATE TABLE `direccion` (
 --
 
 INSERT INTO `direccion` (`id_direccion`, `tipo`, `calle`, `numero`, `edificio`, `planta`, `puerta`, `ciudad`, `provincia`, `codigo_postal`, `pais`) VALUES
-(1, 'comunidad', 'Las Flores', 2, NULL, NULL, NULL, 'Berchules', 'Granada', 14700, 'España');
+(1, 'comunidad', 'Las Flores', 2, NULL, NULL, NULL, 'Berchules', 'Granada', 14700, 'España'),
+(2, 'comunidad', 'Gabriela Mistral', 7, NULL, NULL, NULL, 'Palma del Río', 'Córdoba', 14700, 'España');
+
+-- --------------------------------------------------------
+
+
+--
+-- Estructura de tabla para la tabla `espacios_comunidad`
+--
+
+CREATE TABLE `espacios_comunidad` (
+  `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
+  `id_comunidad` int(10) UNSIGNED NOT NULL,
+  `nombre_espacio` varchar(100) NOT NULL,
+  `aforo` int(4) UNSIGNED NOT NULL,
+  `max_personas` int(4) UNSIGNED NOT NULL,
+  `hora_apertura` time NOT NULL,
+  `hora_cierre` time NOT NULL,
+  `duracion_uso` int(10) UNSIGNED NOT NULL,
+  `bloqueado` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
+  `motivo` varchar(255) DEFAULT NULL,
+  `fecha_actualizacion` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `espacios_normas`
+--
+
+CREATE TABLE `espacios_normas` (
+  `id_espacios_normas` int(10) UNSIGNED NOT NULL,
+  `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
+  `descripcion` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -125,6 +160,27 @@ CREATE TABLE `mancomunidad` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reservas`
+--
+
+CREATE TABLE `reservas` (
+  `id_reservas` int(10) UNSIGNED NOT NULL,
+  `id_usuario` int(10) UNSIGNED NOT NULL,
+  `id_espacios_comunidad` int(10) UNSIGNED NOT NULL,
+  `asistentes` int(4) UNSIGNED NOT NULL DEFAULT 1,
+  `fecha_reserva` date NOT NULL,
+  `hora_inicio` time NOT NULL,
+  `hora_fin` time NOT NULL,
+  `estado_reserva` enum('activo','inactivo') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `reservas`
+--
+
+
 
 --
 -- Estructura de tabla para la tabla `reunion`
@@ -195,7 +251,7 @@ CREATE TABLE `vivienda` (
 
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 (2, 1, 'Planta 2-1B'),
-(4, 1, 'Planta 1 1ºC');
+(4, 1, 'Planta 1-1C');
 
 -- --------------------------------------------------------
 
@@ -298,6 +354,21 @@ ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
 
 --
+-- Indices de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  ADD PRIMARY KEY (`id_espacios_comunidad`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  ADD PRIMARY KEY (`id_espacios_normas`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
+
+
+--
 -- Indices de la tabla `mancomunidad`
 --
 ALTER TABLE `mancomunidad`
@@ -310,6 +381,14 @@ ALTER TABLE `mancomunidad`
 ALTER TABLE `reunion`
   ADD PRIMARY KEY (`id_reunion`),
   ADD KEY `fk_reunion_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD PRIMARY KEY (`id_reservas`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
 
 --
 -- Indices de la tabla `usuario`
@@ -379,8 +458,21 @@ ALTER TABLE `direccion`
   MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  MODIFY `id_espacios_comunidad` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  MODIFY `id_espacios_normas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+--
 -- AUTO_INCREMENT de la tabla `mancomunidad`
 --
+
+
 ALTER TABLE `mancomunidad`
   MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
@@ -390,6 +482,11 @@ ALTER TABLE `mancomunidad`
 ALTER TABLE `reunion`
   MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
+--
+-- AUTO_INCREMENT de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  MODIFY `id_reservas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
@@ -445,12 +542,31 @@ ALTER TABLE `comunidad`
   ADD CONSTRAINT `fk_comunidad_mancomunidad` FOREIGN KEY (`id_mancomunidad`) REFERENCES `mancomunidad` (`id_mancomunidad`) ON UPDATE CASCADE;
 
 --
+-- Filtros para la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  ADD CONSTRAINT `fk_ce_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  ADD CONSTRAINT `fk_normas_comunidad_espacio` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Filtros para la tabla `mancomunidad`
 --
 ALTER TABLE `mancomunidad`
   ADD CONSTRAINT `fk_mancomunidad_direccion` FOREIGN KEY (`id_direccion`) REFERENCES `direccion` (`id_direccion`) ON UPDATE CASCADE;
 
 --
+-- Filtros para la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD CONSTRAINT `fk_reserva_espacio` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_reserva_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
 -- Filtros para la tabla `reunion`
 --
 ALTER TABLE `reunion`

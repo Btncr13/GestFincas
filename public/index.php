@@ -37,3 +37,4 @@ runRouter($config);
 require_once "../src/views/components/footer.php";
 
 ob_end_flush();
+?>
