@@ -31,6 +31,40 @@
                             <h5 class="text-muted">No hay reservas esta semana</h5>
                         </div>
                     <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle border shadow-sm rounded">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Vecino</th>
+                                        <th>Instalación</th>
+                                        <th>Fecha</th>
+                                        <th>Horario</th>
+                                        <th class="text-center">Asist.</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($todasLasReservas as $res): ?>
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold"><?php echo htmlspecialchars($res['vecino_nombre'] . ' ' . $res['apellidos']); ?></div>
+                                            </td>
+                                            <td><?php echo htmlspecialchars($res['nombre_espacio']); ?></td>
+                                            <td><?php echo date('d/m/Y', strtotime($res['fecha'])); ?></td>
+                                            <td><span class="badge bg-light text-dark border"><?php echo substr($res['hora_inicio'], 0, 5); ?> - <?php echo substr($res['hora_fin'], 0, 5); ?></span></td>
+                                            <td class="text-center"><?php echo $res['asistentes']; ?></td>
+                                            <td>
+                                                <?php if ($res['estado_reserva'] === 'activo'): ?>
+                                                    <span class="badge bg-success">Activa</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Inactiva</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php endif; ?>
                 </div>
 
@@ -44,16 +78,46 @@
                             </div>
                         <?php else: ?>
                             <?php foreach ($espacios as $espacio): ?>
-                                <div class="col-md-4 mb-3">
-                                    <div class="card h-100 shadow-sm border-0">
-                                        <div class="card-body">
-                                            <h5 class="card-title fw-bold"><?php echo htmlspecialchars($espacio['nombre_espacio']); ?></h5>
-                                            <p class="card-text text-muted small">
-                                                Aforo: <?php echo $espacio['aforo']; ?> | Max: <?php echo $espacio['max_personas']; ?>
-                                            </p>
-                                            <p class="mb-0 small text-primary fw-bold">
-                                                <?php echo $espacio['hora_apertura']; ?> - <?php echo $espacio['hora_cierre']; ?>
-                                            </p>
+                                <?php 
+                                    $isBloqueado = $espacio['bloqueado'] == 1;
+                                    $colorClase = $isBloqueado ? 'border-danger' : 'border-primary';
+                                ?>
+                                <div class="col-md-4 mb-3" id="espacio-<?php echo $espacio['id_espacios_comunidad']; ?>">
+                                    <div class="card shadow-sm module-card h-100 border-0 border-start border-4 <?php echo $colorClase; ?>">
+                                        <div class="card-body p-4 d-flex flex-column">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div class="text-muted small">
+                                                    <div><?php echo substr($espacio['hora_apertura'], 0, 5); ?> - <?php echo substr($espacio['hora_cierre'], 0, 5); ?></div>
+                                                </div>
+                                                <?php if ($isBloqueado): ?>
+                                                    <span class="badge bg-danger">Bloqueado</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-primary">Operativo</span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <h3 class="fs-5 fw-bold" style="font-family: var(--fuente-titulos);"><?php echo htmlspecialchars($espacio['nombre_espacio']); ?></h3>
+
+                                            <div class="small text-muted mb-3">
+                                                Aforo: <?php echo $espacio['aforo']; ?> · Máx: <?php echo $espacio['duracion_uso']; ?> min
+                                            </div>
+
+                                            <div class="mt-auto d-flex gap-2">
+                                                <button class="btn btn-outline-secondary btn-sm flex-fill" 
+                                                    onclick='abrirModalEditar(<?php echo json_encode($espacio); ?>)'>
+                                                    Editar
+                                                </button>
+
+                                                <button class="btn btn-sm <?php echo $isBloqueado ? 'btn-outline-success' : 'btn-outline-warning'; ?> flex-fill"
+                                                    onclick="toggleEstadoEspacio(<?php echo $espacio['id_espacios_comunidad']; ?>, <?php echo $isBloqueado ? 0 : 1; ?>)">
+                                                    <?php echo $isBloqueado ? 'Activar' : 'Bloquear'; ?>
+                                                </button>
+
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="eliminarEspacio(<?php echo $espacio['id_espacios_comunidad']; ?>)">
+                                                    🗑
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

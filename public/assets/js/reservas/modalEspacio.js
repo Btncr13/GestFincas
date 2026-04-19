@@ -3,172 +3,182 @@
  * Archivo: public/assets/js/reservas/modalEspacio.js
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. ESTADO CENTRALIZADO ---
-    const state = {
-        form: {
-            nombre_espacio: '',
-            aforo: 0,
-            max_personas: 0,
-            hora_apertura: '',
-            hora_cierre: '',
-            duracion_uso: 30,
-            bloqueado: 0,
-            motivo: ''
-        },
-        isValid: false
+document.addEventListener("DOMContentLoaded", () => {
+  // --- 1. ESTADO CENTRALIZADO ---
+  const state = {
+    form: {
+      nombre_espacio: "",
+      aforo: 0,
+      max_personas: 0,
+      hora_apertura: "",
+      hora_cierre: "",
+      duracion_uso: 30,
+      bloqueado: 0,
+      motivo: "",
+    },
+    isValid: false,
+  };
+
+  // --- 2. SELECTORES ---
+  const modalEl = document.getElementById("modalCrearEspacio");
+  const formEl = document.getElementById("formCrearEspacio");
+  const btnGuardar = document.getElementById("btnGuardarEspacio");
+  const contenedorEspacios = document.querySelector("#espacios .row"); // Ajusta  HTML
+
+  // Si la modal no existe en el DOM, detenemos la ejecución para evitar errores
+  if (!modalEl) return;
+
+  const bootstrapModal = new bootstrap.Modal(modalEl);
+
+  // --- 3. INICIALIZACIÓN Y RESET ---
+  modalEl.addEventListener("show.bs.modal", () => {
+    resetForm();
+  });
+
+  const resetForm = () => {
+    formEl.reset();
+    state.form = {
+      nombre_espacio: "",
+      aforo: 0,
+      max_personas: 0,
+      hora_apertura: "",
+      hora_cierre: "",
+      duracion_uso: 30,
+      bloqueado: 0,
+      motivo: "",
     };
+    toggleMotivoField(false);
+    validateForm();
+  };
 
-    // --- 2. SELECTORES ---
-    const modalEl = document.getElementById('modalCrearEspacio');
-    const formEl = document.getElementById('formCrearEspacio');
-    const btnGuardar = document.getElementById('btnGuardarEspacio');
-    const contenedorEspacios = document.querySelector('#espacios .row'); // Ajusta  HTML
-    
-    // Si la modal no existe en el DOM, detenemos la ejecución para evitar errores
-    if (!modalEl) return;
+  // --- 4. ESCUCHA DE CAMBIOS (Update State) ---
+  formEl.addEventListener("input", (e) => {
+    const { name, value, type, checked } = e.target;
 
-    const bootstrapModal = new bootstrap.Modal(modalEl);
+    // Actualizar el estado
+    if (type === "checkbox") {
+      state.form[name] = checked ? 1 : 0;
+      if (name === "bloqueado") toggleMotivoField(checked);
+    } else {
+      state.form[name] = value;
+    }
 
-    // --- 3. INICIALIZACIÓN Y RESET ---
-    modalEl.addEventListener('show.bs.modal', () => {
-        resetForm();
-    });
+    validateForm();
+  });
 
-    const resetForm = () => {
-        formEl.reset();
-        state.form = {
-            nombre_espacio: '',
-            aforo: 0,
-            max_personas: 0,
-            hora_apertura: '',
-            hora_cierre: '',
-            duracion_uso: 30,
-            bloqueado: 0,
-            motivo: ''
-        };
-        toggleMotivoField(false);
-        validateForm();
-    };
+  // --- 5. VALIDACIONES LÓGICAS ---
+  const toggleMotivoField = (show) => {
+    const motivoGroup = document.getElementById("grupoMotivo");
+    if (motivoGroup) motivoGroup.style.display = show ? "block" : "none";
+  };
 
-    // --- 4. ESCUCHA DE CAMBIOS (Update State) ---
-    formEl.addEventListener('input', (e) => {
-        const { name, value, type, checked } = e.target;
-        
-        // Actualizar el estado
-        if (type === 'checkbox') {
-            state.form[name] = checked ? 1 : 0;
-            if (name === 'bloqueado') toggleMotivoField(checked);
-        } else {
-            state.form[name] = value;
-        }
+  const validateForm = () => {
+    const f = state.form;
 
-        validateForm();
-    });
+    // Validaciones básicas
+    const hasNombre = f.nombre_espacio.trim().length > 0;
+    const aforoValido = parseInt(f.aforo) > 0;
+    const asistentesValidos = parseInt(f.max_personas) > 0;
+    const duracionValida = parseInt(f.duracion_uso) > 0;
 
-    // --- 5. VALIDACIONES LÓGICAS ---
-    const toggleMotivoField = (show) => {
-        const motivoGroup = document.getElementById('grupoMotivo');
-        if (motivoGroup) motivoGroup.style.display = show ? 'block' : 'none';
-    };
+    // Lógica de negocio: Max Personas <= Aforo
+    const coherenciaAforo = parseInt(f.max_personas) <= parseInt(f.aforo);
 
-    const validateForm = () => {
-        const f = state.form;
-        
-        // Validaciones básicas
-        const hasNombre = f.nombre_espacio.trim().length > 0;
-        const aforoValido = parseInt(f.aforo) > 0;
-        const asistentesValidos = parseInt(f.max_personas) > 0;
-        const duracionValida = parseInt(f.duracion_uso) > 0;
-        
-        // Lógica de negocio: Max Personas <= Aforo
-        const coherenciaAforo = parseInt(f.max_personas) <= parseInt(f.aforo);
-        
-        // Lógica horaria
-        const horarioValido = f.hora_apertura !== '' && f.hora_cierre !== '' && f.hora_cierre > f.hora_apertura;
-        
-        // Validación de bloqueo
-        const motivoValido = f.bloqueado === 1 ? f.motivo.trim().length > 3 : true;
+    // Lógica horaria
+    const horarioValido =
+      f.hora_apertura !== "" &&
+      f.hora_cierre !== "" &&
+      f.hora_cierre > f.hora_apertura;
 
-        state.isValid = hasNombre && aforoValido && asistentesValidos && 
-                        coherenciaAforo && horarioValido && duracionValida && motivoValido;
+    // Validación de bloqueo
+    const motivoValido = f.bloqueado === 1 ? f.motivo.trim().length > 3 : true;
 
-        btnGuardar.disabled = !state.isValid;
+    state.isValid =
+      hasNombre &&
+      aforoValido &&
+      asistentesValidos &&
+      coherenciaAforo &&
+      horarioValido &&
+      duracionValida &&
+      motivoValido;
 
-       const inputMax = document.getElementById('max_personas');
-        if (inputMax) {
-            // Si max_personas es mayor al aforo, añade la clase 'is-invalid' de Bootstrap
-            if (!coherenciaAforo && f.max_personas > 0) {
-                inputMax.classList.add('is-invalid');
-            } else {
-                inputMax.classList.remove('is-invalid');
-            }
-        }
-    };
+    btnGuardar.disabled = !state.isValid;
 
-    // --- 6. ENVÍO DE DATOS (FETCH) ---
-   // --- 6. ENVÍO DE DATOS (FETCH) ---
-    btnGuardar.addEventListener('click', async () => {
-        if (!state.isValid) return;
+    const inputMax = document.getElementById("max_personas");
+    if (inputMax) {
+      // Si max_personas es mayor al aforo, añade la clase 'is-invalid' de Bootstrap
+      if (!coherenciaAforo && f.max_personas > 0) {
+        inputMax.classList.add("is-invalid");
+      } else {
+        inputMax.classList.remove("is-invalid");
+      }
+    }
+  };
 
-        btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Guardando...';
-        btnGuardar.disabled = true;
+  // --- 6. ENVÍO DE DATOS (FETCH) ---
+  // --- 6. ENVÍO DE DATOS (FETCH) ---
+  btnGuardar.addEventListener("click", async () => {
+    if (!state.isValid) return;
 
-        const formData = new FormData();
-        // IMPORTANTE: Los nombres deben coincidir con lo que recibe el controlador en EspacioController.php
-        formData.append('nombre_espacio', state.form.nombre_espacio);
-        formData.append('aforo', state.form.aforo);
-        formData.append('max_personas', state.form.max_personas);
-        formData.append('hora_apertura', state.form.hora_apertura);
-        formData.append('hora_cierre', state.form.hora_cierre);
-        formData.append('duracion_uso', state.form.duracion_uso);
-        formData.append('bloqueado', state.form.bloqueado);
-        formData.append('motivo', state.form.motivo);
-        
-        // CORRECCIÓN: Usamos para acceder al primer elemento de la lista devuelta por name
-        const normasInput = document.getElementsByName('normas');
-        formData.append('normas', normasInput ? normasInput.value : '');
+    btnGuardar.innerHTML =
+      '<span class="spinner-border spinner-border-sm"></span> Guardando...';
+    btnGuardar.disabled = true;
 
-        try {
-            // La ruta 'index.php?route=espacio/store' es correcta según tu router.php
-            const response = await fetch('index.php?route=espacio/store', {
-                method: 'POST',
-                body: formData
-            });
+    const formData = new FormData();
+    // IMPORTANTE: Los nombres deben coincidir con lo que recibe el controlador en EspacioController.php
+    formData.append("nombre_espacio", state.form.nombre_espacio);
+    formData.append("aforo", state.form.aforo);
+    formData.append("max_personas", state.form.max_personas);
+    formData.append("hora_apertura", state.form.hora_apertura);
+    formData.append("hora_cierre", state.form.hora_cierre);
+    formData.append("duracion_uso", state.form.duracion_uso);
+    formData.append("bloqueado", state.form.bloqueado);
+    formData.append("motivo", state.form.motivo);
 
-            const result = await response.json();
+    // CORRECCIÓN: Usamos el ID único del textarea definido en el modal
+    const normasInput = document.getElementById("normas_espacio");
+    formData.append("normas", normasInput ? normasInput.value : "");
 
-            if (result.status === 'success') {
-                // Usamos el objeto 'espacio' que devuelve tu controlador tras el insert
-                insertNewCard(result.espacio); 
-                bootstrapModal.hide();
-                alert('Espacio creado correctamente');
-            } else {
-                throw new Error(result.message || 'Error en el servidor');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('No se pudo crear el espacio: ' + error.message);
-        } finally {
-            btnGuardar.innerHTML = 'Crear Espacio';
-            btnGuardar.disabled = false;
-        }
-    });
+    try {
+      // La ruta 'index.php?route=espacio/store' es correcta según tu router.php
+      const response = await fetch("index.php?route=espacio/store", {
+        method: "POST",
+        body: formData,
+      });
 
-    // --- 7. ACTUALIZACIÓN DINÁMICA DE LA UI ---
-    const insertNewCard = (data) => {
-        if (!contenedorEspacios) return;
+      const result = await response.json();
 
-        // Definimos el color y el badge según el estado de bloqueo
-        const isBloqueado = data.bloqueado == 1;
-        const colorClase = isBloqueado ? 'border-danger' : 'border-primary';
-        const badgeHTML = isBloqueado 
-            ? '<span class="badge bg-danger">Bloqueado</span>' 
-            : '<span class="badge bg-primary">Operativo</span>';
+      if (result.status === "success") {
+        // Usamos el objeto 'espacio' que devuelve tu controlador tras el insert
+        insertNewCard(result.espacio);
+        bootstrapModal.hide();
+        alert("Espacio creado correctamente");
+      } else {
+        throw new Error(result.message || "Error en el servidor");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("No se pudo crear el espacio: " + error.message);
+    } finally {
+      btnGuardar.innerHTML = "Crear Espacio";
+      btnGuardar.disabled = false;
+    }
+  });
 
-        const cardHTML = `
-<div class="col" id="espacio-${data.id_espacios_comunidad}">
-  <div class="card shadow-sm h-100 border-0 border-start border-4 ${colorClase}">
+  // --- 7. ACTUALIZACIÓN DINÁMICA DE LA UI ---
+  const insertNewCard = (data) => {
+    if (!contenedorEspacios) return;
+
+    // Definimos el color y el badge según el estado de bloqueo
+    const isBloqueado = data.bloqueado == 1;
+    const colorClase = isBloqueado ? "border-danger" : "border-primary";
+    const badgeHTML = isBloqueado
+      ? '<span class="badge bg-danger">Bloqueado</span>'
+      : '<span class="badge bg-primary">Operativo</span>';
+
+    const cardHTML = `
+<div class="col-md-4 mb-3" id="espacio-${data.id_espacios_comunidad}">
+  <div class="card shadow-sm module-card h-100 border-0 border-start border-4 ${colorClase}">
     <div class="card-body p-4 d-flex flex-column">
 
       <div class="d-flex justify-content-between align-items-start mb-2">
@@ -178,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${badgeHTML}
       </div>
 
-      <h3 class="fs-5 fw-bold">
+      <h3 class="fs-5 fw-bold" style="font-family: var(--fuente-titulos);">
         ${data.nombre_espacio}
       </h3>
 
@@ -192,9 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
           Editar
         </button>
 
-        <button class="btn btn-sm ${isBloqueado ? 'btn-outline-success' : 'btn-outline-warning'} flex-fill"
+        <button class="btn btn-sm ${isBloqueado ? "btn-outline-success" : "btn-outline-warning"} flex-fill"
           onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
-          ${isBloqueado ? 'Activar' : 'Bloquear'}
+          ${isBloqueado ? "Activar" : "Bloquear"}
         </button>
 
         <button class="btn btn-sm btn-outline-danger"
@@ -207,11 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 `;
-        // Eliminamos el mensaje de "No hay espacios" si existe
-        const emptyMsg = document.getElementById('mensaje-vacio-espacios');
-        if (emptyMsg) emptyMsg.remove();
+    // Eliminamos el mensaje de "No hay espacios" si existe
+    const emptyMsg = document.getElementById("mensaje-vacio-espacios");
+    if (emptyMsg) emptyMsg.remove();
 
-        // Insertamos la card al principio del contenedor
-        contenedorEspacios.insertAdjacentHTML('afterbegin', cardHTML);
-    };
+    // Insertamos la card al principio del contenedor
+    contenedorEspacios.insertAdjacentHTML("afterbegin", cardHTML);
+  };
 });
