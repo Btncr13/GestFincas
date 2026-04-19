@@ -25,13 +25,14 @@ class EspacioController
     }
 
 
-// API: CREAR ESPACIO
-    public function store() {
+    // API: CREAR ESPACIO
+    public function store()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Limpiamos la salida para asegurar que solo enviamos JSON y evitar errores HTML
-            ob_clean(); 
+            ob_clean();
             header('Content-Type: application/json');
-            
+
             try {
                 $id_comunidad = $_SESSION['vivienda']['id_comunidad'] ?? null;
                 if (!$id_comunidad) {
@@ -46,14 +47,14 @@ class EspacioController
                 $datos = [
                     'nombre_espacio' => $_POST['nombre_espacio'] ?? '',
                     'aforo'          => $_POST['aforo'] ?? 0,
-                    'max_personas'   => $_POST['max_personas'] ?? 0, 
+                    'max_personas'   => $_POST['max_personas'] ?? 0,
                     'hora_apertura'  => $_POST['hora_apertura'] ?? '',
                     'hora_cierre'    => $_POST['hora_cierre'] ?? '',
                     'duracion_uso'   => $_POST['duracion_uso'] ?? 0,
                     'bloqueado'      => $bloqueado,
                     'motivo'         => $motivo,
                     'id_comunidad'   => $id_comunidad,
-                    'normas'         => $_POST['normas'] ?? '' 
+                    'normas'         => $_POST['normas'] ?? ''
                 ];
 
                 if (empty($datos['nombre_espacio'])) {
@@ -64,21 +65,19 @@ class EspacioController
                 $idNuevoEspacio = $this->espacioModel->crearEspacioCompleto($datos);
 
                 if ($idNuevoEspacio) {
-                    
+
                     // 2. Usamos tu función getEspacioById a través del reservaModel
                     $espacioCreado = $this->reservaModel->getEspacioById($idNuevoEspacio);
 
                     // 3. Devolvemos el éxito y pasamos los datos reales recién extraídos de la BD
                     echo json_encode([
-                        'status' => 'success', 
+                        'status' => 'success',
                         'message' => 'Espacio creado correctamente',
-                        'espacio' => $espacioCreado 
+                        'espacio' => $espacioCreado
                     ]);
-                    
                 } else {
                     throw new Exception('Error al guardar en la base de datos. Verifica la inserción.');
                 }
-
             } catch (Exception $e) {
                 // Si hay cualquier error de PHP o de negocio, devolvemos JSON limpio
                 http_response_code(500);
@@ -96,6 +95,7 @@ class EspacioController
             'id_espacios_comunidad' => $_POST['id_espacios_comunidad'] ?? null,
             'id_comunidad'          => $_SESSION['vivienda']['id_comunidad'], // Seguridad
             'nombre_espacio'        => $_POST['nombre_espacio'] ?? '',
+            'aforo'                 => (int)($_POST['aforo'] ?? 1),
             'max_personas'          => (int)($_POST['max_personas'] ?? 1),
             'hora_apertura'         => $_POST['hora_apertura'] ?? '08:00:00',
             'hora_cierre'           => $_POST['hora_cierre'] ?? '22:00:00',
@@ -103,7 +103,8 @@ class EspacioController
         ];
 
         if ($this->espacioModel->modificarEspacio($data)) {
-            echo json_encode(['success' => true, 'message' => 'Espacio actualizado con éxito.']);
+            $espacioActualizado = $this->reservaModel->getEspacioById($data['id_espacios_comunidad']);
+            echo json_encode(['success' => true, 'message' => 'Espacio actualizado.', 'espacio' => $espacioActualizado]);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al modificar el espacio.']);
@@ -120,14 +121,41 @@ class EspacioController
         // En frontend probablemente enviabas estado: 0 o 1, pero ahora nuestro campo 
         // en la BD se llama 'bloqueado' donde 1 es Bloqueado y 0 es Activo.
         $bloqueado = $_POST['bloqueado'] ?? 0;
-        $motivo = $_POST['motivo'] ?? null;
+        // Si estamos activando (bloqueado = 0), el motivo DEBE ser null
+        $motivo = ($bloqueado == 1) ? (trim($_POST['motivo'] ?? '')) : null;
 
         if ($this->espacioModel->bloquearEspacio($id_espacios_comunidad, $bloqueado, $motivo)) {
-            $msg = $bloqueado == 1 ? 'Espacio bloqueado temporalmente.' : 'Espacio desbloqueado y operativo.';
-            echo json_encode(['success' => true, 'message' => $msg]);
+            $espacio = $this->reservaModel->getEspacioById($id_espacios_comunidad);
+            $msg = $bloqueado == 1 ? 'Espacio bloqueado.' : 'Espacio operativo.';
+            echo json_encode(['success' => true, 'message' => $msg, 'espacio' => $espacio]);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al cambiar el estado del espacio.']);
+        }
+    }
+
+    // API: ELIMINAR ESPACIO
+    public function destroy()
+    {
+        header('Content-Type: application/json');
+        $id = $_POST['id_espacios_comunidad'] ?? null;
+
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'ID de espacio no proporcionado.']);
+            return;
+        }
+
+        // Validación de reglas de negocio: No eliminar si hay compromisos activos
+        if ($this->espacioModel->tieneReservasPendientes($id)) {
+            echo json_encode(['success' => false, 'message' => 'No se puede eliminar el espacio: tiene reservas activas o pendientes asociadas.']);
+            return;
+        }
+
+        if ($this->espacioModel->eliminarEspacio($id)) {
+            echo json_encode(['success' => true, 'message' => 'Espacio eliminado correctamente.']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'No se pudo eliminar el espacio.']);
         }
     }
 }

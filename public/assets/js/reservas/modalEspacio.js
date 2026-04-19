@@ -61,6 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (name === "bloqueado") toggleMotivoField(checked);
     } else {
       state.form[name] = value;
+      // Como 'bloqueado' en el modal de creación es un <select>,
+      // debemos disparar la visibilidad del motivo aquí también.
+      if (name === "bloqueado") toggleMotivoField(value == "1");
     }
 
     validateForm();
@@ -183,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="d-flex justify-content-between align-items-start mb-2">
         <div class="text-muted small">
-          <div>${data.hora_apertura} - ${data.hora_cierre}</div>
+          <div>${data.hora_apertura.substring(0, 5)} - ${data.hora_cierre.substring(0, 5)}</div>
         </div>
         ${badgeHTML}
       </div>
@@ -223,5 +226,142 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Insertamos la card al principio del contenedor
     contenedorEspacios.insertAdjacentHTML("afterbegin", cardHTML);
+  };
+
+  // --- 8. FUNCIONALIDADES DE ACCIÓN (EDITAR, BLOQUEAR, ELIMINAR) ---
+
+  // Inicializamos las instancias de los modales una sola vez para evitar duplicados
+  const modalEditEl = document.getElementById("modalEditarEspacio");
+  const bootstrapModalEditar = modalEditEl
+    ? new bootstrap.Modal(modalEditEl)
+    : null;
+  const modalBloqueoEl = document.getElementById("modalBloqueo");
+  const bootstrapModalBloqueo = modalBloqueoEl
+    ? new bootstrap.Modal(modalBloqueoEl)
+    : null;
+
+  window.abrirModalEditar = (espacio) => {
+    document.getElementById("edit_id").value = espacio.id_espacios_comunidad;
+    document.getElementById("edit_nombre").value = espacio.nombre_espacio;
+    document.getElementById("edit_aforo").value = espacio.aforo;
+    document.getElementById("edit_max").value = espacio.max_personas;
+    document.getElementById("edit_apertura").value = espacio.hora_apertura;
+    document.getElementById("edit_cierre").value = espacio.hora_cierre;
+    document.getElementById("edit_duracion").value = espacio.duracion_uso;
+    bootstrapModalEditar?.show();
+  };
+
+  document
+    .getElementById("formEditarEspacio")
+    ?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch("index.php?route=espacio/update", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        actualizarCardUI(data.espacio);
+        bootstrapModalEditar?.hide();
+      }
+    });
+
+  let idParaBloquear = null;
+  window.toggleEstadoEspacio = (id, nuevoEstado) => {
+    if (nuevoEstado === 1) {
+      idParaBloquear = id;
+      document.getElementById("motivoBloqueo").value = "";
+      bootstrapModalBloqueo?.show();
+    } else {
+      peticionEstado(id, 0, null);
+    }
+  };
+
+  document
+    .getElementById("btnConfirmarBloqueo")
+    ?.addEventListener("click", () => {
+      const motivo = document.getElementById("motivoBloqueo").value;
+      if (!motivo) return alert("Debes indicar un motivo");
+      peticionEstado(idParaBloquear, 1, motivo);
+      bootstrapModalBloqueo?.hide();
+    });
+
+  const peticionEstado = async (id, estado, motivo) => {
+    const formData = new FormData();
+    formData.append("id_espacios_comunidad", id);
+    formData.append("bloqueado", estado);
+    if (motivo) formData.append("motivo", motivo);
+
+    const res = await fetch("index.php?route=espacio/toggleEstado", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.success) actualizarCardUI(data.espacio);
+  };
+
+  window.eliminarEspacio = async (id) => {
+    if (!confirm("¿Seguro que quieres eliminar el espacio?")) return;
+    const formData = new FormData();
+    formData.append("id_espacios_comunidad", id);
+    const res = await fetch("index.php?route=espacio/destroy", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.success) document.getElementById(`espacio-${id}`).remove();
+  };
+
+  const actualizarCardUI = (data) => {
+    // Buscamos el contenedor de la columna por ID
+    const colContainer = document.getElementById(
+      `espacio-${data.id_espacios_comunidad}`,
+    );
+    if (!colContainer) {
+      console.error(
+        "No se encontró la card con ID:",
+        data.id_espacios_comunidad,
+      );
+      return;
+    }
+
+    // Aseguramos que bloqueado sea tratado como número para la comparación
+    const isBloqueado = parseInt(data.bloqueado) === 1;
+    const colorClase = isBloqueado ? "border-danger" : "border-primary";
+
+    // Escapamos el objeto para evitar errores de comillas en el atributo onclick
+    const espacioJson = JSON.stringify(data).replace(/'/g, "&apos;");
+
+    colContainer.innerHTML = `
+      <div class="card shadow-sm module-card h-100 border-0 border-start border-4 ${colorClase}">
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="text-muted small">
+              <div>${data.hora_apertura.substring(0, 5)} - ${data.hora_cierre.substring(0, 5)}</div>
+            </div>
+            ${isBloqueado ? '<span class="badge bg-danger">Bloqueado</span>' : '<span class="badge bg-primary">Operativo</span>'}
+          </div>
+          <h3 class="fs-5 fw-bold" style="font-family: var(--fuente-titulos);">${data.nombre_espacio}</h3>
+          <div class="small text-muted mb-3">
+            Aforo: ${data.aforo} · Máx: ${data.duracion_uso} min
+          </div>
+          <div class="mt-auto d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm flex-fill" 
+              onclick='abrirModalEditar(${espacioJson})'>
+              Editar
+            </button>
+            <button class="btn btn-sm ${isBloqueado ? "btn-outline-success" : "btn-outline-warning"} flex-fill"
+              onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
+              ${isBloqueado ? "Activar" : "Bloquear"}
+            </button>
+            <button class="btn btn-sm btn-outline-danger"
+              onclick="eliminarEspacio(${data.id_espacios_comunidad})">
+              🗑
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
   };
 });

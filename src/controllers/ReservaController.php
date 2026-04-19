@@ -127,6 +127,15 @@ class ReservaController
             exit;
         }
 
+        // 1.1 Validación: No permitir reservas en el pasado para el día de hoy
+        // Se añade un margen de 15 minutos de antelación mínima para evitar conflictos
+        $hoy = date('Y-m-d');
+        $horaLimite = date('H:i', strtotime('+15 minutes'));
+        if ($data['fecha_reserva'] === $hoy && $data['hora_inicio'] < $horaLimite) {
+            echo json_encode(['success' => false, 'message' => 'Las reservas deben realizarse con al menos 15 minutos de antelación.']);
+            exit;
+        }
+
         // 2. Validación de aforo (ANTES de crear la reserva)
         if (!$this->reservaModel->hayCapacidad(
             $data['id_espacios_comunidad'],

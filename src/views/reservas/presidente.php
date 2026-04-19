@@ -65,11 +65,11 @@
                                 </tbody>
                             </table>
                         </div>
-                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
 
                 <div class="tab-pane fade" id="espacios" role="tabpanel">
-                    <div class="row pt-3" id="contenedor-cards-espacios"> 
+                    <div class="row pt-3" id="contenedor-cards-espacios">
                         <?php if (empty($espacios)): ?>
                             <div class="text-center py-5" id="mensaje-vacio-espacios">
                                 <i class="fa-solid fa-building-circle-xmark fs-1 text-muted mb-3"></i>
@@ -78,9 +78,9 @@
                             </div>
                         <?php else: ?>
                             <?php foreach ($espacios as $espacio): ?>
-                                <?php 
-                                    $isBloqueado = $espacio['bloqueado'] == 1;
-                                    $colorClase = $isBloqueado ? 'border-danger' : 'border-primary';
+                                <?php
+                                $isBloqueado = $espacio['bloqueado'] == 1;
+                                $colorClase = $isBloqueado ? 'border-danger' : 'border-primary';
                                 ?>
                                 <div class="col-md-4 mb-3" id="espacio-<?php echo $espacio['id_espacios_comunidad']; ?>">
                                     <div class="card shadow-sm module-card h-100 border-0 border-start border-4 <?php echo $colorClase; ?>">
@@ -103,7 +103,7 @@
                                             </div>
 
                                             <div class="mt-auto d-flex gap-2">
-                                                <button class="btn btn-outline-secondary btn-sm flex-fill" 
+                                                <button class="btn btn-outline-secondary btn-sm flex-fill"
                                                     onclick='abrirModalEditar(<?php echo json_encode($espacio); ?>)'>
                                                     Editar
                                                 </button>
@@ -131,5 +131,71 @@
 </div>
 
 <?php include 'src/views/components/reservas/modalCrearEspacio.php'; ?>
+
+<!-- Modal Editar Espacio -->
+<div class="modal fade" id="modalEditarEspacio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Editar Instalación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditarEspacio">
+                <input type="hidden" name="id_espacios_comunidad" id="edit_id">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Nombre</label>
+                            <input type="text" id="edit_nombre" name="nombre_espacio" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Aforo Total</label>
+                            <input type="number" id="edit_aforo" name="aforo" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Max. Personas / Reserva</label>
+                            <input type="number" id="edit_max" name="max_personas" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Apertura</label>
+                            <input type="time" id="edit_apertura" name="hora_apertura" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Cierre</label>
+                            <input type="time" id="edit_cierre" name="hora_cierre" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Duración (min)</label>
+                            <input type="number" id="edit_duracion" name="duracion_uso" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Bloqueo -->
+<div class="modal fade" id="modalBloqueo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark">Bloquear Espacio</h5>
+            </div>
+            <div class="modal-body">
+                <p>Indica el motivo por el cual los vecinos no podrán reservar esta instalación:</p>
+                <input type="text" id="motivoBloqueo" class="form-control" placeholder="Ej: Limpieza de filtros">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnConfirmarBloqueo" class="btn btn-warning fw-bold">Confirmar Bloqueo</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="public/assets/js/reservas/modalEspacio.js"></script>
