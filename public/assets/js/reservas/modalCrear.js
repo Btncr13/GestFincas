@@ -26,10 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const max = new Date();
   max.setDate(hoy.getDate() + 14);
 
-  const formato = (d) => d.toISOString().split("T")[0];
+  // CORRECCIÓN: Usar fecha local para evitar desfases de zona horaria con toISOString()
+  const formato = (d) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   inputFecha.min = formato(hoy);
   inputFecha.max = formato(max);
+  state.fecha = inputFecha.value || null; // Sincronizar estado inicial si el input tiene valor
 
   btnCrear.disabled = true;
 
@@ -70,6 +77,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   inputFecha.addEventListener("change", (e) => {
     state.fecha = e.target.value;
+
+    // Al cambiar la fecha, los tramos disponibles pueden variar (especialmente si es hoy)
+    // Si ya tenemos los datos del espacio, regeneramos el selector de tramos para aplicar el filtro de tiempo
+    if (state.espacioData) {
+      state.tramo = null; // Reset del tramo seleccionado al cambiar fecha
+      generarTramos(
+        state.espacioData.hora_apertura,
+        state.espacioData.hora_cierre,
+        state.espacioData.duracion_uso,
+      );
+    }
+
     comprobarDisponibilidad();
     actualizarBoton();
   });
@@ -237,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => res.json())
       .then((data) => {
         if (!data.success) {
-          alert(data.message);
+          showToast(data.message, "error");
           return;
         }
 
@@ -290,6 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
         bootstrap.Modal.getInstance(
           document.getElementById("modalReserva"),
         ).hide();
+
+        showToast("Reserva confirmada con éxito.");
       })
       .catch((err) => console.error("Error en la petición:", err));
   }
@@ -364,14 +385,31 @@ function eliminarReserva(idReserva) {
     .then((res) => res.json())
     .then((data) => {
       if (!data.success) {
-        alert(data.message);
+        showToast(data.message, "error");
         return;
       }
 
       // 👇 REGENERA TODA LA LISTA DESDE BD
       cargarReservas();
+      showToast(data.message);
     })
     .catch((err) => {
       console.error("Error eliminando reserva:", err);
     });
+}
+
+// =====================================================
+// 🍞 10. SISTEMA DE NOTIFICACIONES (TOAST)
+// =====================================================
+const toastEl = document.getElementById("liveToast");
+const toastBody = document.getElementById("toastMessage");
+const toastInstance = toastEl ? new bootstrap.Toast(toastEl) : null;
+
+function showToast(message, type = "success") {
+  if (!toastInstance) return;
+  toastBody.textContent = message;
+  toastEl.classList.remove("bg-success", "bg-danger", "text-white");
+  const bgClass = type === "success" ? "bg-success" : "bg-danger";
+  toastEl.classList.add(bgClass, "text-white");
+  toastInstance.show();
 }

@@ -137,6 +137,7 @@ class EspacioController
     // API: ELIMINAR ESPACIO
     public function destroy()
     {
+        ob_clean();
         header('Content-Type: application/json');
         $id = $_POST['id_espacios_comunidad'] ?? null;
 

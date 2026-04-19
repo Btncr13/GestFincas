@@ -155,13 +155,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Usamos el objeto 'espacio' que devuelve tu controlador tras el insert
         insertNewCard(result.espacio);
         bootstrapModal.hide();
-        alert("Espacio creado correctamente");
+        showToast("Instalación creada correctamente");
       } else {
         throw new Error(result.message || "Error en el servidor");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("No se pudo crear el espacio: " + error.message);
+      showToast("Error: " + error.message, "error");
     } finally {
       btnGuardar.innerHTML = "Crear Espacio";
       btnGuardar.disabled = false;
@@ -264,6 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         actualizarCardUI(data.espacio);
         bootstrapModalEditar?.hide();
+        showToast("Datos actualizados correctamente");
       }
     });
 
@@ -298,19 +299,52 @@ document.addEventListener("DOMContentLoaded", () => {
       body: formData,
     });
     const data = await res.json();
-    if (data.success) actualizarCardUI(data.espacio);
+    if (data.success) {
+      actualizarCardUI(data.espacio);
+      showToast(data.message);
+    }
   };
 
   window.eliminarEspacio = async (id) => {
     if (!confirm("¿Seguro que quieres eliminar el espacio?")) return;
-    const formData = new FormData();
-    formData.append("id_espacios_comunidad", id);
-    const res = await fetch("index.php?route=espacio/destroy", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (data.success) document.getElementById(`espacio-${id}`).remove();
+
+    try {
+      const formData = new FormData();
+      formData.append("id_espacios_comunidad", id);
+
+      const res = await fetch("index.php?route=espacio/destroy", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const cardAEliminar = document.getElementById(`espacio-${id}`);
+        if (cardAEliminar) {
+          cardAEliminar.remove();
+
+          // Si ya no quedan espacios, mostramos el mensaje de "vacío"
+          if (
+            contenedorEspacios &&
+            contenedorEspacios.querySelectorAll(".col-md-4").length === 0
+          ) {
+            contenedorEspacios.innerHTML = `
+              <div class="text-center py-5" id="mensaje-vacio-espacios">
+                <i class="fa-solid fa-building-circle-xmark fs-1 text-muted mb-3"></i>
+                <h5 class="fw-bold text-muted">No hay espacios creados</h5>
+                <p class="text-muted small">Haz clic en "Nuevo Espacio" para añadir instalaciones a la comunidad.</p>
+              </div>`;
+          }
+          showToast("Espacio eliminado con éxito");
+        }
+      } else {
+        showToast(data.message || "No se pudo eliminar el espacio.", "error");
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      showToast("Error crítico al procesar la eliminación.", "error");
+    }
   };
 
   const actualizarCardUI = (data) => {
@@ -364,4 +398,21 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
   };
+
+  // --- 9. SISTEMA DE NOTIFICACIONES (TOAST) ---
+  const toastEl = document.getElementById("liveToast");
+  const toastBody = document.getElementById("toastMessage");
+  const toastInstance = toastEl ? new bootstrap.Toast(toastEl) : null;
+
+  /**
+   * Muestra una notificación visual en pantalla
+   */
+  function showToast(message, type = "success") {
+    if (!toastInstance) return;
+    toastBody.textContent = message;
+    toastEl.classList.remove("bg-success", "bg-danger", "text-white");
+    const bgClass = type === "success" ? "bg-success" : "bg-danger";
+    toastEl.classList.add(bgClass, "text-white");
+    toastInstance.show();
+  }
 });
