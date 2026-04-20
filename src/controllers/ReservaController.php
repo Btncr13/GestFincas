@@ -155,7 +155,7 @@ class ReservaController
         }
 
         // 3. Validación de cuotas
-        $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva']);
+        $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva'], $data['id_espacios_comunidad']);
         if (!$validacionCuota['status']) {
             echo json_encode(['success' => false, 'message' => $validacionCuota['msg']]);
             exit;
