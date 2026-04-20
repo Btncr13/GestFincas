@@ -296,18 +296,34 @@ class ReservaModel extends BaseModel
     }
 
     //  --------------------------------------------------- ELIMINAR RESERVA
-    public function eliminarReserva($id_reservas, $id_usuario)
+   //  --------------------------------------------------- ELIMINAR RESERVA
+    public function eliminarReserva($id_reservas, $id_usuario, $rol = 'VECINO')
     {
         try {
-            // Utilizamos id_reservas en lugar de id_reserva
-            $sql = "DELETE FROM reservas WHERE id_reservas = :id_reservas AND id_usuario = :id_usuario";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id_reservas', $id_reservas, PDO::PARAM_INT);
-            $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            // Normalizamos el rol a mayúsculas para evitar fallos por case-sensitivity
+            $rol = strtoupper($rol);
+
+            if ($rol === 'PRESIDENTE' || $rol === 'SUPERADMIN') {
+                // El Presidente tiene poder de superusuario sobre las reservas: 
+                // Ignoramos quién la creó, solo necesitamos el ID de la reserva.
+                $sql = "DELETE FROM reservas WHERE id_reservas = :id_reservas";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':id_reservas', $id_reservas, PDO::PARAM_INT);
+            } else {
+                // Regla estricta para vecinos: Solo pueden borrar si la reserva es SUYA.
+                $sql = "DELETE FROM reservas WHERE id_reservas = :id_reservas AND id_usuario = :id_usuario";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':id_reservas', $id_reservas, PDO::PARAM_INT);
+                $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            }
+
+            // Ejecutamos y verificamos si realmente se eliminó alguna fila
             return $stmt->execute() && $stmt->rowCount() > 0;
+            
         } catch (PDOException $e) {
             error_log("Error en eliminarReserva: " . $e->getMessage());
             return false;
         }
     }
+
 }

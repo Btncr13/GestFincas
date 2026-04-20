@@ -443,32 +443,51 @@ function renderReservas(reservas) {
 // ----------------------------------------------------------------------------------
 
 function eliminarReserva(idReserva) {
-  if (!confirm("¿Seguro que deseas cancelar esta reserva?")) return;
-
-  const formData = new FormData();
-  formData.append("id_reserva", idReserva);
-
-  fetch("index.php?route=reserva/destroy", {
-    method: "POST",
-    headers: { "X-Requested-With": "XMLHttpRequest" },
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (!data.success) {
-        showToast(data.message, "error");
+    // 1. Confirmación de seguridad (UX básica)
+    if (!confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
         return;
-      }
+    }
 
-      // 👇 REGENERA TODA LA LISTA DESDE BD
-      cargarReservas();
-      showToast(data.message);
+    // 2. Preparamos los datos para el POST
+    const formData = new FormData();
+    formData.append('id_reserva', idReserva);
+    // Idealmente aquí también añadiríamos: formData.append('csrf_token', tuTokenGlobal);
+
+    // 3. Petición AJAX al controlador (ReservaController::destroy)
+    fetch('index.php?route=reserva/destroy', {
+        method: 'POST',
+        body: formData
     })
-    .catch((err) => {
-      console.error("Error eliminando reserva:", err);
+    .then(async response => {
+        // En lugar de hacer throw inmediato, parseamos la respuesta
+        const data = await response.json().catch(() => null); 
+        
+        if (!response.ok) {
+            // Si hay un error HTTP, lanzamos el mensaje del backend o uno por defecto
+            throw new Error(data?.message || `Error del servidor HTTP ${response.status}`);
+        }
+        
+        return data; // Si todo va bien (200 OK), pasamos la data al siguiente then
+    })
+    .then(data => {
+        if (data && data.success) {
+            const cardReserva = document.getElementById(`reserva-${idReserva}`);
+            if (cardReserva) {
+                cardReserva.style.transition = "opacity 0.3s ease";
+                cardReserva.style.opacity = "0";
+                setTimeout(() => { cardReserva.remove(); }, 300); 
+            }
+        } else {
+            // Uso de Optional Chaining (?.) para evitar el crasheo si data es null
+            alert(data?.message || 'No se pudo cancelar la reserva.');
+        }
+    })
+    .catch(error => {
+        console.error('Detalle del error:', error);
+        // Ahora el alert mostrará el motivo real (ej: "No tienes permisos")
+        alert(`Fallo en la operación: ${error.message}`);
     });
-}
-
+  }
 // =====================================================
 // 🍞 10. SISTEMA DE NOTIFICACIONES (TOAST)
 // =====================================================

@@ -205,18 +205,33 @@ class ReservaController
 
     //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
 
-    public function destroy()
+   public function destroy()
     {
+        // ob_clean() asegura que ningún warning o espacio en blanco previo rompa el JSON devuelto
+        ob_clean();
         header('Content-Type: application/json');
+        
         $id_reservas = $_POST['id_reserva'] ?? null;
         $id_usuario = $_SESSION['vivienda']['id_usuario'];
+        // ARQUITECTURA: Pasamos el "Modo de Vista" actual, no el rol absoluto del usuario.
+        $modo_vista = $_SESSION['modo_vista'] ?? 'vecino'; 
 
-        if ($this->reservaModel->eliminarReserva($id_reservas, $id_usuario)) {
+        if (!$id_reservas) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'No se ha enviado el ID de la reserva.']);
+            exit;
+        }
+
+        $eliminado = $this->reservaModel->eliminarReserva($id_reservas, $id_usuario, $modo_vista);
+
+        if ($eliminado) {
             echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
         } else {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'No autorizado.']);
+            // Ya no usamos 403 duro aquí para que JS lo pueda leer bien, usamos 400
+            http_response_code(400); 
+            echo json_encode(['success' => false, 'message' => 'No tienes permisos o la reserva ya no existe.']);
         }
+        exit; // Asegura que no se imprima nada más después
     }
 
     public function getNormas($id_espacios_comunidad)
