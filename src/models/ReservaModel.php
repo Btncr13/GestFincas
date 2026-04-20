@@ -86,30 +86,32 @@ class ReservaModel extends BaseModel
         }
     }
 
-    public function verificarCuotas($id_usuario, $fecha_reserva)
+    public function verificarCuotas($id_usuario, $fecha_reserva, $id_espacios_comunidad)
     {
         try {
-            // Regla: 1 al día
+            // Regla: 1 al día por espacio
             $sqlDia = "SELECT COUNT(*) as total FROM reservas 
-                       WHERE id_usuario = :id_usuario AND fecha_reserva = :fecha_reserva";
+                       WHERE id_usuario = :id_usuario AND fecha_reserva = :fecha_reserva AND id_espacios_comunidad = :id_espacio";
             $stmtDia = $this->db->prepare($sqlDia);
             $stmtDia->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
             $stmtDia->bindParam(':fecha_reserva', $fecha_reserva, PDO::PARAM_STR);
+            $stmtDia->bindParam(':id_espacio', $id_espacios_comunidad, PDO::PARAM_INT);
             $stmtDia->execute();
             $resDia = $stmtDia->fetch(PDO::FETCH_ASSOC);
 
-            if ($resDia['total'] >= 1) return ['status' => false, 'msg' => 'Ya tienes una reserva para este día.'];
+            if ($resDia['total'] >= 1) return ['status' => false, 'msg' => 'Ya tienes una reserva para este espacio hoy.'];
 
-            // Regla: 3 a la semana
+            // Regla: 3 a la semana por espacio
             $sqlSemana = "SELECT COUNT(*) as total FROM reservas 
-                          WHERE id_usuario = :id_usuario AND YEARWEEK(fecha_reserva, 1) = YEARWEEK(:fecha_reserva, 1)";
+                          WHERE id_usuario = :id_usuario AND YEARWEEK(fecha_reserva, 1) = YEARWEEK(:fecha_reserva, 1) AND id_espacios_comunidad = :id_espacio";
             $stmtSemana = $this->db->prepare($sqlSemana);
             $stmtSemana->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
             $stmtSemana->bindParam(':fecha_reserva', $fecha_reserva, PDO::PARAM_STR);
+            $stmtSemana->bindParam(':id_espacio', $id_espacios_comunidad, PDO::PARAM_INT);
             $stmtSemana->execute();
             $resSemana = $stmtSemana->fetch(PDO::FETCH_ASSOC);
 
-            if ($resSemana['total'] >= 3) return ['status' => false, 'msg' => 'Cupo semanal agotado (máx 3).'];
+            if ($resSemana['total'] >= 3) return ['status' => false, 'msg' => 'Cupo semanal agotado para este espacio (máx 3).'];
 
             return ['status' => true];
         } catch (PDOException $e) {
@@ -296,18 +298,34 @@ class ReservaModel extends BaseModel
     }
 
     //  --------------------------------------------------- ELIMINAR RESERVA
-    public function eliminarReserva($id_reservas, $id_usuario)
+   //  --------------------------------------------------- ELIMINAR RESERVA
+    public function eliminarReserva($id_reservas, $id_usuario, $rol = 'VECINO')
     {
         try {
-            // Utilizamos id_reservas en lugar de id_reserva
-            $sql = "DELETE FROM reservas WHERE id_reservas = :id_reservas AND id_usuario = :id_usuario";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id_reservas', $id_reservas, PDO::PARAM_INT);
-            $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            // Normalizamos el rol a mayúsculas para evitar fallos por case-sensitivity
+            $rol = strtoupper($rol);
+
+            if ($rol === 'PRESIDENTE' || $rol === 'SUPERADMIN') {
+                // El Presidente tiene poder de superusuario sobre las reservas: 
+                // Ignoramos quién la creó, solo necesitamos el ID de la reserva.
+                $sql = "DELETE FROM reservas WHERE id_reservas = :id_reservas";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':id_reservas', $id_reservas, PDO::PARAM_INT);
+            } else {
+                // Regla estricta para vecinos: Solo pueden borrar si la reserva es SUYA.
+                $sql = "DELETE FROM reservas WHERE id_reservas = :id_reservas AND id_usuario = :id_usuario";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':id_reservas', $id_reservas, PDO::PARAM_INT);
+                $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            }
+
+            // Ejecutamos y verificamos si realmente se eliminó alguna fila
             return $stmt->execute() && $stmt->rowCount() > 0;
+            
         } catch (PDOException $e) {
             error_log("Error en eliminarReserva: " . $e->getMessage());
             return false;
         }
     }
+
 }

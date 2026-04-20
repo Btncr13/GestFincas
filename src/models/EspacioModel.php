@@ -38,9 +38,18 @@ class EspacioModel extends BaseModel
             // 2. Insertar en la tabla de detalle: espacios_normas
             // Ajustado a: id_espacios_comunidad y descripcion
             if (!empty($datos['normas'])) {
+                // Dividimos el texto del textarea por saltos de línea (regex para soportar Windows/Linux)
+                $normasArr = preg_split('/\r\n|\r|\n/', $datos['normas']);
+                
                 $sqlNorma = "INSERT INTO espacios_normas (id_espacios_comunidad, descripcion) VALUES (?, ?)";
                 $stmtNorma = $this->db->prepare($sqlNorma);
-                $stmtNorma->execute([$idEspacio, $datos['normas']]);
+
+                foreach ($normasArr as $linea) {
+                    $linea = trim($linea); // Limpiamos espacios en blanco accidentales
+                    if ($linea !== '') {   // Evitamos insertar líneas vacías
+                        $stmtNorma->execute([$idEspacio, $linea]);
+                    }
+                }
             }
 
             $this->db->commit();

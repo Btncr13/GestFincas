@@ -72,13 +72,16 @@ class ReservaController
         $hora_inicio = $_POST['hora_inicio'] ?? null;
         $hora_fin = $_POST['hora_fin'] ?? null;
 
+        // Validamos si el tiempo solicitado es válido (futuro + margen)
+        $esTiempoValido = $this->validarMargenTiempo($fecha, $hora_inicio);
+
         $espacios = $this->reservaModel->getEspaciosDisponibles($id_comunidad);
 
         $resultado = [];
 
         foreach ($espacios as $espacio) {
-
-            $lleno = !$this->reservaModel->hayCapacidad(
+            // Si el tiempo no es válido, marcamos como "lleno" para deshabilitar la opción en el UI
+            $lleno = !$esTiempoValido || !$this->reservaModel->hayCapacidad(
                 $espacio['id_espacios_comunidad'],
                 $fecha,
                 $hora_inicio,
@@ -128,11 +131,11 @@ class ReservaController
         }
 
         // 1.1 Validación: No permitir reservas en el pasado para el día de hoy
-        // Se añade un margen de 15 minutos de antelación mínima para evitar conflictos
-        $hoy = date('Y-m-d');
-        $horaLimite = date('H:i', strtotime('+15 minutes'));
-        if ($data['fecha_reserva'] === $hoy && $data['hora_inicio'] < $horaLimite) {
-            echo json_encode(['success' => false, 'message' => 'Las reservas deben realizarse con al menos 15 minutos de antelación.']);
+        if (!$this->validarMargenTiempo($data['fecha_reserva'], $data['hora_inicio'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No es posible reservar en el pasado. Las reservas para hoy requieren 15 min de antelación.'
+            ]);
             exit;
         }
 
@@ -152,7 +155,7 @@ class ReservaController
         }
 
         // 3. Validación de cuotas
-        $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva']);
+        $validacionCuota = $this->reservaModel->verificarCuotas($id_usuario, $data['fecha_reserva'], $data['id_espacios_comunidad']);
         if (!$validacionCuota['status']) {
             echo json_encode(['success' => false, 'message' => $validacionCuota['msg']]);
             exit;
@@ -202,23 +205,59 @@ class ReservaController
 
     //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
 
-    public function destroy()
+   public function destroy()
     {
+        // ob_clean() asegura que ningún warning o espacio en blanco previo rompa el JSON devuelto
+        ob_clean();
         header('Content-Type: application/json');
+        
         $id_reservas = $_POST['id_reserva'] ?? null;
         $id_usuario = $_SESSION['vivienda']['id_usuario'];
+        // ARQUITECTURA: Pasamos el "Modo de Vista" actual, no el rol absoluto del usuario.
+        $modo_vista = $_SESSION['modo_vista'] ?? 'vecino'; 
 
-        if ($this->reservaModel->eliminarReserva($id_reservas, $id_usuario)) {
+        if (!$id_reservas) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'No se ha enviado el ID de la reserva.']);
+            exit;
+        }
+
+        $eliminado = $this->reservaModel->eliminarReserva($id_reservas, $id_usuario, $modo_vista);
+
+        if ($eliminado) {
             echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
         } else {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'No autorizado.']);
+            // Ya no usamos 403 duro aquí para que JS lo pueda leer bien, usamos 400
+            http_response_code(400); 
+            echo json_encode(['success' => false, 'message' => 'No tienes permisos o la reserva ya no existe.']);
         }
+        exit; // Asegura que no se imprima nada más después
     }
 
     public function getNormas($id_espacios_comunidad)
     {
         header('Content-Type: application/json');
         echo json_encode(['success' => true, 'data' => $this->reservaModel->getNormasByEspacio($id_espacios_comunidad)]);
+    }
+
+    /**
+     * Valida que la fecha y hora de la reserva no sean pasadas 
+     * y respeten el margen de cortesía de 15 minutos.
+     */
+    private function validarMargenTiempo($fecha, $horaInicio)
+    {
+        $hoy = date('Y-m-d');
+
+        // 1. Bloquear cualquier fecha anterior a hoy
+        if ($fecha < $hoy) return false;
+
+        // 2. Si es hoy, validar el margen de 15 minutos
+        if ($fecha === $hoy && $horaInicio) {
+            $horaLimite = date('H:i', strtotime('+15 minutes'));
+            // Si la hora de inicio es menor a la hora actual + 15 min, es inválido
+            return $horaInicio >= $horaLimite;
+        }
+
+        return true;
     }
 }

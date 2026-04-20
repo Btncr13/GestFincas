@@ -142,68 +142,76 @@
                 <div class="tab-pane fade" id="espacios" role="tabpanel">
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
-                        <?php foreach ($espaciosDisponibles as $espacio): ?>
-    <div class="col">
-        <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-primary">
-            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                        <?php if (!empty($espaciosDisponibles)): ?>
+                            <?php foreach ($espaciosDisponibles as $espacio): ?>
+                                <div class="col">
+                                    <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-primary">
+                                        <div class="card-body p-4 d-flex flex-column align-items-center text-center">
 
-                <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm mb-3"
-                    style="width: 64px; height: 64px;">
-                    <i class="fa-solid fa-building fs-4 text-primary"></i>
-                </div>
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center bg-white shadow-sm mb-3"
+                                                style="width: 64px; height: 64px;">
+                                                <i class="fa-solid fa-building fs-4 text-primary"></i>
+                                            </div>
 
-                <h3 class="fs-5 fw-bold text-dark mb-3"
-                    style="font-family: var(--fuente-titulos);">
-                    <?= htmlspecialchars($espacio['nombre_espacio']) ?>
-                </h3>
+                                            <h3 class="fs-5 fw-bold text-dark mb-3"
+                                                style="font-family: var(--fuente-titulos);">
+                                                <?= htmlspecialchars($espacio['nombre_espacio']) ?>
+                                            </h3>
 
-                <div class="text-muted small mb-4 text-start bg-light p-3 rounded w-100">
+                                            <div class="text-muted small mb-4 text-start bg-light p-3 rounded w-100">
 
-                    <!-- AFORO -->
-                    <div class="mb-2">
-                        <i class="fa-solid fa-users me-2 text-primary"></i>
-                        <strong>Aforo:</strong>
-                        <?= htmlspecialchars($espacio['aforo']) ?> personas
-                    </div>
+                                                <!-- AFORO -->
+                                                <div class="mb-2">
+                                                    <i class="fa-solid fa-users me-2 text-primary"></i>
+                                                    <strong>Aforo:</strong>
+                                                    <?= htmlspecialchars($espacio['aforo']) ?> personas
+                                                </div>
 
-                    <!-- NUEVA LÍNEA: MÁXIMO ASISTENTES POR RESERVA -->
-                    <div class="mb-2">
-                        <i class="fa-solid fa-user-group me-2 text-primary"></i>
-                        <strong>Asistentes por reserva:</strong>
-                        <?= htmlspecialchars($espacio['max_personas']) ?> personas
-                    </div>
+                                                <!-- NUEVA LÍNEA: MÁXIMO ASISTENTES POR RESERVA -->
+                                                <div class="mb-2">
+                                                    <i class="fa-solid fa-user-group me-2 text-primary"></i>
+                                                    <strong>Asistentes por reserva:</strong>
+                                                    <?= htmlspecialchars($espacio['max_personas']) ?> personas
+                                                </div>
 
-                    <!-- HORARIO -->
-                    <div class="mb-2">
-                        <i class="fa-regular fa-clock me-2 text-primary"></i>
-                        <strong>Horario:</strong>
-                        <?= htmlspecialchars($espacio['hora_apertura']) ?>
-                        a
-                        <?= htmlspecialchars($espacio['hora_cierre']) ?>
-                    </div>
+                                                <!-- HORARIO -->
+                                                <div class="mb-2">
+                                                    <i class="fa-regular fa-clock me-2 text-primary"></i>
+                                                    <strong>Horario:</strong>
+                                                    <?= htmlspecialchars($espacio['hora_apertura']) ?>
+                                                    a
+                                                    <?= htmlspecialchars($espacio['hora_cierre']) ?>
+                                                </div>
 
-                    <!-- DURACIÓN -->
-                    <div>
-                        <i class="fa-solid fa-stopwatch me-2 text-primary"></i>
-                        <strong>Duración máx:</strong>
-                        <?= htmlspecialchars($espacio['duracion_uso']) ?> min
-                    </div>
+                                                <!-- DURACIÓN -->
+                                                <div>
+                                                    <i class="fa-solid fa-stopwatch me-2 text-primary"></i>
+                                                    <strong>Duración máx:</strong>
+                                                    <?= htmlspecialchars($espacio['duracion_uso']) ?> min
+                                                </div>
 
-                </div>
+                                            </div>
 
-                <div class="mt-auto border-top w-100 pt-3">
-                    <button type="button"
-                        class="btn btn-outline-primary btn-sm fw-semibold w-100"
-                        data-bs-toggle="modal" data-bs-target="#modalReserva">
-                        <i class="fa-solid fa-calendar-check me-2"></i>Reservar
-                    </button>
-                </div>
+                                            <div class="mt-auto border-top w-100 pt-3">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-sm fw-semibold w-100"
+                                                    data-bs-toggle="modal" data-bs-target="#modalReserva">
+                                                    <i class="fa-solid fa-calendar-check me-2"></i>Reservar
+                                                </button>
+                                            </div>
 
-            </div>
-        </div>
-    </div>
-<?php endforeach; ?>
-
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <!-- Mensaje cuando no hay espacios disponibles -->
+                            <div class="col-12 text-center py-5">
+                                <i class="fa-solid fa-building-circle-xmark fs-1 text-muted mb-3"></i>
+                                <h5 class="fw-bold text-muted">No hay espacios disponibles en este momento</h5>
+                                <p class="text-muted small">Contacta con el presidente si crees que esto es un error.</p>
+                            </div>
+                        <?php endif; ?>
 
                     </div>
                 </div>
@@ -216,7 +224,7 @@
 
         <!-- Espacios disponibles para JS -->
         <script>
-        const espaciosDisponibles = <?= json_encode($espaciosDisponibles) ?>;
+            const espaciosDisponibles = <?= json_encode($espaciosDisponibles) ?>;
         </script>
 
         <!-- JS del modal -->
