@@ -6,7 +6,7 @@
                 <h5 class="modal-title fw-bold" style="font-family: var(--fuente-titulos);">Alta de Nueva Vivienda</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="index.php?route=auth/crearViviendaAction" method="POST">
+            <form action="index.php?route=miComunidad/crearViviendaAction" method="POST">
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Comunidad</label>

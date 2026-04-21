@@ -14,7 +14,7 @@
                 <p class="text-muted small mb-0">Registro de nuevo vecino</p>
             </div>
 
-            <form id="registerForm" action="index.php?route=auth/registerAction" method="POST">
+            <form id="registerForm" action="index.php?route=auth/registerAction" method="POST" class="needs-validation" novalidate>
 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -29,7 +29,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">DNI</label>
-                        <input type="text" name="dni" class="form-control custom-input" placeholder="12345678A" required>
+                        <input type="text" name="dni" id="reg_dni" class="form-control custom-input" placeholder="12345678A" required pattern="[0-9]{8}[A-Z]" maxlength="9" title="Debe contener 8 números y una letra mayúscula">
                     </div>
 
                     <div class="col-md-6">
@@ -44,17 +44,17 @@
 
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">Código vivienda</label>
-                        <input type="text" name="codigo_vivienda" class="form-control custom-input" required>
+                        <input type="text" name="codigo_vivienda" id="reg_codigo" class="form-control custom-input fw-bold text-primary" placeholder="Pega tu código aquí" required maxlength="8">
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">Comunidad</label>
-                        <input type="text" name="comunidad" class="form-control custom-input" required>
+                        <input type="text" name="comunidad" id="reg_comunidad" class="form-control custom-input bg-light" readonly placeholder="Se rellenará solo">
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">Vivienda</label>
-                        <input type="text" name="vivienda" class="form-control custom-input" placeholder="Ej: Piso 1A" required>
+                        <input type="text" name="vivienda" id="reg_vivienda" class="form-control custom-input bg-light" readonly placeholder="Se rellenará solo">
                     </div>
                 </div>
 
@@ -120,5 +120,47 @@
                 }
             });
         }
+
+        // Lógica de validación automática de código
+        const dniInput = document.getElementById('reg_dni');
+        if (dniInput) {
+            dniInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        }
+
+        const codigoInput = document.getElementById('reg_codigo');
+        const comunidadInput = document.getElementById('reg_comunidad');
+        const viviendaInput = document.getElementById('reg_vivienda');
+
+        codigoInput.addEventListener('input', function() {
+            const codigo = this.value.trim().toUpperCase();
+            this.value = codigo; // Forzar mayúsculas
+
+            if (codigo.length === 8) {
+                fetch(`index.php?route=vivienda/verificarCodigoAjax&codigo=${codigo}`)
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.success) {
+                            comunidadInput.value = res.data.nombre_comunidad;
+                            viviendaInput.value = res.data.nombre_vivienda;
+                            codigoInput.classList.add('is-valid');
+                            codigoInput.classList.remove('is-invalid');
+                        } else {
+                            comunidadInput.value = 'Código no válido';
+                            viviendaInput.value = 'Código no válido';
+                            codigoInput.classList.add('is-invalid');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error en la petición AJAX:', err);
+                        comunidadInput.value = 'Error de conexión';
+                    });
+            } else {
+                comunidadInput.value = '';
+                viviendaInput.value = '';
+                codigoInput.classList.remove('is-valid', 'is-invalid');
+            }
+        });
     });
 </script>

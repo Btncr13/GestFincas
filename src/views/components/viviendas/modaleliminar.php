@@ -8,7 +8,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="index.php?route=auth/eliminarViviendaAction" method="POST">
+            <form action="index.php?route=miComunidad/eliminarViviendaAction" method="POST">
                 <div class="modal-body px-4 pb-4">
                     <input type="hidden" name="id_vivienda_eliminar" id="id_vivienda_eliminar">
                     <p class="fs-6 mb-1">¿Estás seguro de que quieres eliminar la vivienda <strong id="nombre_vivienda_confirmar"></strong>?</p>
@@ -22,6 +22,3 @@
         </div>
     </div>
 </div>
-
-<?php include 'src/views/components/vivienda/modalVivienda.php'; ?>
-<?php include 'src/views/components/vivienda/modalEliminar.php'; ?>
