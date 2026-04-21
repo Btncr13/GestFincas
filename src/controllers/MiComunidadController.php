@@ -1,4 +1,12 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Rutas directas partiendo desde la raíz del proyecto (donde está el index.php)
+require_once 'libs/PHPMailer/src/Exception.php';
+require_once 'libs/PHPMailer/src/PHPMailer.php';
+require_once 'libs/PHPMailer/src/SMTP.php';
+
 require_once "src/models/UsuarioModel.php";
 require_once "src/models/MiComunidadModel.php";
 
@@ -62,7 +70,7 @@ class MiComunidadController
         require "src/views/micomunidad/micomunidad.php";
     }
 
-    // 🟢 ACCIÓN: CREAR VIVIENDA (Adaptado de tu compañero)
+     // 🟢 ACCIÓN: CREAR VIVIENDA Y ENVIAR EMAIL
     public function crearViviendaAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SESSION['vivienda']['rol'] !== 'presidente') {
@@ -73,6 +81,7 @@ class MiComunidadController
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
         $nombre_vivienda = trim($_POST['vivienda'] ?? '');
         $codigo = trim($_POST['codigo_vivienda'] ?? '');
+        $email_vecino = trim($_POST['email_vecino'] ?? ''); // Capturamos el email del modal [4]
 
         // Validación de formato
         if (!preg_match('/^Planta \d+-[A-Z0-9]+$/i', $nombre_vivienda)) {
@@ -82,6 +91,50 @@ class MiComunidadController
         }
 
         if ($this->miComunidadModel->crearViviendaConCodigo($id_comunidad, $nombre_vivienda, $codigo)) {
+
+            // --- INICIO DE LÓGICA PHPMAILER ---
+            if (!empty($email_vecino)) {
+                $mail = new PHPMailer(true);
+
+                try {
+                    // Configuración del servidor SMTP (Ejemplo usando Mailtrap para pruebas locales o Gmail)
+                    $mail->isSMTP();                                            
+                    $mail->Host       = 'smtp.gmail.com'; // Cambia esto por tu host SMTP (ej. sandbox.smtp.mailtrap.io) [3, 5]
+                    $mail->SMTPAuth   = true;                                   
+                    $mail->Username   = 'moisesmrobles@gmail.com'; // Tu usuario SMTP [5]
+                    $mail->Password   = 'xonw eroz tnke xszg'; // Tu contraseña SMTP 
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         
+                    $mail->Port       = 587;                                    
+
+                    // Remitente y Destinatario
+                    $mail->setFrom('moisesmrobles@gmail.com', 'GestFincas Administración');
+                    $mail->addAddress($email_vecino);
+
+                    // Generar enlace dinámico (OJO: Adapta "localhost/tu_carpeta" a la ruta de tu proyecto local)
+                    $enlaceRegistro = "http://localhost/ComunidadVecinos/JR_M26_ComunidadVecinos/index.php?route=auth/register&codigo=" . urlencode($codigo);
+
+                    // Contenido del Correo
+                $mail->isHTML(true); 
+                    $mail->Subject = mb_encode_mimeheader('Invitación a tu nueva comunidad - GestFincas', 'UTF-8');
+                    $mail->Body    = "
+                        <h2>¡Hola, nuevo vecino!</h2>
+                        <p>Tu presidente te ha dado de alta en la plataforma <b>GestFincas</b> para la vivienda <b>{$nombre_vivienda}</b>.</p>
+                        <p>Para completar tu registro y acceder a la plataforma, por favor haz clic en el siguiente enlace. Tu código de seguridad se rellenará automáticamente:</p>
+                        <br>
+                        <a href='{$enlaceRegistro}' style='background-color: #5CB244; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Completar Registro</a>
+                        <br><br>
+                        <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+                        <p><a href='{$enlaceRegistro}'>{$enlaceRegistro}</a></p>
+                        <p>Tu código de vivienda manual es: <b>{$codigo}</b></p>
+                    ";
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    error_log("El correo no pudo ser enviado. Error de PHPMailer: {$mail->ErrorInfo}");
+                }
+            }
+            // --- FIN DE LÓGICA PHPMAILER ---
+
             header("Location: index.php?route=miComunidad/index&status=success");
         } else {
             header("Location: index.php?route=miComunidad/index&status=error");

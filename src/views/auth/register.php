@@ -1,3 +1,7 @@
+<?php
+// Capturamos el código si viene por la URL
+$codigoPreevaluado = $_GET['codigo'] ?? '';
+?>
 <main class="d-flex justify-content-center align-items-center min-vh-100 bg-light px-3">
     <div class="card shadow-sm register-card-custom mx-auto position-relative">
         
@@ -44,7 +48,11 @@
 
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">Código vivienda</label>
-                        <input type="text" name="codigo_vivienda" id="reg_codigo" class="form-control custom-input fw-bold text-primary" placeholder="Pega tu código aquí" required maxlength="8">
+                        <!-- Le inyectamos el valor de PHP y lo ponemos como readonly si ya trae código -->
+                        <input type="text" name="codigo_vivienda" class="form-control custom-input" 
+                            value="<?= htmlspecialchars($codigoPreevaluado) ?>" 
+                            <?= !empty($codigoPreevaluado) ? 'readonly' : '' ?> 
+                            required>
                     </div>
 
                     <div class="col-md-6">
