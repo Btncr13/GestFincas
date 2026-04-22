@@ -86,6 +86,15 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'finanzas/index') ? 'active fw-bold' : '' ?>"
+                href="index.php?route=finanzas/index"
+                style="background-color: <?= ($ruta_actual == 'finanzas/index') ? 'var(--bs-primary)' : 'transparent' ?>;
+                        color: <?= ($ruta_actual == 'finanzas/index') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-wallet me-2"></i> Finanzas
+                </a>
+            </li>
+
             <li>
                 <hr class="dropdown-divider my-3" style="border-color: var(--color-borde);">
             </li>
