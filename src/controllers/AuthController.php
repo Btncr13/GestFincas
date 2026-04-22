@@ -2,16 +2,19 @@
 
 require_once "src/models/UsuarioModel.php";
 require_once "src/models/VotacionModel.php";
+require_once "src/models/ComunicacionesModel.php";
 
 class AuthController
 {
     private $usuarioModel;
     private $votacionModel;
+    private $comunicacionesModel;
 
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->votacionModel = new VotacionModel($pdo);
+        $this->comunicacionesModel = new ComunicacionesModel($pdo);
     }
 
     // 🟢 ENRUTAMIENTO INICIAL 🟢
@@ -212,6 +215,13 @@ class AuthController
                 $votacionesPendientes++;
             }
         }
+
+        // Obtener comunicaciones pendientes
+        $comunicacionesPendientes = $this->comunicacionesModel->contarNoLeidos($id_comunidad, $id_usuario);
+
+        // Último comunicado real (No Mock)
+        $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
+        $ultimoComunicadoBD = !empty($listaComs) ? $listaComs[0] : null;
 
         require "src/views/auth/panelvecino.php";
     }

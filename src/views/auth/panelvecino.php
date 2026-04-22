@@ -52,8 +52,14 @@
 
                     <!-- Tarjeta 1 - Comunicaciones -->
                     <div class="col">
-                        <a href="index.php?route=auth/comunicaciones" class="text-decoration-none h-100 d-block">
-                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                        <a href="index.php?route=comunicaciones/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
+                                <?php if (isset($comunicacionesPendientes) && $comunicacionesPendientes > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                                        <?= $comunicacionesPendientes ?>
+                                        <span class="visually-hidden">avisos nuevos</span>
+                                    </span>
+                                <?php endif; ?>
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(34, 28, 53, 0.1);">
                                         <i class="bi bi-megaphone-fill text-primary fs-2"></i>

@@ -180,6 +180,25 @@ CREATE TABLE `reservas` (
   KEY `id_espacios_comunidad` (`id_espacios_comunidad`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- TABLAS MÓDULO COMUNICACIONES
+CREATE TABLE `comunicados` (
+  `id_comunicado` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `cuerpo` text NOT NULL,
+  `tipo` enum('normal','urgente') NOT NULL DEFAULT 'normal',
+  `fecha_publicacion` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id_comunicado`),
+  KEY `id_comunidad` (`id_comunidad`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `comunicado_lectura` (
+  `id_comunicado` int(11) UNSIGNED NOT NULL,
+  `id_usuario` int(11) UNSIGNED NOT NULL,
+  PRIMARY KEY (`id_comunicado`,`id_usuario`),
+  KEY `id_comunicado` (`id_comunicado`),
+  KEY `id_usuario` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 -- 2. VOLCADO DE DATOS (MOCK DATA)
@@ -282,5 +301,14 @@ ALTER TABLE `espacios_normas`
 ALTER TABLE `reservas`
   ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_reservas_espacios` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+-- CLAVES FORÁNEAS MÓDULO COMUNICACIONES
+ALTER TABLE `comunicados`
+  ADD CONSTRAINT `fk_comunicados_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `comunicado_lectura`
+  ADD CONSTRAINT `fk_lectura_comunicado` FOREIGN KEY (`id_comunicado`) REFERENCES `comunicados` (`id_comunicado`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_lectura_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 COMMIT;
