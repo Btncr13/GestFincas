@@ -135,9 +135,9 @@ class MiComunidadController
             }
             // --- FIN DE LÓGICA PHPMAILER ---
 
-            header("Location: index.php?route=miComunidad/index&status=success");
+            header("Location: index.php?route=miComunidad/index");
         } else {
-            header("Location: index.php?route=miComunidad/index&status=error");
+            header("Location: index.php?route=miComunidad/index");
         }
         exit;
     }
@@ -166,10 +166,10 @@ class MiComunidadController
         // 4. Llamamos al modelo para ejecutar el UPDATE en la BBDD
         if ($id_vivienda && $this->miComunidadModel->modificarVivienda($id_vivienda, $id_comunidad, $nombre_vivienda)) {
             // Éxito: volvemos pasando 'edit=success' para que salte el Toast verde en JS
-            header("Location: index.php?route=miComunidad/index&edit=success");
+            header("Location: index.php?route=miComunidad/index");
         } else {
             // Error: volvemos pasando 'edit=error'
-            header("Location: index.php?route=miComunidad/index&edit=error");
+            header("Location: index.php?route=miComunidad/index");
         }
         exit;
     }
@@ -185,9 +185,9 @@ class MiComunidadController
         $id_vivienda = $_POST['id_vivienda_eliminar'] ?? null;
 
         if ($id_vivienda && $this->miComunidadModel->eliminarViviendaCompleta($id_vivienda)) {
-            header("Location: index.php?route=miComunidad/index&delete=success");
+            header("Location: index.php?route=miComunidad/index");
         } else {
-            header("Location: index.php?route=miComunidad/index&delete=error");
+            header("Location: index.php?route=miComunidad/index");
         }
         exit;
     }
