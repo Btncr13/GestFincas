@@ -70,7 +70,7 @@
 
                     <!-- Mi Comunidad (Usuarios) -->
                     <div class="col">
-                        <a href="index.php?route=auth/usuarios" class="text-decoration-none h-100 d-block">
+                        <a href="index.php?route=miComunidad/index" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(92, 178, 68, 0.1);">
