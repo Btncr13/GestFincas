@@ -126,9 +126,120 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Aquí puedes añadir en el futuro la acción de ELIMINAR y RESOLVER
-            // if (e.target.closest('.btn-delete')) { ... }
-            // if (e.target.closest('.btn-resolver')) { ... }
+            // ACCIÓN: RESOLVER (PRESIDENTE)
+            if (e.target.closest('.btn-resolver')) {
+                const btn = e.target.closest('.btn-resolver');
+                const idIncidencia = btn.getAttribute('data-id');
+                
+                if (confirm('¿Estás seguro de que deseas marcar esta incidencia como resuelta?')) {
+                    const formData = new FormData();
+                    formData.append('id_incidencia', idIncidencia);
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resolviendo...';
+
+                        const response = await fetch('index.php?route=incidencias/resolve', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            // Recargamos para que el servidor pinte la tarjeta con el formato "RESUELTA" (verde)
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al resolver la incidencia.');
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error de conexión.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
+                    }
+                }
+            }
+
+            // ACCIÓN: ABRIR (PRESIDENTE)
+            if (e.target.closest('.btn-abrir')) {
+                const btn = e.target.closest('.btn-abrir');
+                const idIncidencia = btn.getAttribute('data-id');
+                
+                if (confirm('¿Estás seguro de que deseas marcar esta incidencia como en curso (abierta)?')) {
+                    const formData = new FormData();
+                    formData.append('id_incidencia', idIncidencia);
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
+
+                        const response = await fetch('index.php?route=incidencias/open', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            // Recargamos para que el servidor actualice el botón y el badge de estado
+                            location.reload();
+                        } else {
+                            alert(data.message || 'Error al abrir la incidencia.');
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error de conexión.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
+                    }
+                }
+            }
+
+            // ACCIÓN: ELIMINAR (CREADOR O PRESIDENTE)
+            if (e.target.closest('.btn-delete')) {
+                const btn = e.target.closest('.btn-delete');
+                const idIncidencia = btn.getAttribute('data-id');
+                
+                if (confirm('¿Seguro que deseas eliminar esta incidencia permanentemente?')) {
+                    const formData = new FormData();
+                    formData.append('id_incidencia', idIncidencia);
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
+
+                        const response = await fetch('index.php?route=incidencias/delete', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            // Optimistic UI: Borramos la tarjeta del DOM sin recargar la página entera
+                            const tarjeta = document.getElementById(`incidencia-${idIncidencia}`);
+                            if (tarjeta) tarjeta.remove();
+                            
+                            // Si era la única incidencia visible, recargamos para que aparezca el estado vacío
+                            if (document.querySelectorAll('[id^="incidencia-"]').length === 0) location.reload();
+                        } else {
+                            alert(data.message || 'Error al eliminar la incidencia.');
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error de conexión.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
+                    }
+                }
+            }
             
         });
     }

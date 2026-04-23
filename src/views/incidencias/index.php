@@ -1,6 +1,7 @@
 <?php 
 // Pre-calculamos los permisos generales para usarlos en el HTML
-$esPresidente = ($_SESSION['user']['rol'] === 'PRESIDENTE' || $_SESSION['user']['rol'] === 'SUPERADMIN');
+$rolActual = $rol ?? ($_SESSION['vivienda']['rol'] ?? 'vecino');
+$esPresidente = (strtolower($rolActual) === 'presidente' || strtoupper($rolActual) === 'SUPERADMIN');
 $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
 ?>
 
@@ -37,8 +38,17 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
                                         <?= htmlspecialchars($inc['titulo']) ?>
                                         <?php if($esMia): ?> <span class="badge bg-primary ms-2" style="font-size: 0.6em;">MI INCIDENCIA</span> <?php endif; ?>
                                     </h5>
-                                    <p class="mb-2 text-muted small"><?= htmlspecialchars($inc['descripcion']) ?></p>
+                                    <p class="mb-2 text-muted small"><?= htmlspecialchars($inc['descripcion'] ?? '') ?></p>
                                     
+                                    <!-- MOSTRAR FOTO SI EXISTE -->
+                                    <?php if (!empty($inc['foto_incidencia'])): ?>
+                                        <div class="mb-3">
+                                            <a href="<?= htmlspecialchars($inc['foto_incidencia']) ?>" target="_blank" title="Ver imagen a tamaño completo">
+                                                <img src="<?= htmlspecialchars($inc['foto_incidencia']) ?>" alt="Evidencia de incidencia" class="rounded shadow-sm border" style="max-height: 80px; object-fit: cover;">
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+
                                     <div class="d-flex flex-wrap align-items-center gap-3">
                                         <span class="badge bg-<?= $inc['estado'] == 'resuelta' ? 'success' : ($inc['estado'] == 'abierta' ? 'primary' : 'warning text-dark') ?>">
                                             <?= strtoupper($inc['estado']) ?>
@@ -53,6 +63,12 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
                                     <?php if ($esPresidente && $estaAbierta): ?>
                                         <button class="btn btn-sm btn-success btn-resolver w-100" data-id="<?= $inc['id_incidencias'] ?>">
                                             <i class="fa-solid fa-check"></i> Resolver
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if ($esPresidente && $inc['estado'] === 'pendiente'): ?>
+                                        <button class="btn btn-sm btn-warning text-dark fw-bold btn-abrir w-100" data-id="<?= $inc['id_incidencias'] ?>">
+                                            <i class="fa-solid fa-folder-open"></i> Abrir
                                         </button>
                                     <?php endif; ?>
 

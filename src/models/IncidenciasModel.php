@@ -1,16 +1,15 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/BaseModel.php';
 
-class IncidenciasModel {
-    private $db;
+class IncidenciasModel extends BaseModel {
 
-    public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
+    public function __construct($pdo) {
+        parent::__construct($pdo);
     }
 
    // Obtener incidencias (Regla: Todas las abiertas + Resueltas de los últimos 3 meses)
     public function obtenerIncidenciasGlobales() {
-        $sql = "SELECT i.*, v.nombre_vivienda 
+        $sql = "SELECT i.*, v.nombre AS nombre_vivienda 
                 FROM incidencias i 
                 LEFT JOIN vivienda v ON i.id_vivienda = v.id_vivienda 
                 WHERE i.estado IN ('pendiente', 'abierta') 
@@ -36,7 +35,7 @@ class IncidenciasModel {
 
     // Crear nueva incidencia
     public function crear($id_vivienda, $titulo, $titulo_norm, $descripcion, $foto = null) {
-        $sql = "INSERT INTO incidencias (id_vivienda, titulo, titulo_normalizado, descripcion, foto, estado, numero_afectados) 
+        $sql = "INSERT INTO incidencias (id_vivienda, titulo, titulo_normalizado, descripcion, foto_incidencia, estado, numero_afectados) 
                 VALUES (:id_vivienda, :titulo, :titulo_norm, :descripcion, :foto, 'pendiente', 1)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
