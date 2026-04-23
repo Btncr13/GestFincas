@@ -259,6 +259,9 @@ class AuthController
             }
         }
 
+        // Obtener comunicaciones reales de la BBDD para el panel del presidente
+        $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
+
         require "src/views/auth/panelpresi.php";
     }
 }
