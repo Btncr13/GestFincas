@@ -180,6 +180,29 @@ CREATE TABLE `reservas` (
   KEY `id_espacios_comunidad` (`id_espacios_comunidad`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `gasto` (
+  `id_gasto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `concepto` varchar(255) NOT NULL,
+  `categoria` varchar(100) NOT NULL,
+  `fecha` date NOT NULL,
+  `importe` decimal(10,2) NOT NULL,
+  `estado` enum('pendiente','aprobado','rechazado') NOT NULL DEFAULT 'pendiente',
+  PRIMARY KEY (`id_gasto`),
+  KEY `fk_gasto_comunidad` (`id_comunidad`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `cuota` (
+  `id_cuota` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_vivienda` int(10) UNSIGNED NOT NULL,
+  `tipo` enum('mensual','derrama') NOT NULL DEFAULT 'mensual',
+  `concepto` varchar(255) NOT NULL,
+  `importe` decimal(10,2) NOT NULL,
+  `fecha_emision` date NOT NULL,
+  `estado` enum('pagada','pendiente') NOT NULL DEFAULT 'pendiente',
+  PRIMARY KEY (`id_cuota`),
+  KEY `fk_cuota_vivienda` (`id_vivienda`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 -- 2. VOLCADO DE DATOS (MOCK DATA)
@@ -233,6 +256,17 @@ INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `a
 (4, 3, 3, 15, '2026-04-23', '18:00:00', '18:30:00', 'activo'), 
 (5, 1, 3, 15, '2026-04-22', '18:00:00', '18:30:00', 'activo');
 
+INSERT INTO `gasto` (`id_gasto`, `id_comunidad`, `concepto`, `categoria`, `fecha`, `importe`, `estado`) VALUES
+(1, 1, 'Revisión completa ascensor - presupuesto TechLift', 'Ascensores', '2026-03-20', 650.00, 'pendiente'),
+(2, 1, 'Sustitución luminarias portal', 'Electricidad', '2026-03-16', 387.20, 'pendiente'),
+(3, 1, 'Limpieza mensual marzo', 'Limpieza', '2026-03-01', 200.00, 'aprobado');
+
+INSERT INTO `cuota` (`id_cuota`, `id_vivienda`, `tipo`, `concepto`, `importe`, `fecha_emision`, `estado`) VALUES
+(1, 2, 'mensual', 'Cuota Marzo 2026', 50.00, '2026-03-01', 'pagada'),
+(2, 4, 'mensual', 'Cuota Marzo 2026', 50.00, '2026-03-01', 'pendiente'),
+(3, 2, 'derrama', 'Derrama arreglo tejado', 100.00, '2026-03-15', 'pagada'),
+(4, 4, 'derrama', 'Derrama arreglo tejado', 100.00, '2026-03-15', 'pendiente');
+
 
 -- --------------------------------------------------------
 -- 3. RESTRICCIONES (CLAVES FORÁNEAS)
@@ -282,5 +316,11 @@ ALTER TABLE `espacios_normas`
 ALTER TABLE `reservas`
   ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_reservas_espacios` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `gasto`
+  ADD CONSTRAINT `fk_gasto_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `cuota`
+  ADD CONSTRAINT `fk_cuota_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 COMMIT;
