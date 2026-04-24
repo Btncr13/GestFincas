@@ -48,30 +48,79 @@ class IncidenciasModel extends BaseModel {
         return $this->db->lastInsertId();
     }
 
-    // Unirse a una incidencia existente
-    public function unirse($id_incidencia) {
-        $sql = "UPDATE incidencias SET numero_afectados = numero_afectados + 1 WHERE id_incidencias = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':id' => $id_incidencia]);
-    }
-
-    // Cambiar estado (Solo Presidente)
-    public function actualizarEstado($id_incidencia, $estado) {
-        $sql = "UPDATE incidencias SET estado = :estado WHERE id_incidencias = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':estado' => $estado, ':id' => $id_incidencia]);
-    }
-
-    // Eliminar incidencia (Solo creador original)
-    public function eliminar($id_incidencia, $id_vivienda, $rol) {
-        if ($rol === 'PRESIDENTE' || $rol === 'SUPERADMIN') {
-            $sql = "DELETE FROM incidencias WHERE id_incidencias = :id";
+    // Obtener incidencias a las que el usuario se ha unido (para la UI)
+    public function obtenerMisUniones($id_vivienda) {
+        try {
+            $sql = "SELECT id_incidencias FROM incidencias_uniones WHERE id_vivienda = :id_vivienda";
             $stmt = $this->db->prepare($sql);
-            return $stmt->execute([':id' => $id_incidencia]);
-        } else {
-            $sql = "DELETE FROM incidencias WHERE id_incidencias = :id AND id_vivienda = :id_vivienda";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([':id' => $id_incidencia, ':id_vivienda' => $id_vivienda]);
+            $stmt->bindParam(':id_vivienda', $id_vivienda, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_COLUMN); // Devuelve array: [1, 5, 8]
+        } catch (PDOException $e) {
+            return []; // Retorna vacío si la tabla no existe aún
         }
     }
+
+    // Unirse a una incidencia existente
+    public function unirse($id_incidencia, $id_vivienda) {
+        try {
+            $this->db->beginTransaction();
+            
+            // 1. Guardar la acción (evita duplicados si se hace doble clic rápido)
+            $sqlUnion = "INSERT INTO incidencias_uniones (id_incidencias, id_vivienda) VALUES (:id_incidencia, :id_vivienda)";
+            $stmtUnion = $this->db->prepare($sqlUnion);
+            $stmtUnion->execute([':id_incidencia' => $id_incidencia, ':id_vivienda' => $id_vivienda]);
+            
+            // 2. Incrementar contador oficial
+            $sql = "UPDATE incidencias SET numero_afectados = numero_afectados + 1 WHERE id_incidencias = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':id' => $id_incidencia]);
+            
+            $this->db->commit();
+            return ['success' => true];
+        } catch (PDOException $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            if ($e->getCode() == 23000) return ['success' => false, 'message' => 'Ya te has unido a esta incidencia.'];
+            return ['success' => false, 'message' => 'Error de BD al intentar unirse.'];
+        }
+    }
+
+public function eliminar($id_incidencia, $id_vivienda, $rol) {
+    try {
+        if ($rol === 'PRESIDENTE' || $rol === 'SUPERADMIN') {
+            // El presidente tiene permisos absolutos de borrado
+            $sql = "DELETE FROM incidencias WHERE id_incidencias = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id_incidencia, PDO::PARAM_INT);
+        } else {
+            // El vecino/propietario solo puede borrar SUS incidencias
+            $sql = "DELETE FROM incidencias WHERE id_incidencias = :id AND id_vivienda = :id_vivienda";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id_incidencia, PDO::PARAM_INT);
+            $stmt->bindParam(':id_vivienda', $id_vivienda, PDO::PARAM_INT);
+        }
+        
+        // Execute retorna TRUE si funciona, rowCount > 0 confirma si afectó filas (si existía)
+        return $stmt->execute() && $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        error_log("Error en eliminar incidencia: " . $e->getMessage());
+        return false;
+    }
+}
+
+public function actualizarEstado($id_incidencia, $nuevo_estado) {
+    try {
+        // 'pendiente', 'abierta', 'resuelta'
+        $sql = "UPDATE incidencias SET estado = :estado WHERE id_incidencias = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':estado', $nuevo_estado, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id_incidencia, PDO::PARAM_INT);
+        
+        return $stmt->execute() && $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        error_log("Error al actualizar estado de la incidencia: " . $e->getMessage());
+        return false;
+    }
+}
+
 }

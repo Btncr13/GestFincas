@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-04-2026 a las 17:45:17
+-- Tiempo de generación: 23-04-2026 a las 22:31:37
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -183,6 +183,18 @@ CREATE TABLE `incidencias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
+--
+-- Estructura de tabla para la tabla `incidencias_uniones`
+--
+
+CREATE TABLE IF NOT EXISTS incidencias_uniones (
+    id_incidencias int(10) UNSIGNED NOT NULL,
+    id_vivienda int(10) UNSIGNED NOT NULL,
+    fecha_union TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_incidencias, id_vivienda),
+    FOREIGN KEY (id_incidencias) REFERENCES incidencias(id_incidencias) ON DELETE CASCADE,
+    FOREIGN KEY (id_vivienda) REFERENCES vivienda(id_vivienda) ON DELETE CASCADE
+);
 
 --
 -- Estructura de tabla para la tabla `mancomunidad`
@@ -218,7 +230,7 @@ CREATE TABLE `reservas` (
 INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `asistentes`, `fecha_reserva`, `hora_inicio`, `hora_fin`, `estado_reserva`) VALUES
 (9, 3, 4, 15, '2026-04-19', '11:00:00', '13:00:00', 'inactivo'),
 (11, 1, 5, 1, '2026-04-19', '16:30:00', '17:00:00', 'inactivo'),
-(12, 4, 6, 15, '2026-04-20', '10:00:00', '12:00:00', 'inactivo');
+(12, 4, 6, 15, '2026-04-20', '10:00:00', '12:00:00', 'activo');
 
 -- --------------------------------------------------------
 

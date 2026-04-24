@@ -1,5 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
     
+    // Helper para mostrar Toasts de Bootstrap 5
+    const showToast = (message, type = 'success') => {
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
+        const bgClass = type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-info');
+        
+        const toastHTML = `
+            <div class="toast align-items-center text-white ${bgClass} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>`;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        const toastElement = toastContainer.lastElementChild;
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+        
+        toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+    };
+
+    const createToastContainer = () => {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '1055';
+        document.body.appendChild(container);
+        return container;
+    };
+
     // ==========================================
     // 1. LÓGICA DEL MODAL: CREAR INCIDENCIA
     // ==========================================
@@ -43,13 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     alertaSimilar.classList.remove('d-none');
                     document.getElementById('btn-submit').disabled = true;
                 } else if (response.ok && data.status === 'success') {
-                    location.reload(); 
+                showToast('Incidencia reportada correctamente.', 'success');
+                setTimeout(() => location.reload(), 1500); 
                 } else {
-                    alert(data.message || 'Ocurrió un error al guardar.');
+                showToast(data.message || 'Ocurrió un error al guardar.', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error crítico de red.');
+            showToast('Error crítico de red.', 'error');
             }
         });
     }
@@ -68,11 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData
                 });
                 if (response.ok) {
-                    alert('Te has unido exitosamente a la incidencia comunitaria.');
-                    location.reload(); 
+                showToast('Te has unido exitosamente a la incidencia comunitaria.', 'success');
+                setTimeout(() => location.reload(), 1500); 
+                } else {
+                    const data = await response.json();
+                    showToast(data.message || 'Error al unirse.', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
+            showToast('Error de conexión al intentar unirse.', 'error');
             }
         });
     }
@@ -85,6 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contenedorIncidencias) {
         contenedorIncidencias.addEventListener('click', async (e) => {
             
+            // ACCIÓN: VER FOTO (LIGHTBOX)
+            if (e.target.closest('.lightbox-trigger')) {
+                e.preventDefault();
+                const trigger = e.target.closest('.lightbox-trigger');
+                const imgSrc = trigger.getAttribute('data-img');
+                const lightboxImage = document.getElementById('lightboxImage');
+                
+                if (lightboxImage) {
+                    lightboxImage.src = imgSrc;
+                    const lightboxModal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+                    lightboxModal.show();
+                }
+            }
+
             // ACCIÓN: UNIRME DESDE LA TARJETA
             if (e.target.closest('.btn-unirme-card')) {
                 const btn = e.target.closest('.btn-unirme-card');
@@ -113,15 +162,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         // Cambiar botón para feedback visual
                         btn.classList.replace('btn-info', 'btn-secondary');
+                        btn.classList.remove('btn-unirme-card'); // Quita el gatillo del evento
+                        btn.disabled = true; // Deshabilita el botón físicamente
                         btn.innerHTML = '<i class="fa-solid fa-check"></i> Te has unido';
                     } else {
-                        alert(data.message || 'Error al unirse a la incidencia.');
+                    showToast(data.message || 'Error al unirse a la incidencia.', 'error');
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fa-solid fa-hand-holding-hand"></i> Unirme';
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Error de conexión.');
+                showToast('Error de conexión.', 'error');
                     btn.disabled = false;
                 }
             }
@@ -134,12 +185,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (confirm('¿Estás seguro de que deseas marcar esta incidencia como resuelta?')) {
                     const formData = new FormData();
                     formData.append('id_incidencia', idIncidencia);
+                    formData.append('estado', 'resuelta'); // Añadimos el estado esperado
 
                     try {
                         btn.disabled = true;
                         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resolviendo...';
 
-                        const response = await fetch('index.php?route=incidencias/resolve', {
+                        const response = await fetch('index.php?route=incidencias/updateEstado', {
                             method: 'POST',
                             body: formData
                         });
@@ -147,16 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const data = await response.json();
                         
                         if (response.ok) {
-                            // Recargamos para que el servidor pinte la tarjeta con el formato "RESUELTA" (verde)
-                            location.reload();
+                            showToast('La incidencia ha sido marcada como resuelta.', 'success');
+                            setTimeout(() => location.reload(), 1500);
                         } else {
-                            alert(data.message || 'Error al resolver la incidencia.');
+                            showToast(data.message || 'Error al resolver la incidencia.', 'error');
                             btn.disabled = false;
                             btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Error de conexión.');
+                        showToast('Error crítico de red.', 'error');
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
                     }
@@ -171,12 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (confirm('¿Estás seguro de que deseas marcar esta incidencia como en curso (abierta)?')) {
                     const formData = new FormData();
                     formData.append('id_incidencia', idIncidencia);
+                    formData.append('estado', 'abierta'); // Añadimos el estado esperado
 
                     try {
                         btn.disabled = true;
                         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
 
-                        const response = await fetch('index.php?route=incidencias/open', {
+                        const response = await fetch('index.php?route=incidencias/updateEstado', {
                             method: 'POST',
                             body: formData
                         });
@@ -184,16 +237,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const data = await response.json();
                         
                         if (response.ok) {
-                            // Recargamos para que el servidor actualice el botón y el badge de estado
-                            location.reload();
+                            showToast('La incidencia ha sido abierta (en curso).', 'success');
+                            setTimeout(() => location.reload(), 1500);
                         } else {
-                            alert(data.message || 'Error al abrir la incidencia.');
+                            showToast(data.message || 'Error al abrir la incidencia.', 'error');
                             btn.disabled = false;
                             btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Error de conexión.');
+                        showToast('Error crítico de red.', 'error');
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
                     }

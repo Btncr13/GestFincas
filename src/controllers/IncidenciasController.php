@@ -23,8 +23,11 @@ class IncidenciasController {
         $rol             = $_SESSION['modo_vista'] ?? ($_SESSION['vivienda']['rol'] ?? 'vecino');
         // ===========================================================
 
+        $id_vivienda = $_SESSION['vivienda']['id_vivienda'] ?? null;
+
         // todos ven el tablón global con las reglas de negocio
         $incidencias = $this->model->obtenerIncidenciasGlobales();
+        $misUniones = $this->model->obtenerMisUniones($id_vivienda);
         
         require_once __DIR__ . '/../views/incidencias/index.php';
     }
@@ -103,60 +106,50 @@ class IncidenciasController {
 
     // API: Unirse a incidencia
     public function join() {
+        if (ob_get_length()) ob_clean(); // Fundamental para evitar Notice/Warning que rompan JSON en JS
         header('Content-Type: application/json');
         $id_incidencia = $_POST['id_incidencia'] ?? 0;
+        $id_vivienda = $_SESSION['vivienda']['id_vivienda'] ?? 0;
         
-        if ($this->model->unirse($id_incidencia)) {
-            echo json_encode(['status' => 'success', 'message' => 'Te has unido a la incidencia.']);
+        $resultado = $this->model->unirse($id_incidencia, $id_vivienda);
+        
+        if ($resultado['success']) {
+            echo json_encode(['status' => 'success', 'message' => 'Te has unido exitosamente a la incidencia.']);
         } else {
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Error al unirse.']);
+            http_response_code(400); // 400 (Bad Request) para que JS reciba JSON limpio del rechazo
+            echo json_encode(['status' => 'error', 'message' => $resultado['message']]);
         }
         exit;
     }
 
-    // API: Abrir incidencia (Solo para el Presidente)
-    public function open() {
-        if (ob_get_length()) ob_clean(); // Asegurar JSON limpio
+    // API: Cambiar estado incidencia (Solo para el Presidente)
+    public function updateEstado() {
+        if (ob_get_length()) ob_clean(); 
         header('Content-Type: application/json');
-        $id_incidencia = $_POST['id_incidencia'] ?? 0;
         
-        // Verificación de rol por seguridad
+        $id_incidencia = $_POST['id_incidencia'] ?? 0;
+        $nuevo_estado = $_POST['estado'] ?? ''; 
+        
+        // Verificación de rol por seguridad (RBAC)
         $rolActual = $_SESSION['modo_vista'] ?? ($_SESSION['vivienda']['rol'] ?? 'vecino');
         if (strtolower($rolActual) !== 'presidente' && strtoupper($rolActual) !== 'SUPERADMIN') {
             http_response_code(403);
-            echo json_encode(['status' => 'error', 'message' => 'No tienes permisos para abrir incidencias.']);
+            echo json_encode(['status' => 'error', 'message' => 'No tienes permisos para cambiar el estado.']);
             exit;
         }
 
-        if ($this->model->actualizarEstado($id_incidencia, 'abierta')) {
-            echo json_encode(['status' => 'success', 'message' => 'La incidencia ha sido marcada como abierta.']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Error al abrir la incidencia.']);
-        }
-        exit;
-    }
-
-    // API: Resolver incidencia (Solo para el Presidente)
-    public function resolve() {
-        if (ob_get_length()) ob_clean(); // Asegurar JSON limpio
-        header('Content-Type: application/json');
-        $id_incidencia = $_POST['id_incidencia'] ?? 0;
-        
-        // Verificación de rol por seguridad
-        $rolActual = $_SESSION['modo_vista'] ?? ($_SESSION['vivienda']['rol'] ?? 'vecino');
-        if (strtolower($rolActual) !== 'presidente' && strtoupper($rolActual) !== 'SUPERADMIN') {
-            http_response_code(403);
-            echo json_encode(['status' => 'error', 'message' => 'No tienes permisos para resolver incidencias.']);
+        // Validación del estado a inyectar
+        if (!in_array($nuevo_estado, ['abierta', 'resuelta'])) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Estado no válido.']);
             exit;
         }
 
-        if ($this->model->actualizarEstado($id_incidencia, 'resuelta')) {
-            echo json_encode(['status' => 'success', 'message' => 'La incidencia ha sido marcada como resuelta.']);
+        if ($this->model->actualizarEstado($id_incidencia, $nuevo_estado)) {
+            echo json_encode(['status' => 'success', 'message' => 'Estado actualizado a ' . $nuevo_estado]);
         } else {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Error al resolver la incidencia.']);
+            echo json_encode(['status' => 'error', 'message' => 'Error al actualizar el estado de la incidencia.']);
         }
         exit;
     }
