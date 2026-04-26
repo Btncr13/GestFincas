@@ -173,7 +173,7 @@ CREATE TABLE `incidencias` (
   `id_incidencias` int(10) UNSIGNED NOT NULL,
   `id_vivienda` int(10) UNSIGNED NOT NULL,
   `titulo` varchar(100) NOT NULL,
-  `titulo_normalizado` varchar(100) NOT NULL,
+  `titulo_normalizado` varchar(400) NOT NULL,
   `descripcion` varchar(255) NOT NULL,
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
   `fecha_actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -428,6 +428,7 @@ ALTER TABLE `espacios_normas`
 --
 ALTER TABLE `incidencias`
   ADD PRIMARY KEY (`id_incidencias`),
+  ADD INDEX `idx_titulo_normalizado` (`titulo_normalizado`),
   ADD KEY `id_vivienda` (`id_vivienda`);
 
 --

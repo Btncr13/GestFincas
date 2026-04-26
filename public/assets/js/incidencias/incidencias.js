@@ -1,299 +1,421 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Helper para mostrar Toasts de Bootstrap 5
-    const showToast = (message, type = 'success') => {
-        const toastContainer = document.getElementById('toast-container') || createToastContainer();
-        const bgClass = type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-info');
-        
-        const toastHTML = `
+document.addEventListener("DOMContentLoaded", () => {
+  // Helper para mostrar Toasts de Bootstrap 5
+  const showToast = (message, type = "success") => {
+    const toastContainer =
+      document.getElementById("toast-container") || createToastContainer();
+    const bgClass =
+      type === "success"
+        ? "bg-success"
+        : type === "error"
+          ? "bg-danger"
+          : "bg-info";
+
+    const toastHTML = `
             <div class="toast align-items-center text-white ${bgClass} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">${message}</div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>`;
-        
-        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-        const toastElement = toastContainer.lastElementChild;
-        const toast = new bootstrap.Toast(toastElement);
-        toast.show();
-        
-        toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
-    };
 
-    const createToastContainer = () => {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        container.style.zIndex = '1055';
-        document.body.appendChild(container);
-        return container;
-    };
+    toastContainer.insertAdjacentHTML("beforeend", toastHTML);
+    const toastElement = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
 
-    // ==========================================
-    // 1. LÓGICA DEL MODAL: CREAR INCIDENCIA
-    // ==========================================
-    const form = document.getElementById('form-incidencia');
-    const inputTitulo = document.getElementById('titulo');
-    const errorTitulo = document.getElementById('error-titulo');
-    const alertaSimilar = document.getElementById('alerta-similar');
-    const btnUnirmeModal = document.getElementById('btn-unirme');
-    
+    toastElement.addEventListener("hidden.bs.toast", () =>
+      toastElement.remove(),
+    );
+  };
+
+  const createToastContainer = () => {
+    const container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "toast-container position-fixed bottom-0 end-0 p-3";
+    container.style.zIndex = "1055";
+    document.body.appendChild(container);
+    return container;
+  };
+
+  // ==========================================
+  // 1. LÓGICA DEL MODAL: CREAR INCIDENCIA
+  // ==========================================
+  const form = document.getElementById("form-incidencia");
+
+  if (form) {
+    const inputTitulo = document.getElementById("incidencia-titulo");
+    const counterTitulo = document.getElementById("counter-titulo");
+    const errorTitulo = document.getElementById("error-titulo");
+    const inputDescripcion = document.getElementById("incidencia-descripcion");
+    const counterDescripcion = document.getElementById("counter-descripcion");
+    const alertaSimilar = document.getElementById("alerta-similar");
+    const btnUnirmeModal = document.getElementById("btn-unirme");
+    const btnSubmit = document.getElementById("btn-submit");
+
     let idIncidenciaSimilar = null;
 
-    if (form) {
-        // Validación en vivo: Máximo 4 palabras
-        inputTitulo.addEventListener('input', function() {
-            const words = this.value.trim().split(/\s+/).filter(word => word.length > 0);
-            if (words.length > 4) {
-                errorTitulo.classList.remove('d-none');
-                this.value = words.slice(0, 4).join(' '); // Recortar
-            } else {
-                errorTitulo.classList.add('d-none');
-            }
-        });
+    // Función para validar el formulario y habilitar/deshabilitar el botón
+    const checkFormValidity = () => {
+      if (!inputTitulo || !inputDescripcion) return;
 
-        // Envío del formulario de creación
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
+      const words = inputTitulo.value.trim().match(/\S+/g) || [];
+      const isTituloValid = words.length > 0 && words.length <= 4;
+      const isDescripcionValid = inputDescripcion.value.trim().length > 0;
+      const isSimilarAlertActive =
+        alertaSimilar && !alertaSimilar.classList.contains("d-none");
 
-            try {
-                const response = await fetch('index.php?route=incidencias/store', {
-                    method: 'POST',
-                    body: formData
-                });
+      const isValid =
+        isTituloValid && isDescripcionValid && !isSimilarAlertActive;
 
-                const data = await response.json();
+      if (btnSubmit) {
+        btnSubmit.disabled = !isValid;
+        btnSubmit.classList.toggle("opacity-50", !isValid);
+      }
+    };
 
-                if (response.status === 409 && data.status === 'similar_found') {
-                    // Mostrar alerta de similitud en el modal
-                    document.getElementById('sim-titulo').innerText = `"${data.incidencia.titulo}" reportado el ${data.incidencia.fecha_creacion.split(' ')}`;
-                    idIncidenciaSimilar = data.incidencia.id_incidencias;
-                    alertaSimilar.classList.remove('d-none');
-                    document.getElementById('btn-submit').disabled = true;
-                } else if (response.ok && data.status === 'success') {
-                showToast('Incidencia reportada correctamente.', 'success');
-                setTimeout(() => location.reload(), 1500); 
-                } else {
-                showToast(data.message || 'Ocurrió un error al guardar.', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            showToast('Error crítico de red.', 'error');
-            }
-        });
+    // Escuchador global para cualquier cambio en el formulario (limpieza de alertas)
+    form.addEventListener("input", () => {
+      if (alertaSimilar && !alertaSimilar.classList.contains("d-none")) {
+        alertaSimilar.classList.add("d-none");
+      }
+    });
+
+    // 1. Contador y validación de palabras para el Título
+    if (inputTitulo) {
+      inputTitulo.addEventListener("input", function () {
+        // Contamos palabras ignorando espacios múltiples
+        let words = this.value.match(/\S+/g) || [];
+
+        if (words.length > 4) {
+          if (errorTitulo) errorTitulo.classList.remove("d-none");
+          // Bloqueamos la entrada a solo 4 palabras
+          this.value = words.slice(0, 4).join(" ");
+          words = words.slice(0, 4);
+        } else {
+          if (errorTitulo) errorTitulo.classList.add("d-none");
+        }
+
+        if (counterTitulo) {
+          counterTitulo.innerText = `${words.length} / 4`;
+          counterTitulo.classList.toggle("text-danger", words.length >= 4);
+          counterTitulo.classList.toggle("text-muted", words.length < 4);
+        }
+
+        checkFormValidity();
+      });
     }
+
+    // 2. Contador de caracteres para la Descripción
+    if (inputDescripcion) {
+      inputDescripcion.addEventListener("input", function () {
+        if (counterDescripcion) {
+          const length = this.value.length;
+          counterDescripcion.innerText = `${length} / 255`;
+          counterDescripcion.classList.toggle("text-danger", length >= 255);
+          counterDescripcion.classList.toggle("text-muted", length < 255);
+        }
+
+        checkFormValidity();
+      });
+    }
+
+    // Envío del formulario de creación
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("index.php?route=incidencias/store", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (response.status === 409 && data.status === "similar_found") {
+          // Mostrar alerta de similitud en el modal
+          const fecha = data.incidencia.fecha_creacion.split(" ")[0]; // Solo la fecha
+          document.getElementById("sim-titulo").innerText =
+            `Se detectó coincidencia con: "${data.incidencia.titulo}" (Reportada el ${fecha}).`;
+
+          idIncidenciaSimilar = data.incidencia.id_incidencias;
+          alertaSimilar.classList.remove("d-none");
+          checkFormValidity(); // Esto deshabilitará el botón al detectar similitud
+        } else if (response.ok && data.status === "success") {
+          showToast("Incidencia reportada correctamente.", "success");
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          showToast(data.message || "Ocurrió un error al guardar.", "error");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        showToast("Error crítico de red.", "error");
+      }
+    });
 
     // Lógica para Unirse desde el aviso de duplicado (dentro del Modal)
+    // Ahora está dentro de 'if (form)' para compartir el ámbito de 'idIncidenciaSimilar'
     if (btnUnirmeModal) {
-        btnUnirmeModal.addEventListener('click', async () => {
-            if (!idIncidenciaSimilar) return;
-            
-            const formData = new FormData();
-            formData.append('id_incidencia', idIncidenciaSimilar);
+      btnUnirmeModal.addEventListener("click", async () => {
+        if (!idIncidenciaSimilar) return;
 
-            try {
-                const response = await fetch('index.php?route=incidencias/join', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                showToast('Te has unido exitosamente a la incidencia comunitaria.', 'success');
-                setTimeout(() => location.reload(), 1500); 
-                } else {
-                    const data = await response.json();
-                    showToast(data.message || 'Error al unirse.', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            showToast('Error de conexión al intentar unirse.', 'error');
-            }
-        });
+        const formData = new FormData();
+        formData.append("id_incidencia", idIncidenciaSimilar);
+
+        try {
+          const response = await fetch("index.php?route=incidencias/join", {
+            method: "POST",
+            body: formData,
+          });
+          if (response.ok) {
+            showToast(
+              "Te has unido exitosamente a la incidencia comunitaria.",
+              "success",
+            );
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            const data = await response.json();
+            showToast(data.message || "Error al unirse.", "error");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showToast("Error de conexión al intentar unirse.", "error");
+        }
+      });
     }
 
-    // ==========================================
-    // 2. LÓGICA DEL TABLÓN: DELEGACIÓN DE EVENTOS 
-    // ==========================================
-    const contenedorIncidencias = document.getElementById('contenedor-incidencias');
-    
-    if (contenedorIncidencias) {
-        contenedorIncidencias.addEventListener('click', async (e) => {
-            
-            // ACCIÓN: VER FOTO (LIGHTBOX)
-            if (e.target.closest('.lightbox-trigger')) {
-                e.preventDefault();
-                const trigger = e.target.closest('.lightbox-trigger');
-                const imgSrc = trigger.getAttribute('data-img');
-                const lightboxImage = document.getElementById('lightboxImage');
-                
-                if (lightboxImage) {
-                    lightboxImage.src = imgSrc;
-                    const lightboxModal = new bootstrap.Modal(document.getElementById('lightboxModal'));
-                    lightboxModal.show();
-                }
+    // Sincronizar estado inicial del botón (debe nacer deshabilitado)
+    checkFormValidity();
+  }
+
+  // ==========================================
+  // 2. LÓGICA DEL TABLÓN: DELEGACIÓN DE EVENTOS
+  // ==========================================
+  const contenedorIncidencias = document.getElementById(
+    "contenedor-incidencias",
+  );
+
+  if (contenedorIncidencias) {
+    contenedorIncidencias.addEventListener("click", async (e) => {
+      // ACCIÓN: VER FOTO (LIGHTBOX)
+      if (e.target.closest(".lightbox-trigger")) {
+        e.preventDefault();
+        const trigger = e.target.closest(".lightbox-trigger");
+        const imgSrc = trigger.getAttribute("data-img");
+        const lightboxImage = document.getElementById("lightboxImage");
+
+        if (lightboxImage) {
+          lightboxImage.src = imgSrc;
+          const lightboxModal = new bootstrap.Modal(
+            document.getElementById("lightboxModal"),
+          );
+          lightboxModal.show();
+        }
+      }
+
+      // ACCIÓN: UNIRME DESDE LA TARJETA
+      if (e.target.closest(".btn-unirme-card")) {
+        const btn = e.target.closest(".btn-unirme-card");
+        const idIncidencia = btn.getAttribute("data-id");
+
+        const formData = new FormData();
+        formData.append("id_incidencia", idIncidencia);
+
+        try {
+          // Deshabilitar temporalmente para evitar doble clic
+          btn.disabled = true;
+          btn.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Uniéndose...';
+
+          const response = await fetch("index.php?route=incidencias/join", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Optimistic UI: Sumar 1 al contador sin recargar
+            const contadorDOM = document.getElementById(
+              `afectados-${idIncidencia}`,
+            );
+            if (contadorDOM) {
+              contadorDOM.innerText = parseInt(contadorDOM.innerText) + 1;
             }
+            // Cambiar botón para feedback visual
+            btn.classList.replace("btn-info", "btn-secondary");
+            btn.classList.remove("btn-unirme-card"); // Quita el gatillo del evento
+            btn.disabled = true; // Deshabilita el botón físicamente
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Te has unido';
+          } else {
+            showToast(
+              data.message || "Error al unirse a la incidencia.",
+              "error",
+            );
+            btn.disabled = false;
+            btn.innerHTML =
+              '<i class="fa-solid fa-hand-holding-hand"></i> Unirme';
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showToast("Error de conexión.", "error");
+          btn.disabled = false;
+        }
+      }
 
-            // ACCIÓN: UNIRME DESDE LA TARJETA
-            if (e.target.closest('.btn-unirme-card')) {
-                const btn = e.target.closest('.btn-unirme-card');
-                const idIncidencia = btn.getAttribute('data-id');
-                
-                const formData = new FormData();
-                formData.append('id_incidencia', idIncidencia);
+      // ACCIÓN: RESOLVER (PRESIDENTE)
+      if (e.target.closest(".btn-resolver")) {
+        const btn = e.target.closest(".btn-resolver");
+        const idIncidencia = btn.getAttribute("data-id");
 
-                try {
-                    // Deshabilitar temporalmente para evitar doble clic
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uniéndose...';
+        if (
+          confirm(
+            "¿Estás seguro de que deseas marcar esta incidencia como resuelta?",
+          )
+        ) {
+          const formData = new FormData();
+          formData.append("id_incidencia", idIncidencia);
+          formData.append("estado", "resuelta"); // Añadimos el estado esperado
 
-                    const response = await fetch('index.php?route=incidencias/join', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        // Optimistic UI: Sumar 1 al contador sin recargar
-                        const contadorDOM = document.getElementById(`afectados-${idIncidencia}`);
-                        if (contadorDOM) {
-                            contadorDOM.innerText = parseInt(contadorDOM.innerText) + 1;
-                        }
-                        // Cambiar botón para feedback visual
-                        btn.classList.replace('btn-info', 'btn-secondary');
-                        btn.classList.remove('btn-unirme-card'); // Quita el gatillo del evento
-                        btn.disabled = true; // Deshabilita el botón físicamente
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Te has unido';
-                    } else {
-                    showToast(data.message || 'Error al unirse a la incidencia.', 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-hand-holding-hand"></i> Unirme';
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                showToast('Error de conexión.', 'error');
-                    btn.disabled = false;
-                }
+          try {
+            btn.disabled = true;
+            btn.innerHTML =
+              '<i class="fa-solid fa-spinner fa-spin"></i> Resolviendo...';
+
+            const response = await fetch(
+              "index.php?route=incidencias/updateEstado",
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showToast(
+                "La incidencia ha sido marcada como resuelta.",
+                "success",
+              );
+              setTimeout(() => location.reload(), 1500);
+            } else {
+              showToast(
+                data.message || "Error al resolver la incidencia.",
+                "error",
+              );
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
             }
-            
-            // ACCIÓN: RESOLVER (PRESIDENTE)
-            if (e.target.closest('.btn-resolver')) {
-                const btn = e.target.closest('.btn-resolver');
-                const idIncidencia = btn.getAttribute('data-id');
-                
-                if (confirm('¿Estás seguro de que deseas marcar esta incidencia como resuelta?')) {
-                    const formData = new FormData();
-                    formData.append('id_incidencia', idIncidencia);
-                    formData.append('estado', 'resuelta'); // Añadimos el estado esperado
+          } catch (error) {
+            console.error("Error:", error);
+            showToast("Error crítico de red.", "error");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
+          }
+        }
+      }
 
-                    try {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resolviendo...';
+      // ACCIÓN: ABRIR (PRESIDENTE)
+      if (e.target.closest(".btn-abrir")) {
+        const btn = e.target.closest(".btn-abrir");
+        const idIncidencia = btn.getAttribute("data-id");
 
-                        const response = await fetch('index.php?route=incidencias/updateEstado', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (response.ok) {
-                            showToast('La incidencia ha sido marcada como resuelta.', 'success');
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            showToast(data.message || 'Error al resolver la incidencia.', 'error');
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Error crítico de red.', 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Resolver';
-                    }
-                }
+        if (
+          confirm(
+            "¿Estás seguro de que deseas marcar esta incidencia como en curso (abierta)?",
+          )
+        ) {
+          const formData = new FormData();
+          formData.append("id_incidencia", idIncidencia);
+          formData.append("estado", "abierta"); // Añadimos el estado esperado
+
+          try {
+            btn.disabled = true;
+            btn.innerHTML =
+              '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
+
+            const response = await fetch(
+              "index.php?route=incidencias/updateEstado",
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showToast("La incidencia ha sido abierta (en curso).", "success");
+              setTimeout(() => location.reload(), 1500);
+            } else {
+              showToast(
+                data.message || "Error al abrir la incidencia.",
+                "error",
+              );
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
             }
+          } catch (error) {
+            console.error("Error:", error);
+            showToast("Error crítico de red.", "error");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
+          }
+        }
+      }
 
-            // ACCIÓN: ABRIR (PRESIDENTE)
-            if (e.target.closest('.btn-abrir')) {
-                const btn = e.target.closest('.btn-abrir');
-                const idIncidencia = btn.getAttribute('data-id');
-                
-                if (confirm('¿Estás seguro de que deseas marcar esta incidencia como en curso (abierta)?')) {
-                    const formData = new FormData();
-                    formData.append('id_incidencia', idIncidencia);
-                    formData.append('estado', 'abierta'); // Añadimos el estado esperado
+      // ACCIÓN: ELIMINAR (CREADOR O PRESIDENTE)
+      if (e.target.closest(".btn-delete")) {
+        const btn = e.target.closest(".btn-delete");
+        const idIncidencia = btn.getAttribute("data-id");
 
-                    try {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abriendo...';
+        if (
+          confirm(
+            "¿Seguro que deseas eliminar esta incidencia permanentemente?",
+          )
+        ) {
+          const formData = new FormData();
+          formData.append("id_incidencia", idIncidencia);
 
-                        const response = await fetch('index.php?route=incidencias/updateEstado', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (response.ok) {
-                            showToast('La incidencia ha sido abierta (en curso).', 'success');
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            showToast(data.message || 'Error al abrir la incidencia.', 'error');
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Error crítico de red.', 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Abrir';
-                    }
-                }
+          try {
+            btn.disabled = true;
+            btn.innerHTML =
+              '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
+
+            const response = await fetch("index.php?route=incidencias/delete", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showToast("Incidencia eliminada correctamente.", "success");
+              // Optimistic UI: Borramos la tarjeta del DOM sin recargar la página entera
+              const tarjeta = document.getElementById(
+                `incidencia-${idIncidencia}`,
+              );
+              if (tarjeta) tarjeta.remove();
+
+              // Si era la única incidencia visible, recargamos para que aparezca el estado vacío
+              if (document.querySelectorAll('[id^="incidencia-"]').length === 0)
+                location.reload();
+            } else {
+              showToast(
+                data.message || "Error al eliminar la incidencia.",
+                "error",
+              );
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
             }
-
-            // ACCIÓN: ELIMINAR (CREADOR O PRESIDENTE)
-            if (e.target.closest('.btn-delete')) {
-                const btn = e.target.closest('.btn-delete');
-                const idIncidencia = btn.getAttribute('data-id');
-                
-                if (confirm('¿Seguro que deseas eliminar esta incidencia permanentemente?')) {
-                    const formData = new FormData();
-                    formData.append('id_incidencia', idIncidencia);
-
-                    try {
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
-
-                        const response = await fetch('index.php?route=incidencias/delete', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (response.ok) {
-                            // Optimistic UI: Borramos la tarjeta del DOM sin recargar la página entera
-                            const tarjeta = document.getElementById(`incidencia-${idIncidencia}`);
-                            if (tarjeta) tarjeta.remove();
-                            
-                            // Si era la única incidencia visible, recargamos para que aparezca el estado vacío
-                            if (document.querySelectorAll('[id^="incidencia-"]').length === 0) location.reload();
-                        } else {
-                            alert(data.message || 'Error al eliminar la incidencia.');
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error de conexión.');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
-                    }
-                }
-            }
-            
-        });
-    }
+          } catch (error) {
+            console.error("Error:", error);
+            showToast("Error de conexión.", "error");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
+          }
+        }
+      }
+    });
+  }
 });

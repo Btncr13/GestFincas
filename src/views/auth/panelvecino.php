@@ -114,7 +114,7 @@
                             </div>
                         </a>
                     </div>
-                    
+
                     <!-- Tarjeta 5 - Incidencias -->
                     <div class="col">
                         <a href="index.php?route=incidencias/index" class="text-decoration-none h-100 d-block">
