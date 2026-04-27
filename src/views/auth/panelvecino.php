@@ -145,9 +145,14 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCom-<?= $com['id_comunicado'] ?>" aria-expanded="false" aria-controls="collapseCom-<?= $com['id_comunicado'] ?>">
                                 <div class="d-flex flex-column w-100 me-3">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-bold text-truncate" style="max-width: 85%;">
-                                            <?= htmlspecialchars($com['titulo']) ?>
-                                        </span>
+                                                    <div class="d-flex align-items-center text-truncate" style="max-width: 80%;">
+                                                        <span class="fw-bold text-truncate">
+                                                            <?= htmlspecialchars($com['titulo']) ?>
+                                                        </span>
+                                                        <?php if (($com['tipo'] ?? '') === 'urgente'): ?>
+                                                            <i class="bi bi-exclamation-triangle-fill text-danger ms-2" title="Urgente"></i>
+                                                        <?php endif; ?>
+                                                    </div>
                                         <small class="text-muted text-nowrap" style="font-size: 0.8rem;">
                                             <?= date('d/m/Y', strtotime($com['fecha_creacion'] ?? $com['fecha_publicacion'])) ?>
                                         </small>
