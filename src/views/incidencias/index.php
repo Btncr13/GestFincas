@@ -85,4 +85,5 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
 </script>
 
 <?php include __DIR__ . '/../components/incidencias/modalIncidencias.php'; ?>
+<script src="public/assets/js/incidencias/incidencias-board.js"></script>
 <script src="public/assets/js/incidencias/incidencias.js"></script>
