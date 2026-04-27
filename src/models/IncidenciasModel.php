@@ -9,6 +9,19 @@ class IncidenciasModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    // Obtener absolutamente TODAS las incidencias de la comunidad para que JS las filtre
+    public function obtenerIncidenciasPorComunidad($id_comunidad)
+    {
+        $sql = "SELECT i.*, v.nombre AS nombre_vivienda 
+                FROM incidencias i 
+                JOIN vivienda v ON i.id_vivienda = v.id_vivienda 
+                WHERE v.id_comunidad = :id_comunidad
+                ORDER BY i.fecha_creacion DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_comunidad' => $id_comunidad]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Obtener incidencias (Regla: Todas las abiertas + Resueltas de los últimos 3 meses)
     public function obtenerIncidenciasGlobales()
     {
@@ -25,28 +38,78 @@ class IncidenciasModel extends BaseModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Obtiene todas las incidencias abiertas para realizar comprobación de similitud en el controlador.
-     */
-    public function obtenerActivasParaComparar()
+    // Obtener incidencias con filtros dinámicos (Mis/Otras, Estado, Tiempo)
+    public function obtenerIncidenciasFiltradas($id_comunidad, $id_vivienda, $rol, $tipo_vista, $estado, $tiempo)
     {
-        $sql = "SELECT id_incidencias, titulo, titulo_normalizado, descripcion, fecha_creacion FROM incidencias 
-                WHERE estado IN ('pendiente', 'abierta')";
+        $sql = "SELECT i.*, v.nombre AS nombre_vivienda 
+                FROM incidencias i 
+                JOIN vivienda v ON i.id_vivienda = v.id_vivienda 
+                WHERE v.id_comunidad = :id_comunidad";
+        
+        $params = [':id_comunidad' => $id_comunidad];
+
+        // Filtro por Estado (Pendiente, Abierta, Resuelta)
+        if (in_array($estado, ['pendiente', 'abierta', 'resuelta'])) {
+            $sql .= " AND i.estado = :estado";
+            $params[':estado'] = $estado;
+        }
+
+        // Filtro por Propiedad (Solo afecta al rol vecino)
+        if (strtolower($rol) === 'vecino') {
+            if ($tipo_vista === 'mis') {
+                $sql .= " AND i.id_vivienda = :id_vivienda";
+                $params[':id_vivienda'] = $id_vivienda;
+            } elseif ($tipo_vista === 'otras') {
+                $sql .= " AND i.id_vivienda != :id_vivienda";
+                $params[':id_vivienda'] = $id_vivienda;
+            }
+        }
+
+        // Filtro por Tiempo
+        if ($tiempo === 'anio_actual') {
+            $sql .= " AND YEAR(i.fecha_creacion) = YEAR(CURDATE())";
+        } elseif ($tiempo === 'ultimos_3_meses') {
+            $sql .= " AND i.fecha_creacion >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)";
+        } elseif ($tiempo === 'mensual') {
+            $sql .= " AND YEAR(i.fecha_creacion) = YEAR(CURDATE()) AND MONTH(i.fecha_creacion) = MONTH(CURDATE())";
+        }
+
+        $sql .= " ORDER BY i.fecha_creacion DESC";
+
         $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Busca incidencias similares utilizando un índice FULLTEXT y un umbral de relevancia.
+     */
+    public function buscarIncidenciasSimilares($texto_normalizado, $umbral = 2.5)
+    {
+        $sql = "SELECT id_incidencias, titulo, texto_normalizado, fecha_creacion,
+                       MATCH(texto_normalizado) AGAINST(:texto1 IN NATURAL LANGUAGE MODE) AS score 
+                FROM incidencias 
+                WHERE estado IN ('pendiente', 'abierta') 
+                  AND MATCH(texto_normalizado) AGAINST(:texto2 IN NATURAL LANGUAGE MODE) > :umbral
+                ORDER BY score DESC LIMIT 5";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':texto1', $texto_normalizado, PDO::PARAM_STR);
+        $stmt->bindValue(':texto2', $texto_normalizado, PDO::PARAM_STR);
+        $stmt->bindValue(':umbral', $umbral, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Crear nueva incidencia
-    public function crear($id_vivienda, $titulo, $titulo_norm, $descripcion, $foto = null)
+    public function crear($id_vivienda, $titulo, $texto_normalizado, $descripcion, $foto = null)
     {
-        $sql = "INSERT INTO incidencias (id_vivienda, titulo, titulo_normalizado, descripcion, foto_incidencia, estado, numero_afectados) 
-                VALUES (:id_vivienda, :titulo, :titulo_norm, :descripcion, :foto, 'pendiente', 1)";
+        $sql = "INSERT INTO incidencias (id_vivienda, titulo, texto_normalizado, descripcion, foto_incidencia, estado, numero_afectados) 
+                VALUES (:id_vivienda, :titulo, :texto_normalizado, :descripcion, :foto, 'pendiente', 1)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':id_vivienda' => $id_vivienda,
             ':titulo' => $titulo,
-            ':titulo_norm' => $titulo_norm,
+            ':texto_normalizado' => $texto_normalizado,
             ':descripcion' => $descripcion,
             ':foto' => $foto
         ]);

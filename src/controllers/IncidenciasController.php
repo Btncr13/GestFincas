@@ -30,9 +30,13 @@ class IncidenciasController
         // ===========================================================
 
         $id_vivienda = $_SESSION['vivienda']['id_vivienda'] ?? null;
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'] ?? null;
 
-        // todos ven el tablón global con las reglas de negocio
-        $incidencias = $this->model->obtenerIncidenciasGlobales();
+        // Pasamos a JS la base de datos de incidencias de la comunidad entera
+        $incidenciasData = [];
+        if ($id_comunidad) {
+            $incidenciasData = $this->model->obtenerIncidenciasPorComunidad($id_comunidad);
+        }
         $misUniones = $this->model->obtenerMisUniones($id_vivienda);
 
         require_once __DIR__ . '/../views/incidencias/index.php';
@@ -40,7 +44,10 @@ class IncidenciasController
     // API: Guardar o detectar similitud
     public function store()
     {
-        if (ob_get_length()) ob_clean(); // Evitamos un Notice si el buffer estaba vacío
+        // 1. SOLUCIÓN AL ERROR DE BÚFER: Limpiar TODOS los niveles
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -49,21 +56,28 @@ class IncidenciasController
                 echo json_encode(['status' => 'error', 'message' => 'Sesión caducada.']);
                 exit;
             }
+        
 
             $titulo = trim(strip_tags($_POST['titulo'] ?? ''));
             $descripcion = trim(strip_tags($_POST['descripcion'] ?? ''));
-
+        // 2. RECUPERAR EL FLAG QUE ENVÍA JS CUANDO PULSAMOS "NO, ES DIFERENTE"
+            $forzar_creacion = isset($_POST['forzar_creacion']) && $_POST['forzar_creacion'] === 'true';
             if (empty($titulo) || empty($descripcion)) {
                 echo json_encode(['status' => 'error', 'message' => 'El título y la descripción son obligatorios.']);
                 exit;
             }
 
-            // Normalización estricta del título
-            $titulo_norm = $this->normalizarTitulo($titulo);
-            $desc_norm   = $this->normalizarTitulo($descripcion);
+            
+            $texto_normalizado = $this->normalizarTexto($titulo . ' ' . $descripcion);
+            
+            if (empty($texto_normalizado)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'El texto no contiene palabras clave válidas tras el filtro.']);
+                exit;
+            }
 
             // --- LÓGICA PARA SUBIR LA FOTO ---
-            $foto_ruta = null;
+            $foto_ruta = ''; // Carga string vacío en vez de null para evitar error en MySQL (NOT NULL)
             if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
                 // Usamos dirname con nivel 2 para garantizar compatibilidad absoluta con Windows/XAMPP
                 $uploadDir = dirname(__DIR__, 2) . '/public/uploads/incidencias/';
@@ -89,43 +103,55 @@ class IncidenciasController
                 throw new Exception('Error de subida del archivo. Código de error PHP: ' . $_FILES['foto']['error']);
             }
 
-            // --- LÓGICA DE SIMILITUD MEJORADA ---
-            // Creamos un bloque único de búsqueda que combina título y descripción
-            $bloqueBusquedaInput = $titulo_norm . ' ' . $desc_norm;
+           // 3. LÓGICA DE DETECCIÓN: Solo buscamos duplicados si NO estamos forzando la creación
+            if (!$forzar_creacion) {
+                
+                $incidenciasSimilares = $this->model->buscarIncidenciasSimilares($texto_normalizado, 0.1);
+                $similarEncontrada = null;
+                $userWords = array_unique(explode(' ', $texto_normalizado));
 
-            $incidenciasActivas = $this->model->obtenerActivasParaComparar();
-            $similarEncontrada = null;
+                foreach ($incidenciasSimilares as $inc) {
+                    $dbWords = array_unique(explode(' ', $inc['texto_normalizado']));
+                    $coincidencias = count(array_intersect($userWords, $dbWords));
+                    
+                    
+                    if ($coincidencias >= 2) {
+                        $similarEncontrada = [
+                            'id_incidencias' => $inc['id_incidencias'],
+                            'titulo' => $inc['titulo'],
+                            'fecha_creacion' => $inc['fecha_creacion']
+                        ];
+                        break; 
+                    }
+                }
 
-            foreach ($incidenciasActivas as $inc) {
-                // Comparamos el nuevo bloque contra lo que ya está en la BD
-                // (que ahora guardará el bloque completo gracias al cambio en el store)
-                similar_text($bloqueBusquedaInput, $inc['titulo_normalizado'], $porcentaje);
-
-                if ($porcentaje >= 70) {
-                    $similarEncontrada = $inc;
-                    break;
+                if ($similarEncontrada) {
+                    http_response_code(409); // Conflict
+                    echo json_encode([
+                        'status' => 'similar_found',
+                        'incidencia' => $similarEncontrada,
+                        'message' => 'Se ha detectado una incidencia muy similar.'
+                    ]);
+                    exit;
                 }
             }
 
-            if ($similarEncontrada) {
-                http_response_code(409); // Conflict: Avisamos al frontend
-                echo json_encode([
-                    'status' => 'similar_found',
-                    'incidencia' => $similarEncontrada,
-                    'message' => 'Ya existe una incidencia muy similar reportada. Por favor, únete a ella.'
-                ]);
-                exit;
+            // Guardamos la nueva incidencia
+            $id = $this->model->crear($id_vivienda, $titulo, $texto_normalizado, $descripcion, $foto_ruta);
+
+            while (ob_get_level() > 0) ob_end_clean(); // Destrucción total de cualquier HTML previo
+            header('Content-Type: application/json');
+            if ($id) {
+                echo json_encode(['status' => 'success', 'message' => 'Incidencia reportada correctamente.']);
+            } else {
+                throw new Exception('Error interno en la base de datos al guardar.');
             }
-
-            // Guardamos el bloque combinado en el campo 'titulo_normalizado' de la BD
-            $id = $this->model->crear($id_vivienda, $titulo, $bloqueBusquedaInput, $descripcion, $foto_ruta);
-
-            if ($id) echo json_encode(['status' => 'success', 'message' => 'Incidencia reportada correctamente.']);
-            else throw new Exception('Error interno en la base de datos al guardar.');
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            while (ob_get_level() > 0) ob_end_clean(); // Limpieza profunda antes del error
+            header('Content-Type: application/json');
             http_response_code(500);
-            // Si falla la base de datos o la subida de la imagen, mostrará aquí el motivo exacto.
-            echo json_encode(['status' => 'error', 'message' => 'Error del servidor: ' . $e->getMessage()]);
+            $msg = mb_convert_encoding($e->getMessage(), 'UTF-8', 'auto');
+            echo json_encode(['status' => 'error', 'message' => 'Error del servidor: ' . $msg]);
         }
         exit;
     }
@@ -133,7 +159,7 @@ class IncidenciasController
     // API: Unirse a incidencia
     public function join()
     {
-        if (ob_get_length()) ob_clean(); // Fundamental para evitar Notice/Warning que rompan JSON en JS
+        while (ob_get_level() > 0) ob_end_clean();
         header('Content-Type: application/json');
         $id_incidencia = $_POST['id_incidencia'] ?? 0;
         $id_vivienda = $_SESSION['vivienda']['id_vivienda'] ?? 0;
@@ -152,7 +178,7 @@ class IncidenciasController
     // API: Cambiar estado incidencia (Solo para el Presidente)
     public function updateEstado()
     {
-        if (ob_get_length()) ob_clean();
+        while (ob_get_level() > 0) ob_end_clean();
         header('Content-Type: application/json');
 
         $id_incidencia = $_POST['id_incidencia'] ?? 0;
@@ -185,7 +211,7 @@ class IncidenciasController
     // API: Eliminar incidencia (Propietario o Presidente)
     public function delete()
     {
-        if (ob_get_length()) ob_clean(); // Evitamos que un notice rompa el JSON en el JS
+        while (ob_get_level() > 0) ob_end_clean();
         header('Content-Type: application/json');
         $id_incidencia = $_POST['id_incidencia'] ?? 0;
         $id_vivienda = $_SESSION['vivienda']['id_vivienda'];
@@ -201,7 +227,7 @@ class IncidenciasController
     }
 
     // Helpers
-    private function normalizarTitulo($string)
+    private function normalizarTexto($string)
     {
         $string = mb_strtolower($string, 'UTF-8');
         // Eliminar acentos
@@ -216,6 +242,8 @@ class IncidenciasController
         // Diccionario de sinónimos: mapeamos variaciones a un concepto base
         $sinonimos = [
             // Estado de la avería
+            'rota'       => 'roto',
+            'rotura'     => 'roto',
             'averiado'   => 'roto',
             'averia'     => 'roto',
             'estropeado' => 'roto',
@@ -226,6 +254,8 @@ class IncidenciasController
             'falla'      => 'roto',
             'fundido'    => 'roto',
             'fundida'    => 'roto',
+            'parpadeando'=> 'parpadea',
+            'parpadeo'   => 'parpadea',
             // Elementos comunes
             'bombilla'   => 'luz',
             'foco'       => 'luz',

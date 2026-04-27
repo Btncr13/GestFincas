@@ -5,112 +5,57 @@ $esPresidente = (strtolower($rolActual) === 'presidente' || strtoupper($rolActua
 $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
 ?>
 
-<div class="d-flex" id="wrapper">
+<?php include __DIR__ . '/../components/topbar.php'; ?>
+
+<div class="container-fluid p-0">
+    <div class="row flex-nowrap m-0">
     
-    <?php include __DIR__ . '/../components/sidebar.php'; ?>
+        <?php include __DIR__ . '/../components/sidebar.php'; ?>
 
-    <div id="page-content-wrapper" class="w-100 bg-light">
-        
-        <?php include __DIR__ . '/../components/topbar.php'; ?>
-
-        <main class="container-fluid py-4 px-md-4">
+        <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
             
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <h1 class="h3 fw-bold text-primary mb-0">Tablón de Incidencias</h1>
-                
-                <?php if (!$esPresidente): ?>
-                    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalIncidencia">
-                        <i class="fa-solid fa-plus me-2"></i> Crear Incidencia
-                    </button>
-                <?php endif; ?>
-            </div>
+            <div class="container-fluid p-0 position-relative" id="appIncidencias">
 
-            <div class="row g-3" id="contenedor-incidencias">
-                <?php if(!empty($incidencias)): ?>
-                    <?php foreach ($incidencias as $inc): ?>
-                        <?php 
-                            // Lógica condicional por tarjeta
-                            $esMia = ($inc['id_vivienda'] == $miViviendaId);
-                            $estaAbierta = in_array($inc['estado'], ['pendiente', 'abierta']);
-                            $yaUnido = in_array($inc['id_incidencias'], $misUniones ?? []);
-                        ?>
-                        <div class="col-12 card-incidencia" id="incidencia-<?= $inc['id_incidencias'] ?>">
-                            <div class="card shadow-sm border-0 flex-column flex-md-row align-items-md-center p-3 <?= $esMia ? 'border-start border-primary border-4' : '' ?>">
-                                <div class="flex-grow-1 mb-3 mb-md-0">
-                                    <h5 class="mb-1 fw-bold">
-                                        <?= htmlspecialchars($inc['titulo']) ?>
-                                        <?php if($esMia): ?> <span class="badge bg-primary ms-2" style="font-size: 0.6em;">MI INCIDENCIA</span> <?php endif; ?>
-                                    </h5>
-                                    <p class="mb-2 text-muted small"><?= htmlspecialchars($inc['descripcion'] ?? '') ?></p>
-                                    
-                                    <!-- MOSTRAR FOTO SI EXISTE -->
-                                    <?php if (!empty($inc['foto_incidencia'])): ?>
-                                        <div class="mb-3">
-                                            <a href="javascript:void(0);" class="lightbox-trigger" data-img="<?= htmlspecialchars($inc['foto_incidencia']) ?>" title="Ampliar imagen">
-                                                <img src="<?= htmlspecialchars($inc['foto_incidencia']) ?>" alt="Evidencia de incidencia" class="rounded shadow-sm border" style="max-height: 80px; object-fit: cover; cursor: zoom-in; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <div class="d-flex flex-wrap align-items-center gap-3">
-                                        <!-- ====== RENDERIZADO DEL BADGE SEGÚN ESTADO ====== -->
-                                        <?php if ($inc['estado'] === 'pendiente'): ?>
-                                            <span class="badge bg-secondary"><i class="fa-solid fa-clock"></i> Pendiente</span>
-                                        <?php elseif ($inc['estado'] === 'abierta'): ?>
-                                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-folder-open"></i> En curso</span>
-                                        <?php elseif ($inc['estado'] === 'resuelta'): ?>
-                                            <span class="badge bg-success"><i class="fa-solid fa-check-circle"></i> Resuelta</span>
-                                        <?php endif; ?>
-                                        
-                                        <span class="text-muted small"><i class="fa-solid fa-users text-info me-1"></i> Afectados: <strong id="afectados-<?= $inc['id_incidencias'] ?>"><?= $inc['numero_afectados'] ?></strong></span>
-                                        <span class="text-muted small"><i class="fa-solid fa-house me-1"></i> <?= htmlspecialchars($inc['nombre_vivienda'] ?? 'Comunidad') ?></span>
-                                        <span class="text-muted small"><i class="fa-solid fa-calendar me-1"></i> <?= date('d/m/Y', strtotime($inc['fecha_creacion'])) ?></span>
-                                    </div>
-                                </div>
-                                
-                                <div class="ms-md-3 text-md-end d-flex flex-row flex-md-column gap-2">
-                                    <?php if ($esPresidente && $inc['estado'] === 'abierta'): ?>
-                                        <button class="btn btn-sm btn-success btn-resolver w-100" data-id="<?= $inc['id_incidencias'] ?>">
-                                            <i class="fa-solid fa-check"></i> Resolver
-                                        </button>
-                                    <?php endif; ?>
-
-                                    <?php if ($esPresidente && $inc['estado'] === 'pendiente'): ?>
-                                        <button class="btn btn-sm btn-warning text-dark fw-bold btn-abrir w-100" data-id="<?= $inc['id_incidencias'] ?>">
-                                            <i class="fa-solid fa-folder-open"></i> Abrir
-                                        </button>
-                                    <?php endif; ?>
-
-                                    <?php if ($esMia || $esPresidente): ?>
-                                        <button class="btn btn-sm btn-outline-danger btn-delete w-100" data-id="<?= $inc['id_incidencias'] ?>" title="Eliminar incidencia">
-                                            <i class="fa-solid fa-trash"></i> Eliminar
-                                        </button>
-                                    <?php endif; ?>
-                                    
-                                    <?php if (!$esMia && $estaAbierta && !$esPresidente): ?>
-                                        <?php if ($yaUnido): ?>
-                                            <button class="btn btn-sm btn-secondary text-white fw-bold w-100" disabled>
-                                                <i class="fa-solid fa-check"></i> Te has unido
-                                            </button>
-                                        <?php else: ?>
-                                            <button class="btn btn-sm btn-info text-white fw-bold btn-unirme-card w-100" data-id="<?= $inc['id_incidencias'] ?>">
-                                                <i class="fa-solid fa-hand-holding-hand"></i> Unirme
-                                            </button>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="col-12">
-                        <div class="card shadow-sm border-0 p-5 text-center">
-                            <i class="fa-solid fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5 class="text-muted">No hay incidencias en la comunidad</h5>
-                            <p class="text-muted small">Todo funciona correctamente en este momento.</p>
-                        </div>
+                <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
+                    <div>
+                        <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">Tablón de Incidencias</h1>
+                        <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestiona las averías de la comunidad</p>
                     </div>
+                    <?php if (!$esPresidente): ?>
+                    <button class="btn d-flex align-items-center gap-2" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;" data-bs-toggle="modal" data-bs-target="#modalIncidencia">
+                        <i class="bi bi-plus fs-6"></i> Crear Incidencia
+                    </button>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Filtro Desplegable de Tiempo (Global) -->
+                <div class="d-flex justify-content-end mb-3">
+                    <select id="filtro-tiempo" class="form-select w-auto shadow-sm" style="border-radius: var(--radio-md); font-size: 14px; border: 1px solid var(--color-borde); background-color: var(--bs-light); color: var(--color-texto);" onchange="appIncidencias.changeFiltroTiempo(this.value)">
+                        <option value="anio_actual">Año en curso</option>
+                        <option value="ultimos_3_meses" selected>Últimos 3 meses</option>
+                        <option value="mensual">Mensual</option>
+                    </select>
+                </div>
+
+                <!-- Controles Tabulados -->
+                <?php if (!$esPresidente): ?>
+                <!-- TABS VECINO -->
+                <div class="d-flex mb-3 p-1" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+                    <button id="btn-tab-mis" class="btn flex-fill text-center rounded-2 py-2" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="appIncidencias.switchTabVecino('mis')">Mis incidencias</button>
+                    <button id="btn-tab-otras" class="btn flex-fill text-center rounded-2 py-2 text-muted" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="appIncidencias.switchTabVecino('otras')">Otras incidencias</button>
+                </div>
+                <?php else: ?>
+                <!-- TABS PRESIDENTE -->
+                <div class="d-flex mb-3 p-1 flex-wrap" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+                    <button id="btn-tab-pendiente" class="btn flex-fill text-center rounded-2 py-2" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="appIncidencias.switchTabPresi('pendiente')">Pendientes</button>
+                    <button id="btn-tab-abierta" class="btn flex-fill text-center rounded-2 py-2 text-muted" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="appIncidencias.switchTabPresi('abierta')">Abiertas</button>
+                    <button id="btn-tab-resuelta" class="btn flex-fill text-center rounded-2 py-2 text-muted" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="appIncidencias.switchTabPresi('resuelta')">Resueltas</button>
+                </div>
                 <?php endif; ?>
+
+                <!-- Contenedor donde JS escupirá las tarjetas filtradas -->
+                <div id="contenedor-incidencias" class="d-flex flex-column gap-3"></div>
+                
             </div>
         </main>
     </div>
@@ -129,6 +74,15 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
         </div>
     </div>
 </div>
+
+<!-- 🟢 INYECCIÓN DE DATOS PHP -> JAVASCRIPT 🟢 -->
+<script>
+    const incidenciasDB = <?= json_encode($incidenciasData ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const misUnionesDB = <?= json_encode($misUniones ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const userRolActual = <?= json_encode($rolActual) ?>;
+    const isPresi = <?= $esPresidente ? 'true' : 'false' ?>;
+    const miViviendaId = <?= json_encode($miViviendaId) ?>;
+</script>
 
 <?php include __DIR__ . '/../components/incidencias/modalIncidencias.php'; ?>
 <script src="public/assets/js/incidencias/incidencias.js"></script>

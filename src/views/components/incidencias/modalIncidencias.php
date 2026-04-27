@@ -7,12 +7,19 @@
             </div>
             <div class="modal-body">
 
-                <div id="alerta-similar" class="alert alert-warning d-none">
-                    <h6 class="alert-heading fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> ¡Atención! Incidencia Duplicada</h6>
-                    <p class="small mb-1">No puedes crear esta incidencia porque ya existe una abierta con especificaciones similares en tu comunidad.</p>
-                    <p class="small fw-bold mb-2" id="sim-titulo"></p>
-                    <p class="small mb-2">Para evitar duplicados, te recomendamos unirte a la incidencia existente haciendo clic en el botón de abajo:</p>
-                    <button class="btn btn-sm btn-warning fw-bold w-100" id="btn-unirme">Unirme a esta incidencia</button>
+                <div id="alerta-similar" class="alert alert-warning d-none mb-3">
+                    <h6 class="alert-heading fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Posible coincidencia</h6>
+                    <p class="small mb-2">Ya existe una incidencia abierta que podría ser la misma:</p>
+                    <p class="small mb-3 p-2 bg-white rounded border text-muted" id="sim-titulo" style="font-style: italic;"></p>
+                    
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-sm btn-warning fw-bold" id="btn-unirme">
+                            <i class="fa-solid fa-hand-holding-hand"></i> Sí, unirme a esta
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-forzar-crear">
+                            <i class="fa-solid fa-file-circle-plus"></i> No, es un problema diferente (Crear nueva)
+                        </button>
+                    </div>
                 </div>
 
                 <form id="form-incidencia">

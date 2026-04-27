@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-04-2026 a las 22:31:37
+-- Tiempo de generación: 27-04-2026 a las 17:48:56
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -173,7 +173,7 @@ CREATE TABLE `incidencias` (
   `id_incidencias` int(10) UNSIGNED NOT NULL,
   `id_vivienda` int(10) UNSIGNED NOT NULL,
   `titulo` varchar(100) NOT NULL,
-  `titulo_normalizado` varchar(400) NOT NULL,
+  `texto_normalizado` varchar(400) NOT NULL,
   `descripcion` varchar(255) NOT NULL,
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
   `fecha_actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -182,19 +182,26 @@ CREATE TABLE `incidencias` (
   `foto_incidencia` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `incidencias`
+--
+
+INSERT INTO `incidencias` (`id_incidencias`, `id_vivienda`, `titulo`, `texto_normalizado`, `descripcion`, `fecha_creacion`, `fecha_actualizacion`, `estado`, `numero_afectados`, `foto_incidencia`) VALUES
+(6, 4, 'Bombilla fundida', 'luz roto luz portal parpadea', 'La bombilla del portal parpadea', '2026-04-27 16:50:37', '2026-04-27 16:50:37', 'pendiente', 1, 'public/uploads/incidencias/inc_69ef77bd0254a1.10175354.jpg');
+
 -- --------------------------------------------------------
+
 --
 -- Estructura de tabla para la tabla `incidencias_uniones`
 --
 
-CREATE TABLE IF NOT EXISTS incidencias_uniones (
-    id_incidencias int(10) UNSIGNED NOT NULL,
-    id_vivienda int(10) UNSIGNED NOT NULL,
-    fecha_union TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_incidencias, id_vivienda),
-    FOREIGN KEY (id_incidencias) REFERENCES incidencias(id_incidencias) ON DELETE CASCADE,
-    FOREIGN KEY (id_vivienda) REFERENCES vivienda(id_vivienda) ON DELETE CASCADE
-);
+CREATE TABLE `incidencias_uniones` (
+  `id_incidencias` int(10) UNSIGNED NOT NULL,
+  `id_vivienda` int(10) UNSIGNED NOT NULL,
+  `fecha_union` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `mancomunidad`
@@ -428,7 +435,14 @@ ALTER TABLE `espacios_normas`
 --
 ALTER TABLE `incidencias`
   ADD PRIMARY KEY (`id_incidencias`),
-  ADD INDEX `idx_titulo_normalizado` (`titulo_normalizado`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+ALTER TABLE `incidencias` ADD FULLTEXT KEY `texto_normalizado` (`texto_normalizado`);
+
+--
+-- Indices de la tabla `incidencias_uniones`
+--
+ALTER TABLE `incidencias_uniones`
+  ADD PRIMARY KEY (`id_incidencias`,`id_vivienda`),
   ADD KEY `id_vivienda` (`id_vivienda`);
 
 --
@@ -536,7 +550,7 @@ ALTER TABLE `espacios_normas`
 -- AUTO_INCREMENT de la tabla `incidencias`
 --
 ALTER TABLE `incidencias`
-  MODIFY `id_incidencias` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id_incidencias` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `mancomunidad`
@@ -627,6 +641,13 @@ ALTER TABLE `espacios_normas`
 --
 ALTER TABLE `incidencias`
   ADD CONSTRAINT `fk_incidencias_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `incidencias_uniones`
+--
+ALTER TABLE `incidencias_uniones`
+  ADD CONSTRAINT `incidencias_uniones_ibfk_1` FOREIGN KEY (`id_incidencias`) REFERENCES `incidencias` (`id_incidencias`) ON DELETE CASCADE,
+  ADD CONSTRAINT `incidencias_uniones_ibfk_2` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `mancomunidad`
