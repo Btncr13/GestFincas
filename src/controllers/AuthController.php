@@ -2,16 +2,19 @@
 
 require_once "src/models/UsuarioModel.php";
 require_once "src/models/VotacionModel.php";
+require_once "src/models/ReservaModel.php";
 
 class AuthController
 {
     private $usuarioModel;
     private $votacionModel;
+    private $reservaModel;
 
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->votacionModel = new VotacionModel($pdo);
+        $this->reservaModel = new ReservaModel($pdo);
     }
 
     // 🟢 ENRUTAMIENTO INICIAL 🟢
@@ -172,7 +175,9 @@ class AuthController
     // 🟢 HELPER: RESPUESTAS JSON PARA AJAX 🟢
     private function jsonResponse($success, $message = null)
     {
-        ob_clean();
+        if (ob_get_length()) {
+            ob_clean();
+        }
         header('Content-Type: application/json');
         echo json_encode(['success' => $success, 'message' => $message]);
         exit;
@@ -213,6 +218,9 @@ class AuthController
             }
         }
 
+        // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
+        $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
+
         require "src/views/auth/panelvecino.php";
     }
 
@@ -248,6 +256,9 @@ class AuthController
                 $votacionesPendientes++;
             }
         }
+
+        // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
+        $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
 
         require "src/views/auth/panelpresi.php";
     }

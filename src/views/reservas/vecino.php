@@ -1,4 +1,12 @@
-<?php $titulo_pagina = "Reservas"; ?>
+<?php 
+/**
+ * @var bool $tieneReservaHoy
+ * @var int|null $votacionesPendientes
+ * @var string|null $nombreVivienda
+ * @var array $espaciosDisponibles
+ * @var array $misReservas
+ */
+$titulo_pagina = "Reservas"; ?>
 
 <?php include 'src/views/components/topbarv.php'; ?>
 
@@ -40,6 +48,7 @@
             $reservasActivas = [];
             $reservasInactivas = [];
             $limiteInactivas = strtotime('-14 days');
+            $hoy = date('Y-m-d');
 
             if (!empty($misReservas)) {
                 foreach ($misReservas as $reserva) {
@@ -90,8 +99,13 @@
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: <?= htmlspecialchars($reserva['asistentes']) ?></span>
                                                 </div>
                                             </div>
-                                            <div class="ms-auto">
-                                                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
+                                            <div class="ms-auto text-end">
+                                                <?php if ($reserva['fecha'] === $hoy): ?>
+                                                    <button class="btn btn-sm btn-success btn-confirmar-reserva w-100 mb-2 shadow-sm fw-semibold" data-fecha="<?= htmlspecialchars($reserva['fecha']) ?>">
+                                                        <i class="bi bi-check-circle me-1"></i> Confirmar Asistencia
+                                                    </button>
+                                                <?php endif; ?>
+                                                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm w-100 btn-eliminar-reserva" data-fecha="<?= htmlspecialchars($reserva['fecha']) ?>" onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
                                                     <i class="fa-solid fa-trash me-2"></i>Eliminar
                                                 </button>
                                             </div>
@@ -201,3 +215,51 @@
 
 <!-- JS de Pestañas tipo Switch -->
 <script src="public/assets/js/reservas/panelvecino.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // 1. Al cargar la página, inicializar botones (Toggle State)
+    document.querySelectorAll('.btn-confirmar-reserva').forEach(btn => {
+        const fecha = btn.getAttribute('data-fecha');
+        if (localStorage.getItem('reserva_confirmada_' + fecha)) {
+            btn.classList.replace('btn-success', 'btn-warning');
+            btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
+        }
+    });
+
+    // 2. Delegación de eventos para Confirmar/Anular y Eliminar
+    document.body.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-confirmar-reserva');
+        if (btn) {
+            const fecha = btn.getAttribute('data-fecha');
+            const isConfirmada = localStorage.getItem('reserva_confirmada_' + fecha);
+
+            if (isConfirmada) {
+                // Revertir a no confirmada (limpiar memoria)
+                localStorage.removeItem('reserva_confirmada_' + fecha);
+                document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
+                    b.classList.replace('btn-warning', 'btn-success');
+                    b.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirmar Asistencia';
+                });
+            } else {
+                // Marcar como confirmada (guardar memoria)
+                localStorage.setItem('reserva_confirmada_' + fecha, 'true');
+                document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
+                    b.classList.replace('btn-success', 'btn-warning');
+                    b.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
+                });
+            }
+        }
+
+        // 3. Limpiar caché automáticamente al pulsar Eliminar
+        const btnEliminar = e.target.closest('.btn-eliminar-reserva');
+        if (btnEliminar) {
+            const fecha = btnEliminar.getAttribute('data-fecha');
+            if (fecha) {
+                localStorage.removeItem('reserva_confirmada_' + fecha);
+            }
+        }
+    });
+});
+</script>

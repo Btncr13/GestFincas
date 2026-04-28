@@ -37,7 +37,6 @@ class ReservaController
         $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
         $nombreVivienda  = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
         $direccion       = trim($calle . ' ' . $numero);
-        $rolReal         = $_SESSION['vivienda']['rol'] ?? 'vecino';
 
         // 3. DECISIÓN DE VISTA SEGÚN EL ROL ACTIVO
         if ($rol === 'presidente') {
@@ -59,16 +58,15 @@ class ReservaController
         }
     }
 
-
-    // ----------------------------------------------------------- ENDPOINT PARA COMPROBAR DISPONIBILIDAD ESPACIO POR TRAMO HORARIO 
-
-
+    // =========================================================================
+    // ENDPOINTS Y LÓGICA DE API
+    // =========================================================================
     public function comprobarDisponibilidad()
     {
         header('Content-Type: application/json');
 
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
-        $fecha = $_POST['fecha_reserva'];
+        $fecha = $_POST['fecha_reserva'] ?? null;
         $hora_inicio = $_POST['hora_inicio'] ?? null;
         $hora_fin = $_POST['hora_fin'] ?? null;
 
@@ -98,7 +96,6 @@ class ReservaController
         echo json_encode($resultado);
     }
 
-    // ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
     public function store()
     {
         header('Content-Type: application/json');
@@ -184,8 +181,6 @@ class ReservaController
         exit;
     }
 
-    // -------------------------------------------------------------------- ENDPOINT RECUPERAR RESERVAS DE MANERA DINAMICA
-
     public function getMisReservasAjax()
     {
 
@@ -202,13 +197,12 @@ class ReservaController
         exit;
     }
 
-
-    //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
-
    public function destroy()
     {
         // ob_clean() asegura que ningún warning o espacio en blanco previo rompa el JSON devuelto
-        ob_clean();
+        if (ob_get_length()) {
+            ob_clean();
+        }
         header('Content-Type: application/json');
         
         $id_reservas = $_POST['id_reserva'] ?? null;

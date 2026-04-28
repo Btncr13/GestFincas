@@ -1,6 +1,10 @@
 <?php
+// Blindaje de variables: si no existen, las sacamos de la sesión por defecto
+$rolReal = $rolReal ?? $_SESSION['user']['rol'] ?? 'vecino';
+$rol = $rol ?? $rolReal;
+
 // 🟢 LÓGICA DE RUTAS Y MENÚ ACTIVO 🟢
-$dashboardUrl = ($rol === 'presidente') ? 'auth/panelpresi' : 'auth/panelvecino';
+$dashboardUrl = ($rol === 'presidente' || $rol === 'PRESIDENTE') ? 'auth/panelpresi' : 'auth/panelvecino';
 $ruta_actual = $_GET['route'] ?? $dashboardUrl;
 $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
 ?>

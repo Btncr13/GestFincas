@@ -25,6 +25,20 @@ class ReservaModel extends BaseModel
         }
     }
 
+    public function getEspacioById($id_espacios_comunidad)
+    {
+        try {
+            $sql = "SELECT * FROM espacios_comunidad WHERE id_espacios_comunidad = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id_espacios_comunidad, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error en getEspacioById: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function hayCapacidad($id_espacios_comunidad, $fecha, $hora_inicio, $hora_fin, $nuevos_asistentes = 1)
     {
 
@@ -54,21 +68,6 @@ class ReservaModel extends BaseModel
 
         // 3. Validación real
         return ($ocupacion + $nuevos_asistentes) <= $aforo;
-    }
-
-
-    public function getEspacioById($id_espacios_comunidad)
-    {
-        try {
-            $sql = "SELECT * FROM espacios_comunidad WHERE id_espacios_comunidad = :id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id', $id_espacios_comunidad, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Error en getEspacioById: " . $e->getMessage());
-            return false;
-        }
     }
 
     public function getNormasByEspacio($id_espacios_comunidad)
@@ -120,10 +119,9 @@ class ReservaModel extends BaseModel
         }
     }
 
-
-    // ------------------------------------- -------------------------------------------------------GESTIÓN RESERVAS
-
-    // --------------------------------------------------- CREAR RESERVA
+    // =========================================================================
+    // GESTIÓN DE RESERVAS
+    // =========================================================================
     public function crearReserva($data)
     {
 
@@ -215,8 +213,6 @@ class ReservaModel extends BaseModel
         }
     }
 
-    // --------------------------------------------------- LEER RESERVAS POR ID_RESERVAS
-
     public function getReservaById($id)
     {
         $sql = "SELECT r.*, ec.nombre_espacio
@@ -230,8 +226,6 @@ class ReservaModel extends BaseModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-
-    // --------------------------------------------------- LEER RESERVAS POR ID_USUARIO
     public function getReservasUsuario($id_usuario)
     {
         try {
@@ -240,7 +234,7 @@ class ReservaModel extends BaseModel
                     FROM reservas r 
                     JOIN espacios_comunidad ec ON r.id_espacios_comunidad = ec.id_espacios_comunidad 
                     WHERE r.id_usuario = :id_usuario 
-                    ORDER BY r.fecha_reserva DESC, r.hora_inicio DESC";
+                    ORDER BY r.fecha_reserva ASC, r.hora_inicio ASC";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
             $stmt->execute();
@@ -251,7 +245,23 @@ class ReservaModel extends BaseModel
         }
     }
 
-    // --------------------------------------------------- LEER TODAS LAS RESERVAS DE LA COMUNIDAD
+    public function tieneReservaHoy($id_usuario)
+    {
+        try {
+            $sql = "SELECT COUNT(*) FROM reservas 
+                    WHERE id_usuario = :id_usuario 
+                    AND fecha_reserva = CURDATE() 
+                    AND estado_reserva = 'activo'";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Error en tieneReservaHoy: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getTodasLasReservasComunidad($id_comunidad)
     {
         try {
@@ -276,7 +286,6 @@ class ReservaModel extends BaseModel
         }
     }
 
-    // --------------------------------------------------- ACTUALIZAR RESERVAS VENCIDAS
     public function actualizarReservasVencidas()
     {
         try {
@@ -297,8 +306,6 @@ class ReservaModel extends BaseModel
         }
     }
 
-    //  --------------------------------------------------- ELIMINAR RESERVA
-   //  --------------------------------------------------- ELIMINAR RESERVA
     public function eliminarReserva($id_reservas, $id_usuario, $rol = 'VECINO')
     {
         try {
