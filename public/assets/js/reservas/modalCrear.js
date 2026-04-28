@@ -326,39 +326,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const html = `
-      <div class="col" id="reserva-${r.id_reservas}">
-        <div class="card shadow-sm module-card h-100 border-0 border-start border-4 border-success">
-          <div class="card-body p-4 d-flex flex-column">
-
-            <div class="d-flex justify-content-between mb-3">
-              <div class="text-muted small">
-                <div>${r.fecha_reserva}</div>
-                <div>${r.hora_inicio} - ${r.hora_fin}</div>
-              </div>
-
-              <span class="badge bg-success">Activa</span>
+<div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-${r.id_reservas || r.id_reserva}">
+    <div class="card-body p-3 p-md-4">
+        <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <span style="font-size:15px; font-weight:700; color:var(--bs-dark); font-family: var(--fuente-titulos);">${r.nombre_espacio}</span>
+                    <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Activa</span>
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${r.fecha_reserva}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${r.hora_inicio} - ${r.hora_fin}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: ${r.asistentes}</span>
+                </div>
             </div>
-
-            <h3 class="fs-5 fw-bold text-dark mb-2">
-              ${r.nombre_espacio}
-            </h3>
-
-            <div class="small text-muted mb-3">
-              <i class="fa-solid fa-users me-2"></i>
-              Asistentes: ${r.asistentes}
+            <div class="ms-auto">
+                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(${r.id_reservas || r.id_reserva})">
+                    <i class="fa-solid fa-trash me-2"></i>Eliminar
+                </button>
             </div>
-
-            <div class="mt-auto d-flex justify-content-end border-top pt-3">
-              <button class="btn btn-sm btn-outline-danger"
-                onclick="eliminarReserva(${r.id_reservas})">
-                Cancelar
-              </button>
-            </div>
-
-          </div>
         </div>
-      </div>
-    `;
+    </div>
+</div>
+`;
 
         document
           .getElementById("contenedorReservas")
@@ -409,32 +399,29 @@ function renderReservas(reservas) {
 
   reservas.forEach((r) => {
     const html = `
-      <div class="col" id="reserva-${r.id_reserva}">
-        <div class="card shadow-sm h-100 border-0 border-start border-4 border-success">
-          <div class="card-body p-4 d-flex flex-column">
-
-            <div class="text-muted small mb-2">
-              <div>${r.fecha_reserva}</div>
-              <div>${r.hora_inicio} - ${r.hora_fin}</div>
+<div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-${r.id_reserva}">
+    <div class="card-body p-3 p-md-4">
+        <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <span style="font-size:15px; font-weight:700; color:var(--bs-dark); font-family: var(--fuente-titulos);">${r.nombre_espacio}</span>
+                    <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Activa</span>
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${r.fecha_reserva}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${r.hora_inicio} - ${r.hora_fin}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: ${r.asistentes}</span>
+                </div>
             </div>
-
-            <h3 class="fs-5 fw-bold">
-              ${r.nombre_espacio}
-            </h3>
-
-            <div class="small text-muted mb-3">
-              Asistentes: ${r.asistentes}
+            <div class="ms-auto">
+                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(${r.id_reserva})">
+                    <i class="fa-solid fa-trash me-2"></i>Eliminar
+                </button>
             </div>
-
-            <button class="btn btn-sm btn-outline-danger"
-              onclick="eliminarReserva(${r.id_reserva})">
-              Cancelar
-            </button>
-
-          </div>
         </div>
-      </div>
-    `;
+    </div>
+</div>
+`;
 
     contenedor.insertAdjacentHTML("beforeend", html);
   });
