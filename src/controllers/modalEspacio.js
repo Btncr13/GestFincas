@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const textClase = isBloqueado ? "text-danger" : "text-primary";
     const badgeHTML = isBloqueado
       ? '<span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>'
-      : '<span class="badge bg-success" style="font-size: 10px;">Operativo</span>';
+      : '<span class="badge bg-success" style="font-size: 10px;">Operativo</span>'; // Cambiado a bg-success
     const toggleBtnClass = isBloqueado
       ? "btn-outline-success"
       : "btn-outline-warning";
@@ -203,10 +203,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${badgeHTML}
                 </div>
                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users ${textClase}"></i> Aforo: ${data.aforo}</span>
-                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Máx: ${data.duracion_uso} min</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users ${textClase}"></i> Aforo Total: ${data.aforo}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-group ${textClase}"></i> Máx. Personas/Reserva: ${data.max_personas}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Duración: ${data.duracion_uso} min</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock ${textClase}"></i> ${data.hora_apertura.substring(0, 5)} a ${data.hora_cierre.substring(0, 5)}</span>
                 </div>
+                <details class="mt-3" style="font-size:13px; color:var(--color-texto);">
+                    <summary class="fw-semibold cursor-pointer ${textClase}">
+                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                    </summary>
+                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                        ${data.normas && data.normas.length > 0 ?
+                            data.normas.map(norma => `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`).join('')
+                            : '<li>No hay normas definidas para este espacio.</li>'}
+                    </ul>
+                </details>
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 ms-md-auto">
@@ -229,21 +240,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Insertamos la card al principio del contenedor
     contenedorEspacios.insertAdjacentHTML("afterbegin", cardHTML);
-  };
-
-  // Lógica para alternar la visibilidad de las normas (estilo reuniones)
-  window.toggleNormas = (id) => {
-    const el = document.getElementById(`normas-${id}`);
-    const icon = document.getElementById(`icon-normas-${id}`);
-    if (!el || !icon) return;
-    
-    if (el.classList.contains('d-none')) {
-      el.classList.remove('d-none');
-      icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
-    } else {
-      el.classList.add('d-none');
-      icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
-    }
   };
 
   // --- 8. FUNCIONALIDADES DE ACCIÓN (EDITAR, BLOQUEAR, ELIMINAR) ---
@@ -425,7 +421,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const textClase = isBloqueado ? "text-danger" : "text-primary";
     const badgeHTML = isBloqueado
       ? '<span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>'
-      : '<span class="badge bg-success" style="font-size: 10px;">Operativo</span>';
+      : '<span class="badge bg-success" style="font-size: 10px;">Operativo</span>'; // Cambiado a bg-success
     const toggleBtnClass = isBloqueado
       ? "btn-outline-success"
       : "btn-outline-warning";
@@ -459,18 +455,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Duración: ${data.duracion_uso} min</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock ${textClase}"></i> ${data.hora_apertura.substring(0, 5)} a ${data.hora_cierre.substring(0, 5)}</span>
                 </div>
-                <div class="mt-3">
-                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('${data.id_espacios_comunidad}')">
-                        <i class="bi bi-chevron-down" id="icon-normas-${data.id_espacios_comunidad}"></i> Normas de Uso
-                    </button>
-                    <div id="normas-${data.id_espacios_comunidad}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                        <ul class="list-unstyled mb-0">
-                            ${data.normas && data.normas.length > 0 ?
-                                data.normas.map(norma => `<li class="mb-1">${norma}</li>`).join('')
-                                : '<li>No hay normas definidas.</li>'}
-                        </ul>
-                    </div>
-                </div>
+                <details class="mt-3" style="font-size:13px; color:var(--color-texto);">
+                    <summary class="fw-semibold cursor-pointer ${textClase}">
+                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                    </summary>
+                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                        ${data.normas && data.normas.length > 0 ?
+                            data.normas.map(norma => `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`).join('')
+                            : '<li>No hay normas definidas para este espacio.</li>'}
+                    </ul>
+                </details>
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 ms-md-auto">

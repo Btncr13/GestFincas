@@ -7,7 +7,10 @@
 
         <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <h1 class="fw-bold mb-0 text-dark">Gestión Espacios / Reservas</h1>
+                <div>
+                    <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 28px; font-weight: 700; color: var(--bs-dark);">Gestión Espacios / Reservas</h1>
+                    <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestión de reservas y espacios de la comunidad</p>
+                </div>
                 <button type="button" class="btn btn-primary fw-semibold shadow-sm"
                     data-bs-toggle="modal" data-bs-target="#modalCrearEspacio">
                     <i class="fa-solid fa-plus me-2"></i> Nuevo Espacio
@@ -45,7 +48,7 @@
                 <!-- FILTRO ESTADO RESERVAS (Desplegable a la derecha) -->
                 <div class="d-flex justify-content-end mb-3">
                     <select class="form-select w-auto shadow-sm fw-semibold text-dark border-0" style="background-color: var(--color-fondo-formularios, #f8f9fa); border-radius: var(--radio-md, 0.375rem); font-size: 14px; cursor: pointer;" onchange="switchSubTab(this.value)">
-                        <option value="activas">Reservas Activas (<?= count($reservasActivas) ?>)</option>
+                        <option value="activas">Reservas Activas</option>
                         <option value="inactivas">Reservas Inactivas (Últ. 2 sem)</option>
                     </select>
                 </div>
@@ -132,64 +135,83 @@
 
             <!-- SECCIÓN 2: ESPACIOS DE LA COMUNIDAD -->
             <div id="vista-espacios" class="d-none">
-                    <div class="d-flex flex-column gap-3" id="contenedor-cards-espacios">
-                        <?php if (empty($espacios)): ?>
-                            <div class="text-center py-5" id="mensaje-vacio-espacios">
-                                <i class="fa-solid fa-building-circle-xmark fs-1 text-muted mb-3"></i>
-                                <h5 class="fw-bold text-muted">No hay espacios creados</h5>
-                                <p class="text-muted small">Haz clic en "Nuevo Espacio" para añadir instalaciones a la comunidad.</p>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach ($espacios as $espacio): ?>
-                                <?php
-                                $isBloqueado = $espacio['bloqueado'] == 1;
-                                $colorClase = $isBloqueado ? 'border-danger' : 'border-primary';
-                                $textClase = $isBloqueado ? 'text-danger' : 'text-primary';
-                                ?>
-                                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid <?php echo $colorClase; ?> !important;" id="espacio-<?php echo $espacio['id_espacios_comunidad']; ?>">
-                                    <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
-                                                <i class="fa-solid fa-building fs-5 <?php echo $textClase; ?>"></i>
-                                            </div>
-                                            <div>
-                                                <div class="d-flex align-items-center gap-2 mb-1">
-                                                    <h3 class="fs-6 fw-bold text-dark mb-0" style="font-family: var(--fuente-titulos);">
-                                                        <?php echo htmlspecialchars($espacio['nombre_espacio']); ?>
-                                                    </h3>
-                                                    <?php if ($isBloqueado): ?>
-                                                        <span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-primary" style="font-size: 10px;">Operativo</span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users <?php echo $textClase; ?>"></i> Aforo: <?php echo $espacio['aforo']; ?></span>
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch <?php echo $textClase; ?>"></i> Máx: <?php echo $espacio['duracion_uso']; ?> min</span>
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock <?php echo $textClase; ?>"></i> <?php echo substr($espacio['hora_apertura'], 0, 5); ?> a <?php echo substr($espacio['hora_cierre'], 0, 5); ?></span>
-                                                </div>
-                                            </div>
+                <div class="d-flex flex-column gap-3" id="contenedor-cards-espacios">
+                    <?php if (empty($espacios)): ?>
+                        <div class="text-center py-5" id="mensaje-vacio-espacios">
+                            <i class="fa-solid fa-building-circle-xmark fs-1 text-muted mb-3"></i>
+                            <h5 class="fw-bold text-muted">No hay espacios creados</h5>
+                            <p class="text-muted small">Haz clic en "Nuevo Espacio" para añadir instalaciones a la comunidad.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($espacios as $espacio): ?>
+                            <?php
+                            $isBloqueado = $espacio['bloqueado'] == 1;
+                            $colorClase = $isBloqueado ? 'border-danger' : 'border-primary';
+                            $textClase = $isBloqueado ? 'text-danger' : 'text-primary';
+                            ?>
+                            <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid <?php echo $colorClase; ?> !important;" id="espacio-<?php echo $espacio['id_espacios_comunidad']; ?>">
+                                <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-building fs-5 <?php echo $textClase; ?>"></i>
                                         </div>
-                                        <div class="d-flex align-items-center gap-2 ms-md-auto">
-                                            <button class="btn btn-outline-secondary btn-sm fw-semibold shadow-sm" onclick='abrirModalEditar(<?php echo json_encode($espacio); ?>)'>
-                                                <i class="fa-solid fa-pen-to-square me-1"></i>Editar
-                                            </button>
-                                            <button class="btn btn-sm <?php echo $isBloqueado ? 'btn-outline-success' : 'btn-outline-warning'; ?> fw-semibold shadow-sm" onclick="toggleEstadoEspacio(<?php echo $espacio['id_espacios_comunidad']; ?>, <?php echo $isBloqueado ? 0 : 1; ?>)">
-                                                <?php echo $isBloqueado ? '<i class="fa-solid fa-check me-1"></i>Activar' : '<i class="fa-solid fa-ban me-1"></i>Bloquear'; ?>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger fw-semibold shadow-sm" onclick="eliminarEspacio(<?php echo $espacio['id_espacios_comunidad']; ?>)">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <h3 class="fs-6 fw-bold text-dark mb-0" style="font-family: var(--fuente-titulos);">
+                                                    <?php echo htmlspecialchars($espacio['nombre_espacio']); ?>
+                                                </h3>
+                                                <?php if ($isBloqueado): ?>
+                                                    <span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-primary" style="font-size: 10px;">Operativo</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                                                <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users <?php echo $textClase; ?>"></i> Aforo Total: <?php echo $espacio['aforo']; ?></span>
+                                                <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-group <?php echo $textClase; ?>"></i> Máx. Personas/Reserva: <?php echo $espacio['max_personas']; ?></span>
+                                                <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch <?php echo $textClase; ?>"></i> Duración: <?php echo $espacio['duracion_uso']; ?> min</span>
+                                                <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock <?php echo $textClase; ?>"></i> <?php echo substr($espacio['hora_apertura'], 0, 5); ?> a <?php echo substr($espacio['hora_cierre'], 0, 5); ?></span>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('<?php echo $espacio['id_espacios_comunidad']; ?>')">
+                                                    <i class="bi bi-chevron-down" id="icon-normas-<?php echo $espacio['id_espacios_comunidad']; ?>"></i>
+                                                    Normas de Uso
+                                                </button>
+                                                <div id="normas-<?php echo $espacio['id_espacios_comunidad']; ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                                                    <ul class="list-unstyled mb-0">
+                                                        <?php if (!empty($espacio['normas'])): ?>
+                                                            <?php foreach ($espacio['normas'] as $norma): ?>
+                                                                <li class="mb-1"><?php echo htmlspecialchars($norma); ?></li>
+                                                            <?php endforeach; ?>
+                                                        <?php else: ?>
+                                                            <li>No hay normas definidas.</li>
+                                                        <?php endif; ?>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div class="d-flex align-items-center gap-2 ms-md-auto">
+                                        <button class="btn btn-outline-secondary btn-sm fw-semibold shadow-sm" onclick='abrirModalEditar(<?php echo htmlspecialchars(json_encode($espacio), ENT_QUOTES, "UTF-8"); ?>)'>
+                                            <i class="fa-solid fa-pen-to-square me-1"></i>Editar
+                                        </button>
+                                        <button class="btn btn-sm <?php echo $isBloqueado ? 'btn-outline-success' : 'btn-outline-warning'; ?> fw-semibold shadow-sm" onclick="toggleEstadoEspacio(<?php echo $espacio['id_espacios_comunidad']; ?>, <?php echo $isBloqueado ? 0 : 1; ?>)">
+                                            <?php echo $isBloqueado ? '<i class="fa-solid fa-check me-1"></i>Activar' : '<i class="fa-solid fa-ban me-1"></i>Bloquear'; ?>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger fw-semibold shadow-sm" onclick="eliminarEspacio(<?php echo $espacio['id_espacios_comunidad']; ?>)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
-        </main>
     </div>
+    </main>
+</div>
 </div>
 
 <?php include 'src/views/components/reservas/modalCrearEspacio.php'; ?>
@@ -229,6 +251,15 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Duración (min)</label>
                             <input type="number" id="edit_duracion" name="duracion_uso" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-2">
+                                Normas de Uso
+                                <button type="button" class="btn btn-sm btn-outline-primary shadow-sm" onclick="crearInputNormaEdit()">
+                                    <i class="fa-solid fa-plus me-1"></i>Añadir Norma
+                                </button>
+                            </label>
+                            <div id="contenedor-normas-edit" class="d-flex flex-column gap-2"></div>
                         </div>
                     </div>
                 </div>

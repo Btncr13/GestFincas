@@ -215,30 +215,45 @@ class ReservaModel extends BaseModel
 
     public function getReservaById($id)
     {
-        $sql = "SELECT r.*, ec.nombre_espacio
-            FROM reservas r
-            JOIN espacios_comunidad ec 
-                ON ec.id_espacios_comunidad = r.id_espacios_comunidad
-            WHERE r.id_reservas = ?";
+        $sql = "SELECT r.*, r.id_reservas as id_reserva, ec.nombre_espacio,
+                       GROUP_CONCAT(en.descripcion ORDER BY en.id_espacios_normas ASC SEPARATOR '|||') AS normas_str
+                FROM reservas r
+                JOIN espacios_comunidad ec ON ec.id_espacios_comunidad = r.id_espacios_comunidad
+                LEFT JOIN espacios_normas en ON ec.id_espacios_comunidad = en.id_espacios_comunidad
+                WHERE r.id_reservas = ?
+                GROUP BY r.id_reservas";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $reserva = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($reserva) {
+            $reserva['normas'] = !empty($reserva['normas_str']) ? explode('|||', $reserva['normas_str']) : [];
+            unset($reserva['normas_str']);
+        }
+        return $reserva;
     }
 
     public function getReservasUsuario($id_usuario)
     {
         try {
-            $sql = "SELECT r.id_reservas as id_reserva, r.fecha_reserva as fecha, r.hora_inicio, r.hora_fin, r.estado_reserva, r.asistentes, 
-                           ec.nombre_espacio 
+            $sql = "SELECT r.id_reservas as id_reserva, r.fecha_reserva, r.hora_inicio, r.hora_fin, r.estado_reserva, r.asistentes, 
+                           ec.nombre_espacio,
+                           GROUP_CONCAT(en.descripcion ORDER BY en.id_espacios_normas ASC SEPARATOR '|||') AS normas_str
                     FROM reservas r 
                     JOIN espacios_comunidad ec ON r.id_espacios_comunidad = ec.id_espacios_comunidad 
+                    LEFT JOIN espacios_normas en ON ec.id_espacios_comunidad = en.id_espacios_comunidad
                     WHERE r.id_usuario = :id_usuario 
+                    GROUP BY r.id_reservas
                     ORDER BY r.fecha_reserva ASC, r.hora_inicio ASC";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $reservas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($reservas as &$r) {
+                $r['normas'] = !empty($r['normas_str']) ? explode('|||', $r['normas_str']) : [];
+                unset($r['normas_str']);
+            }
+            return $reservas;
         } catch (PDOException $e) {
             error_log("Error en getReservasUsuario: " . $e->getMessage());
             return [];
@@ -328,11 +343,9 @@ class ReservaModel extends BaseModel
 
             // Ejecutamos y verificamos si realmente se eliminó alguna fila
             return $stmt->execute() && $stmt->rowCount() > 0;
-            
         } catch (PDOException $e) {
             error_log("Error en eliminarReserva: " . $e->getMessage());
             return false;
         }
     }
-
 }

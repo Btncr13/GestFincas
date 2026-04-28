@@ -326,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const html = `
-<div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-${r.id_reservas || r.id_reserva}">
+<div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-${r.id_reserva}">
     <div class="card-body p-3 p-md-4">
         <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
             <div class="flex-grow-1">
@@ -339,9 +339,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${r.hora_inicio} - ${r.hora_fin}</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: ${r.asistentes}</span>
                 </div>
+                <div class="mt-3">
+                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('${r.id_reserva}')">
+                        <i class="bi bi-chevron-down" id="icon-normas-${r.id_reserva}"></i> Normas de Uso
+                    </button>
+                    <div id="normas-${r.id_reserva}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                        <ul class="list-unstyled mb-0">
+                            ${r.normas && r.normas.length > 0 ?
+                                r.normas.map(norma => `<li class="mb-1">${norma}</li>`).join('')
+                                : '<li>No hay normas definidas.</li>'}
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="ms-auto">
-                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(${r.id_reservas || r.id_reserva})">
+                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(${r.id_reserva})">
                     <i class="fa-solid fa-trash me-2"></i>Eliminar
                 </button>
             </div>
@@ -411,6 +423,18 @@ function renderReservas(reservas) {
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${r.fecha_reserva}</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${r.hora_inicio} - ${r.hora_fin}</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: ${r.asistentes}</span>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('${r.id_reserva}')">
+                        <i class="bi bi-chevron-down" id="icon-normas-${r.id_reserva}"></i> Normas de Uso
+                    </button>
+                    <div id="normas-${r.id_reserva}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                        <ul class="list-unstyled mb-0">
+                            ${r.normas && r.normas.length > 0 ?
+                                r.normas.map(norma => `<li class="mb-1">${norma}</li>`).join('')
+                                : '<li>No hay normas definidas.</li>'}
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="ms-auto">
@@ -490,3 +514,18 @@ function showToast(message, type = "success") {
   toastEl.classList.add(bgClass, "text-white");
   toastInstance.show();
 }
+
+// Lógica para alternar la visibilidad de las normas (estilo reuniones)
+window.toggleNormas = (id) => {
+  const el = document.getElementById(`normas-${id}`);
+  const icon = document.getElementById(`icon-normas-${id}`);
+  if (!el || !icon) return;
+  
+  if (el.classList.contains('d-none')) {
+    el.classList.remove('d-none');
+    icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+  } else {
+    el.classList.add('d-none');
+    icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+  }
+};

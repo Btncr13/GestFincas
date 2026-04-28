@@ -44,7 +44,8 @@ class ReservaController
             // --- Carga de datos para PRESIDENTE ---
             $this->reservaModel->actualizarReservasVencidas();
 
-            $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
+            // Cambiamos a la función que recupera los espacios junto con sus normas
+            $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
             $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
 
             require_once __DIR__ . '/../views/reservas/presidente.php';
@@ -197,18 +198,18 @@ class ReservaController
         exit;
     }
 
-   public function destroy()
+    public function destroy()
     {
         // ob_clean() asegura que ningún warning o espacio en blanco previo rompa el JSON devuelto
         if (ob_get_length()) {
             ob_clean();
         }
         header('Content-Type: application/json');
-        
+
         $id_reservas = $_POST['id_reserva'] ?? null;
         $id_usuario = $_SESSION['vivienda']['id_usuario'];
         // ARQUITECTURA: Pasamos el "Modo de Vista" actual, no el rol absoluto del usuario.
-        $modo_vista = $_SESSION['modo_vista'] ?? 'vecino'; 
+        $modo_vista = $_SESSION['modo_vista'] ?? 'vecino';
 
         if (!$id_reservas) {
             http_response_code(400);
@@ -222,7 +223,7 @@ class ReservaController
             echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
         } else {
             // Ya no usamos 403 duro aquí para que JS lo pueda leer bien, usamos 400
-            http_response_code(400); 
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'No tienes permisos o la reserva ya no existe.']);
         }
         exit; // Asegura que no se imprima nada más después

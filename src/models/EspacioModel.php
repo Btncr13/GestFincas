@@ -36,11 +36,10 @@ class EspacioModel extends BaseModel
             $idEspacio = $this->db->lastInsertId();
 
             // 2. Insertar en la tabla de detalle: espacios_normas
-            // Ajustado a: id_espacios_comunidad y descripcion
             if (!empty($datos['normas'])) {
-                // Dividimos el texto del textarea por saltos de línea (regex para soportar Windows/Linux)
-                $normasArr = preg_split('/\r\n|\r|\n/', $datos['normas']);
-                
+                // Soportamos tanto array de inputs dinámicos como string de textarea
+                $normasArr = is_array($datos['normas']) ? $datos['normas'] : preg_split('/\r\n|\r|\n/', $datos['normas']);
+
                 $sqlNorma = "INSERT INTO espacios_normas (id_espacios_comunidad, descripcion) VALUES (?, ?)";
                 $stmtNorma = $this->db->prepare($sqlNorma);
 
@@ -64,6 +63,8 @@ class EspacioModel extends BaseModel
     public function modificarEspacio($data)
     {
         try {
+            $this->db->beginTransaction();
+
             $sql = "UPDATE espacios_comunidad 
                     SET nombre_espacio = :nombre_espacio, aforo = :aforo, max_personas = :max_personas, 
                         hora_apertura = :hora_apertura, hora_cierre = :hora_cierre, duracion_uso = :duracion_uso 
@@ -79,10 +80,33 @@ class EspacioModel extends BaseModel
             $stmt->bindParam(':id_espacios_comunidad', $data['id_espacios_comunidad'], PDO::PARAM_INT);
             $stmt->bindParam(':id_comunidad', $data['id_comunidad'], PDO::PARAM_INT);
 
-            // Devolvemos simplemente el resultado de la ejecución. 
-            // Si el usuario no cambia nada, rowCount es 0 pero la ejecución es exitosa.
-            return $stmt->execute();
-        } catch (PDOException $e) {
+            $stmt->execute();
+
+            // 2. Actualizar las normas asociadas
+            // Primero, eliminar las normas existentes para este espacio
+            $sqlDeleteNormas = "DELETE FROM espacios_normas WHERE id_espacios_comunidad = :id_espacios_comunidad";
+            $stmtDeleteNormas = $this->db->prepare($sqlDeleteNormas);
+            $stmtDeleteNormas->bindParam(':id_espacios_comunidad', $data['id_espacios_comunidad'], PDO::PARAM_INT);
+            $stmtDeleteNormas->execute();
+
+            // Luego, insertar las nuevas normas si se proporcionaron
+            if (!empty($data['normas'])) {
+                // Soportamos tanto array de inputs dinámicos como string de textarea
+                $normasArr = is_array($data['normas']) ? $data['normas'] : preg_split('/\r\n|\r|\n/', $data['normas']);
+
+                $sqlInsertNorma = "INSERT INTO espacios_normas (id_espacios_comunidad, descripcion) VALUES (?, ?)";
+                $stmtInsertNorma = $this->db->prepare($sqlInsertNorma);
+
+                foreach ($normasArr as $linea) {
+                    $linea = trim($linea);
+                    if ($linea !== '') {
+                        $stmtInsertNorma->execute([$data['id_espacios_comunidad'], $linea]);
+                    }
+                }
+            }
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) { // Catch PDOException and other Exceptions
             error_log("Error en modificarEspacio: " . $e->getMessage());
             return false;
         }
@@ -120,6 +144,55 @@ class EspacioModel extends BaseModel
         }
     }
 
+    /**
+     * Obtiene todos los espacios de una comunidad, incluyendo sus normas asociadas.
+     *
+     * @param int $id_comunidad El ID de la comunidad.
+     * @return array Un array de espacios, cada uno con un array de 'normas'.
+     */
+    public function getEspaciosByComunidadConNormas($id_comunidad)
+    {
+        try {
+            $sql = "SELECT ec.*, GROUP_CONCAT(en.descripcion ORDER BY en.id_espacios_normas ASC SEPARATOR '|||') AS normas_str
+                    FROM espacios_comunidad ec
+                    LEFT JOIN espacios_normas en ON ec.id_espacios_comunidad = en.id_espacios_comunidad
+                    WHERE ec.id_comunidad = :id_comunidad
+                    GROUP BY ec.id_espacios_comunidad";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id_comunidad', $id_comunidad, PDO::PARAM_INT);
+            $stmt->execute();
+            $espacios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Procesar la cadena de normas en un array
+            foreach ($espacios as &$espacio) {
+                $espacio['normas'] = !empty($espacio['normas_str']) ? explode('|||', $espacio['normas_str']) : [];
+                unset($espacio['normas_str']); // Eliminar la cadena original
+            }
+            return $espacios;
+        } catch (PDOException $e) {
+            error_log("Error en getEspaciosByComunidadConNormas: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtiene las normas de uso para un espacio comunitario específico.
+     * @param int $id_espacios_comunidad El ID del espacio.
+     * @return array Un array de strings con las descripciones de las normas.
+     */
+    public function getNormasByEspacio($id_espacios_comunidad)
+    {
+        try {
+            $sql = "SELECT descripcion FROM espacios_normas WHERE id_espacios_comunidad = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id_espacios_comunidad, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_COLUMN); // Fetch just the descriptions
+        } catch (PDOException $e) {
+            error_log("Error en getNormasByEspacio: " . $e->getMessage());
+            return [];
+        }
+    }
     /**
      * Verifica si un espacio tiene reservas activas que aún no han concluido.
      * Esto protege la integridad del servicio para los vecinos.

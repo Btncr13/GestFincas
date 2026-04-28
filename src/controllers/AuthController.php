@@ -1,6 +1,7 @@
 <?php
 
 require_once "src/models/UsuarioModel.php";
+require_once "src/models/EspacioModel.php";
 require_once "src/models/VotacionModel.php";
 require_once "src/models/ReservaModel.php";
 
@@ -9,12 +10,13 @@ class AuthController
     private $usuarioModel;
     private $votacionModel;
     private $reservaModel;
-
+    private $espacioModel;
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->votacionModel = new VotacionModel($pdo);
         $this->reservaModel = new ReservaModel($pdo);
+        $this->espacioModel = new EspacioModel($pdo);
     }
 
     // 🟢 ENRUTAMIENTO INICIAL 🟢
@@ -259,6 +261,9 @@ class AuthController
 
         // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
         $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
+
+        // Obtener todos los espacios de la comunidad con sus normas
+        $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
 
         require "src/views/auth/panelpresi.php";
     }

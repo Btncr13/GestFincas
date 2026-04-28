@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * @var bool $tieneReservaHoy
  * @var int|null $votacionesPendientes
@@ -53,7 +54,7 @@ $titulo_pagina = "Reservas"; ?>
             if (!empty($misReservas)) {
                 foreach ($misReservas as $reserva) {
                     if ($reserva['estado_reserva'] === 'inactivo') {
-                        $fechaRes = strtotime($reserva['fecha']);
+                        $fechaRes = strtotime($reserva['fecha_reserva']);
                         if ($fechaRes >= $limiteInactivas) {
                             $reservasInactivas[] = $reserva;
                         }
@@ -75,8 +76,8 @@ $titulo_pagina = "Reservas"; ?>
                 <!-- FILTRO ESTADO RESERVAS (Desplegable a la derecha) -->
                 <div class="d-flex justify-content-end mb-3">
                     <select class="form-select w-auto shadow-sm fw-semibold text-dark border-0" style="background-color: var(--color-fondo-formularios, #f8f9fa); border-radius: var(--radio-md, 0.375rem); font-size: 14px; cursor: pointer;" onchange="switchSubTab(this.value)">
-                        <option value="activas">Reservas Activas (<?= count($reservasActivas) ?>)</option>
-                        <option value="inactivas">Reservas Inactivas (Últ. 2 sem)</option>
+                        <option value="activas">Reservas Activas</option>
+                        <option value="inactivas">Reservas Inactivas</option>
                     </select>
                 </div>
 
@@ -94,18 +95,36 @@ $titulo_pagina = "Reservas"; ?>
                                                     <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Activa</span>
                                                 </div>
                                                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> <?= htmlspecialchars($reserva['fecha']) ?></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> <?= htmlspecialchars($reserva['fecha_reserva']) ?></span>
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> <?= htmlspecialchars($reserva['hora_inicio']) ?> - <?= htmlspecialchars($reserva['hora_fin']) ?></span>
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: <?= htmlspecialchars($reserva['asistentes']) ?></span>
                                                 </div>
+
+                                                <div class="mt-3">
+                                                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('<?= $reserva['id_reserva'] ?>')">
+                                                        <i class="bi bi-chevron-down" id="icon-normas-<?= $reserva['id_reserva'] ?>"></i>
+                                                        Normas de Uso
+                                                    </button>
+                                                    <div id="normas-<?= $reserva['id_reserva'] ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                                                        <ul class="list-unstyled mb-0">
+                                                            <?php if (!empty($reserva['normas'])): ?>
+                                                                <?php foreach ($reserva['normas'] as $norma): ?>
+                                                                    <li class="mb-1"><?php echo htmlspecialchars($norma); ?></li>
+                                                                <?php endforeach; ?>
+                                                            <?php else: ?>
+                                                                <li>No hay normas definidas.</li>
+                                                            <?php endif; ?>
+                                                        </ul>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="ms-auto text-end">
-                                                <?php if ($reserva['fecha'] === $hoy): ?>
-                                                    <button class="btn btn-sm btn-success btn-confirmar-reserva w-100 mb-2 shadow-sm fw-semibold" data-fecha="<?= htmlspecialchars($reserva['fecha']) ?>">
+                                                <?php if ($reserva['fecha_reserva'] === $hoy): ?>
+                                                    <button class="btn btn-sm btn-success btn-confirmar-reserva w-100 mb-2 shadow-sm fw-semibold" data-fecha="<?= htmlspecialchars($reserva['fecha_reserva']) ?>">
                                                         <i class="bi bi-check-circle me-1"></i> Confirmar Asistencia
                                                     </button>
                                                 <?php endif; ?>
-                                                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm w-100 btn-eliminar-reserva" data-fecha="<?= htmlspecialchars($reserva['fecha']) ?>" onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
+                                                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm w-100 btn-eliminar-reserva" data-fecha="<?= htmlspecialchars($reserva['fecha_reserva']) ?>" onclick="eliminarReserva(<?= $reserva['id_reserva'] ?>)">
                                                     <i class="fa-solid fa-trash me-2"></i>Eliminar
                                                 </button>
                                             </div>
@@ -137,9 +156,27 @@ $titulo_pagina = "Reservas"; ?>
                                                     <span class="badge bg-secondary px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Inactiva</span>
                                                 </div>
                                                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-secondary"></i> <?= htmlspecialchars($reserva['fecha']) ?></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-secondary"></i> <?= htmlspecialchars($reserva['fecha_reserva']) ?></span>
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-secondary"></i> <?= htmlspecialchars($reserva['hora_inicio']) ?> - <?= htmlspecialchars($reserva['hora_fin']) ?></span>
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-secondary"></i> Asistentes: <?= htmlspecialchars($reserva['asistentes']) ?></span>
+                                                </div>
+
+                                                <div class="mt-3">
+                                                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('<?= $reserva['id_reserva'] ?>')">
+                                                        <i class="bi bi-chevron-down" id="icon-normas-<?= $reserva['id_reserva'] ?>"></i>
+                                                        Normas de Uso
+                                                    </button>
+                                                    <div id="normas-<?= $reserva['id_reserva'] ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                                                        <ul class="list-unstyled mb-0">
+                                                            <?php if (!empty($reserva['normas'])): ?>
+                                                                <?php foreach ($reserva['normas'] as $norma): ?>
+                                                                    <li class="mb-1"><?php echo htmlspecialchars($norma); ?></li>
+                                                                <?php endforeach; ?>
+                                                            <?php else: ?>
+                                                                <li>No hay normas definidas.</li>
+                                                            <?php endif; ?>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -217,49 +254,49 @@ $titulo_pagina = "Reservas"; ?>
 <script src="public/assets/js/reservas/panelvecino.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // 1. Al cargar la página, inicializar botones (Toggle State)
-    document.querySelectorAll('.btn-confirmar-reserva').forEach(btn => {
-        const fecha = btn.getAttribute('data-fecha');
-        if (localStorage.getItem('reserva_confirmada_' + fecha)) {
-            btn.classList.replace('btn-success', 'btn-warning');
-            btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
-        }
-    });
-
-    // 2. Delegación de eventos para Confirmar/Anular y Eliminar
-    document.body.addEventListener('click', function(e) {
-        const btn = e.target.closest('.btn-confirmar-reserva');
-        if (btn) {
+        // 1. Al cargar la página, inicializar botones (Toggle State)
+        document.querySelectorAll('.btn-confirmar-reserva').forEach(btn => {
             const fecha = btn.getAttribute('data-fecha');
-            const isConfirmada = localStorage.getItem('reserva_confirmada_' + fecha);
-
-            if (isConfirmada) {
-                // Revertir a no confirmada (limpiar memoria)
-                localStorage.removeItem('reserva_confirmada_' + fecha);
-                document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
-                    b.classList.replace('btn-warning', 'btn-success');
-                    b.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirmar Asistencia';
-                });
-            } else {
-                // Marcar como confirmada (guardar memoria)
-                localStorage.setItem('reserva_confirmada_' + fecha, 'true');
-                document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
-                    b.classList.replace('btn-success', 'btn-warning');
-                    b.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
-                });
+            if (localStorage.getItem('reserva_confirmada_' + fecha)) {
+                btn.classList.replace('btn-success', 'btn-warning');
+                btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
             }
-        }
+        });
 
-        // 3. Limpiar caché automáticamente al pulsar Eliminar
-        const btnEliminar = e.target.closest('.btn-eliminar-reserva');
-        if (btnEliminar) {
-            const fecha = btnEliminar.getAttribute('data-fecha');
-            if (fecha) {
-                localStorage.removeItem('reserva_confirmada_' + fecha);
+        // 2. Delegación de eventos para Confirmar/Anular y Eliminar
+        document.body.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-confirmar-reserva');
+            if (btn) {
+                const fecha = btn.getAttribute('data-fecha');
+                const isConfirmada = localStorage.getItem('reserva_confirmada_' + fecha);
+
+                if (isConfirmada) {
+                    // Revertir a no confirmada (limpiar memoria)
+                    localStorage.removeItem('reserva_confirmada_' + fecha);
+                    document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
+                        b.classList.replace('btn-warning', 'btn-success');
+                        b.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirmar Asistencia';
+                    });
+                } else {
+                    // Marcar como confirmada (guardar memoria)
+                    localStorage.setItem('reserva_confirmada_' + fecha, 'true');
+                    document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
+                        b.classList.replace('btn-success', 'btn-warning');
+                        b.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
+                    });
+                }
             }
-        }
+
+            // 3. Limpiar caché automáticamente al pulsar Eliminar
+            const btnEliminar = e.target.closest('.btn-eliminar-reserva');
+            if (btnEliminar) {
+                const fecha = btnEliminar.getAttribute('data-fecha');
+                if (fecha) {
+                    localStorage.removeItem('reserva_confirmada_' + fecha);
+                }
+            }
+        });
     });
-});
 </script>
