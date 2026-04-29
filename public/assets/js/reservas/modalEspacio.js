@@ -1,6 +1,5 @@
 /**
  * Gestión de Modal para Creación de Espacios Comunitarios
- * Archivo: public/assets/js/reservas/modalEspacio.js
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -23,7 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalEl = document.getElementById("modalCrearEspacio");
   const formEl = document.getElementById("formCrearEspacio");
   const btnGuardar = document.getElementById("btnGuardarEspacio");
-  const contenedorEspacios = document.querySelector("#espacios .row"); // Ajusta  HTML
+  const contenedorEspacios = document.getElementById(
+    "contenedor-cards-espacios",
+  );
 
   // Si la modal no existe en el DOM, detenemos la ejecución para evitar errores
   if (!modalEl) return;
@@ -119,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- 6. ENVÍO DE DATOS (FETCH) ---
-  // --- 6. ENVÍO DE DATOS (FETCH) ---
   btnGuardar.addEventListener("click", async () => {
     if (!state.isValid) return;
 
@@ -174,50 +174,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Definimos el color y el badge según el estado de bloqueo
     const isBloqueado = data.bloqueado == 1;
-    const colorClase = isBloqueado ? "border-danger" : "border-primary";
+    const colorClase = isBloqueado ? "var(--bs-danger)" : "var(--bs-primary)";
+    const textClase = isBloqueado ? "text-danger" : "text-primary";
     const badgeHTML = isBloqueado
-      ? '<span class="badge bg-danger">Bloqueado</span>'
-      : '<span class="badge bg-primary">Operativo</span>';
+      ? '<span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>'
+      : '<span class="badge bg-success" style="font-size: 10px;">Operativo</span>';
+    const toggleBtnClass = isBloqueado
+      ? "btn-outline-success"
+      : "btn-outline-warning";
+    const toggleBtnIcon = isBloqueado
+      ? '<i class="fa-solid fa-check me-1"></i>Activar'
+      : '<i class="fa-solid fa-ban me-1"></i>Bloquear';
+
+    // Escapamos el objeto para evitar errores de comillas
+    const espacioJson = JSON.stringify(data).replace(/'/g, "&apos;");
 
     const cardHTML = `
-<div class="col-md-4 mb-3" id="espacio-${data.id_espacios_comunidad}">
-  <div class="card shadow-sm module-card h-100 border-0 border-start border-4 ${colorClase}">
-    <div class="card-body p-4 d-flex flex-column">
-
-      <div class="d-flex justify-content-between align-items-start mb-2">
-        <div class="text-muted small">
-          <div>${data.hora_apertura.substring(0, 5)} - ${data.hora_cierre.substring(0, 5)}</div>
+<div class="card shadow-sm border module-card" style="border-left: 4px solid var(--color-borde) !important; border-color: var(--color-borde) !important;" id="espacio-${data.id_espacios_comunidad}">
+    <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
+                <i class="fa-solid fa-building fs-5 ${textClase}"></i>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h3 class="fs-6 fw-bold text-dark mb-0" style="font-family: var(--fuente-titulos);">
+                        ${data.nombre_espacio}
+                    </h3>
+                    ${badgeHTML}
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users ${textClase}"></i> Aforo Total: ${data.aforo}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-group ${textClase}"></i> Máx. Personas/Reserva: ${data.max_personas}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Duración: ${data.duracion_uso} min</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock ${textClase}"></i> ${data.hora_apertura.substring(0, 5)} a ${data.hora_cierre.substring(0, 5)}</span>
+                </div>
+                <details class="mt-3" style="font-size:13px; color:var(--color-texto);">
+                    <summary class="fw-semibold cursor-pointer ${textClase}">
+                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                    </summary>
+                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                        ${
+                          data.normas && data.normas.length > 0
+                            ? data.normas
+                                .map(
+                                  (norma) =>
+                                    `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`,
+                                )
+                                .join("")
+                            : "<li>No hay normas definidas para este espacio.</li>"
+                        }
+                    </ul>
+                </details>
+            </div>
         </div>
-        ${badgeHTML}
-      </div>
-
-      <h3 class="fs-5 fw-bold" style="font-family: var(--fuente-titulos);">
-        ${data.nombre_espacio}
-      </h3>
-
-      <div class="small text-muted mb-3">
-        Aforo: ${data.aforo} · Máx: ${data.duracion_uso} min
-      </div>
-
-      <div class="mt-auto d-flex gap-2">
-        <button class="btn btn-outline-secondary btn-sm flex-fill"
-          onclick='abrirModalEditar(${JSON.stringify(data)})'>
-          Editar
-        </button>
-
-        <button class="btn btn-sm ${isBloqueado ? "btn-outline-success" : "btn-outline-warning"} flex-fill"
-          onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
-          ${isBloqueado ? "Activar" : "Bloquear"}
-        </button>
-
-        <button class="btn btn-sm btn-outline-danger"
-          onclick="eliminarEspacio(${data.id_espacios_comunidad})">
-          🗑
-        </button>
-      </div>
-
+        <div class="d-flex align-items-center gap-2 ms-md-auto">
+            <button class="btn btn-outline-secondary btn-sm fw-semibold shadow-sm" onclick='abrirModalEditar(${espacioJson})'>
+                <i class="fa-solid fa-pen-to-square me-1"></i>Editar
+            </button>
+            <button class="btn btn-sm ${toggleBtnClass} fw-semibold shadow-sm" onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
+                ${toggleBtnIcon}
+            </button>
+            <button class="btn btn-sm btn-outline-danger fw-semibold shadow-sm" onclick="eliminarEspacio(${data.id_espacios_comunidad})">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
     </div>
-  </div>
 </div>
 `;
     // Eliminamos el mensaje de "No hay espacios" si existe
@@ -240,7 +262,22 @@ document.addEventListener("DOMContentLoaded", () => {
     ? new bootstrap.Modal(modalBloqueoEl)
     : null;
 
-  window.abrirModalEditar = (espacio) => {
+  // Función global para añadir un nuevo campo de norma en el modal de edición
+  window.crearInputNormaEdit = (valor = "") => {
+    const contenedor = document.getElementById("contenedor-normas-edit");
+    if (!contenedor) return;
+    const div = document.createElement("div");
+    div.className = "input-group input-group-sm mb-1";
+    div.innerHTML = `
+        <input type="text" name="normas[]" class="form-control border-end-0" value="${valor}" placeholder="Describa la norma...">
+        <button class="btn btn-outline-danger border-start-0" type="button" onclick="this.parentElement.remove()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    `;
+    contenedor.appendChild(div);
+  };
+
+  window.abrirModalEditar = async (espacio) => {
     document.getElementById("edit_id").value = espacio.id_espacios_comunidad;
     document.getElementById("edit_nombre").value = espacio.nombre_espacio;
     document.getElementById("edit_aforo").value = espacio.aforo;
@@ -248,6 +285,25 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("edit_apertura").value = espacio.hora_apertura;
     document.getElementById("edit_cierre").value = espacio.hora_cierre;
     document.getElementById("edit_duracion").value = espacio.duracion_uso;
+
+    // Fetch norms for the space and populate the textarea
+    try {
+      const response = await fetch(
+        `index.php?route=espacio/getNormasForEspacio&id=${espacio.id_espacios_comunidad}`,
+      );
+      const result = await response.json();
+      const contenedor = document.getElementById("contenedor-normas-edit");
+      if (contenedor) {
+        contenedor.innerHTML = ""; // Limpiar normas previas
+        if (result.success && result.normas.length > 0) {
+          result.normas.forEach((n) => window.crearInputNormaEdit(n));
+        } else {
+          window.crearInputNormaEdit(); // Un campo vacío por defecto
+        }
+      }
+    } catch (error) {
+      console.error("Network error fetching norms:", error);
+    }
     bootstrapModalEditar?.show();
   };
 
@@ -255,6 +311,10 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("formEditarEspacio")
     ?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      // Deshabilitar el botón para evitar envíos múltiples
+      const btnActualizar = e.submitter;
+      if (btnActualizar) btnActualizar.disabled = true;
+
       const formData = new FormData(e.target);
       const res = await fetch("index.php?route=espacio/update", {
         method: "POST",
@@ -265,7 +325,10 @@ document.addEventListener("DOMContentLoaded", () => {
         actualizarCardUI(data.espacio);
         bootstrapModalEditar?.hide();
         showToast("Datos actualizados correctamente");
+      } else {
+        showToast(data.message || "Error al actualizar el espacio.", "error");
       }
+      if (btnActualizar) btnActualizar.disabled = false; // Re-enable button
     });
 
   let idParaBloquear = null;
@@ -294,14 +357,27 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("bloqueado", estado);
     if (motivo) formData.append("motivo", motivo);
 
-    const res = await fetch("index.php?route=espacio/toggleEstado", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (data.success) {
-      actualizarCardUI(data.espacio);
-      showToast(data.message);
+    try {
+      const res = await fetch("index.php?route=espacio/toggleEstado", {
+        method: "POST",
+        body: formData,
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        actualizarCardUI(data.espacio);
+        showToast(data.message);
+        // Refrescamos la pestaña de reservas para reflejar cancelaciones/reactivaciones
+        if (typeof window.cargarReservasPresi === 'function') {
+            window.cargarReservasPresi();
+        }
+      } else {
+        showToast(data.message || "Error al cambiar el estado", "error");
+      }
+    } catch (error) {
+      console.error("Error en toggleEstado:", error);
+      showToast("Error de conexión con el servidor", "error");
     }
   };
 
@@ -327,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Si ya no quedan espacios, mostramos el mensaje de "vacío"
           if (
             contenedorEspacios &&
-            contenedorEspacios.querySelectorAll(".col-md-4").length === 0
+            contenedorEspacios.querySelectorAll(".card").length === 0
           ) {
             contenedorEspacios.innerHTML = `
               <div class="text-center py-5" id="mensaje-vacio-espacios">
@@ -362,40 +438,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Aseguramos que bloqueado sea tratado como número para la comparación
     const isBloqueado = parseInt(data.bloqueado) === 1;
-    const colorClase = isBloqueado ? "border-danger" : "border-primary";
+    const colorClase = isBloqueado ? "var(--bs-danger)" : "var(--bs-primary)";
+    const textClase = isBloqueado ? "text-danger" : "text-primary";
+    const badgeHTML = isBloqueado
+      ? '<span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>'
+      : '<span class="badge bg-success" style="font-size: 10px;">Operativo</span>';
+    const toggleBtnClass = isBloqueado
+      ? "btn-outline-success"
+      : "btn-outline-warning";
+    const toggleBtnIcon = isBloqueado
+      ? '<i class="fa-solid fa-check me-1"></i>Activar'
+      : '<i class="fa-solid fa-ban me-1"></i>Bloquear';
 
     // Escapamos el objeto para evitar errores de comillas en el atributo onclick
     const espacioJson = JSON.stringify(data).replace(/'/g, "&apos;");
 
+    colContainer.classList.remove("border-0");
+    colContainer.classList.add("border");
+    colContainer.setAttribute(
+      "style",
+      `border-left: 4px solid var(--color-borde) !important; border-color: var(--color-borde) !important;`,
+    );
     colContainer.innerHTML = `
-      <div class="card shadow-sm module-card h-100 border-0 border-start border-4 ${colorClase}">
-        <div class="card-body p-4 d-flex flex-column">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <div class="text-muted small">
-              <div>${data.hora_apertura.substring(0, 5)} - ${data.hora_cierre.substring(0, 5)}</div>
+    <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
+                <i class="fa-solid fa-building fs-5 ${textClase}"></i>
             </div>
-            ${isBloqueado ? '<span class="badge bg-danger">Bloqueado</span>' : '<span class="badge bg-primary">Operativo</span>'}
-          </div>
-          <h3 class="fs-5 fw-bold" style="font-family: var(--fuente-titulos);">${data.nombre_espacio}</h3>
-          <div class="small text-muted mb-3">
-            Aforo: ${data.aforo} · Máx: ${data.duracion_uso} min
-          </div>
-          <div class="mt-auto d-flex gap-2">
-            <button class="btn btn-outline-secondary btn-sm flex-fill" 
-              onclick='abrirModalEditar(${espacioJson})'>
-              Editar
-            </button>
-            <button class="btn btn-sm ${isBloqueado ? "btn-outline-success" : "btn-outline-warning"} flex-fill"
-              onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
-              ${isBloqueado ? "Activar" : "Bloquear"}
-            </button>
-            <button class="btn btn-sm btn-outline-danger"
-              onclick="eliminarEspacio(${data.id_espacios_comunidad})">
-              🗑
-            </button>
-          </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h3 class="fs-6 fw-bold text-dark mb-0" style="font-family: var(--fuente-titulos);">
+                        ${data.nombre_espacio}
+                    </h3>
+                    ${badgeHTML}
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users ${textClase}"></i> Aforo Total: ${data.aforo}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-group ${textClase}"></i> Máx. Personas/Reserva: ${data.max_personas}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Duración: ${data.duracion_uso} min</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock ${textClase}"></i> ${data.hora_apertura.substring(0, 5)} a ${data.hora_cierre.substring(0, 5)}</span>
+                </div>
+                <details class="mt-3" style="font-size:13px; color:var(--color-texto);">
+                    <summary class="fw-semibold cursor-pointer ${textClase}">
+                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                    </summary>
+                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                        ${
+                          data.normas && data.normas.length > 0
+                            ? data.normas
+                                .map(
+                                  (norma) =>
+                                    `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`,
+                                )
+                                .join("")
+                            : "<li>No hay normas definidas para este espacio.</li>"
+                        }
+                    </ul>
+                </details>
+            </div>
         </div>
-      </div>
+        <div class="d-flex align-items-center gap-2 ms-md-auto">
+            <button class="btn btn-outline-secondary btn-sm fw-semibold shadow-sm" onclick='abrirModalEditar(${espacioJson})'>
+                <i class="fa-solid fa-pen-to-square me-1"></i>Editar
+            </button>
+            <button class="btn btn-sm ${toggleBtnClass} fw-semibold shadow-sm" onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
+                ${toggleBtnIcon}
+            </button>
+            <button class="btn btn-sm btn-outline-danger fw-semibold shadow-sm" onclick="eliminarEspacio(${data.id_espacios_comunidad})">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    </div>
     `;
   };
 
@@ -407,12 +520,12 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Muestra una notificación visual en pantalla
    */
-  function showToast(message, type = "success") {
+  window.showToast = (message, type = "success") => {
     if (!toastInstance) return;
     toastBody.textContent = message;
     toastEl.classList.remove("bg-success", "bg-danger", "text-white");
     const bgClass = type === "success" ? "bg-success" : "bg-danger";
     toastEl.classList.add(bgClass, "text-white");
     toastInstance.show();
-  }
+  };
 });

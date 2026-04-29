@@ -45,7 +45,8 @@ class ReservaController
             // --- Carga de datos para PRESIDENTE ---
             $this->reservaModel->actualizarReservasVencidas();
 
-            $espacios = $this->espacioModel->getEspaciosByComunidad($id_comunidad);
+            // Cambiamos a la función que recupera los espacios junto con sus normas
+            $espacios = $this->espacioModel->getNormasByEspacio($id_comunidad);
             $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
 
             require_once __DIR__ . '/../views/reservas/presidente.php';
@@ -59,16 +60,15 @@ class ReservaController
         }
     }
 
-
-    // ----------------------------------------------------------- ENDPOINT PARA COMPROBAR DISPONIBILIDAD ESPACIO POR TRAMO HORARIO 
-
-
+    // =========================================================================
+    // ENDPOINTS Y LÓGICA DE API
+    // =========================================================================
     public function comprobarDisponibilidad()
     {
         header('Content-Type: application/json');
 
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
-        $fecha = $_POST['fecha_reserva'];
+        $fecha = $_POST['fecha_reserva'] ?? null;
         $hora_inicio = $_POST['hora_inicio'] ?? null;
         $hora_fin = $_POST['hora_fin'] ?? null;
 
@@ -98,7 +98,6 @@ class ReservaController
         echo json_encode($resultado);
     }
 
-    // ----------------------------------------------------------- ENDPOINT CREAR RESERVA DESDE VENTANA MODAL
     public function store()
     {
         header('Content-Type: application/json');
@@ -184,8 +183,6 @@ class ReservaController
         exit;
     }
 
-    // -------------------------------------------------------------------- ENDPOINT RECUPERAR RESERVAS DE MANERA DINAMICA
-
     public function getMisReservasAjax()
     {
 
@@ -202,19 +199,32 @@ class ReservaController
         exit;
     }
 
-
-    //---------------------------------------------------------------- FUNCIÓN ELIMINAR ESPACIO
-
-   public function destroy()
+    public function getTodasLasReservasComunidadAjax()
     {
-        // ob_clean() asegura que ningún warning o espacio en blanco previo rompa el JSON devuelto
-        ob_clean();
+        if (ob_get_length()) ob_clean();
         header('Content-Type: application/json');
         
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        
+        $this->reservaModel->actualizarReservasVencidas();
+        $reservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
+        
+        echo json_encode(['success' => true, 'reservas' => $reservas]);
+        exit;
+    }
+
+    public function destroy()
+    {
+        // ob_clean() asegura que ningún warning o espacio en blanco previo rompa el JSON devuelto
+        if (ob_get_length()) {
+            ob_clean();
+        }
+        header('Content-Type: application/json');
+
         $id_reservas = $_POST['id_reserva'] ?? null;
         $id_usuario = $_SESSION['vivienda']['id_usuario'];
         // ARQUITECTURA: Pasamos el "Modo de Vista" actual, no el rol absoluto del usuario.
-        $modo_vista = $_SESSION['modo_vista'] ?? 'vecino'; 
+        $modo_vista = $_SESSION['modo_vista'] ?? 'vecino';
 
         if (!$id_reservas) {
             http_response_code(400);
@@ -228,7 +238,7 @@ class ReservaController
             echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
         } else {
             // Ya no usamos 403 duro aquí para que JS lo pueda leer bien, usamos 400
-            http_response_code(400); 
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'No tienes permisos o la reserva ya no existe.']);
         }
         exit; // Asegura que no se imprima nada más después
