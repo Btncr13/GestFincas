@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-04-2026 a las 17:48:56
+-- Tiempo de generación: 27-04-2026 a las 21:29:52
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -33,7 +33,7 @@ CREATE TABLE `asistencia_reunion` (
   `id_vivienda` int(10) UNSIGNED NOT NULL,
   `confirmacion` enum('pendiente','confirmada','rechazada') NOT NULL DEFAULT 'pendiente',
   `fecha_respuesta` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `asistencia_reunion`
@@ -85,6 +85,47 @@ CREATE TABLE `comunidad` (
 INSERT INTO `comunidad` (`id_comunidad`, `id_mancomunidad`, `id_direccion`, `nombre`, `fecha_creacion`) VALUES
 (1, NULL, 1, 'Las Flores', '2026-04-09 17:30:25'),
 (2, NULL, 2, 'Gabriela Mistral', '2026-04-14 00:03:33');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `direccion`
+--
+
+--
+-- Volcado de datos para la tabla `comunidad`
+--
+
+INSERT INTO `comunidad` (`id_comunidad`, `id_mancomunidad`, `id_direccion`, `nombre`, `fecha_creacion`) VALUES
+(1, NULL, 1, 'Las Flores', '2026-04-09 17:30:25');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cuota`
+--
+
+CREATE TABLE `cuota` (
+  `id_cuota` int(11) UNSIGNED NOT NULL,
+  `id_vivienda` int(10) UNSIGNED NOT NULL,
+  `tipo` enum('mensual','derrama') NOT NULL DEFAULT 'mensual',
+  `concepto` varchar(255) NOT NULL,
+  `importe` decimal(10,2) NOT NULL,
+  `fecha_emision` date NOT NULL,
+  `estado` enum('pagada','pendiente') NOT NULL DEFAULT 'pendiente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `cuota`
+--
+
+INSERT INTO `cuota` (`id_cuota`, `id_vivienda`, `tipo`, `concepto`, `importe`, `fecha_emision`, `estado`) VALUES
+(13, 2, 'mensual', 'Cuota Marzo 2026', 50.00, '2026-03-01', 'pagada'),
+(14, 4, 'mensual', 'Cuota Marzo 2026', 50.00, '2026-03-01', 'pagada'),
+(17, 2, 'mensual', 'Ascensor reparación', 111.00, '2026-04-10', 'pagada'),
+(18, 4, 'mensual', 'Ascensor reparación', 111.00, '2026-04-10', 'pagada'),
+(19, 2, 'mensual', 'Cuota MAyo 2026', 66.00, '2026-04-30', 'pagada'),
+(20, 4, 'mensual', 'Cuota MAyo 2026', 66.00, '2026-04-30', 'pagada');
 
 -- --------------------------------------------------------
 
@@ -245,6 +286,23 @@ INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `a
 -- Estructura de tabla para la tabla `reunion`
 --
 
+--
+-- Volcado de datos para la tabla `reservas`
+--
+
+INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `asistentes`, `fecha_reserva`, `hora_inicio`, `hora_fin`, `estado_reserva`) VALUES
+(1, 3, 3, 4, '2026-04-22', '10:00:00', '10:30:00', 'inactivo'),
+(2, 1, 3, 13, '2026-04-21', '18:00:00', '18:30:00', 'inactivo'),
+(3, 3, 3, 2, '2026-04-21', '18:30:00', '19:00:00', 'inactivo'),
+(4, 3, 3, 15, '2026-04-23', '18:00:00', '18:30:00', 'inactivo'),
+(5, 1, 3, 15, '2026-04-22', '18:00:00', '18:30:00', 'inactivo');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reunion`
+--
+
 CREATE TABLE `reunion` (
   `id_reunion` int(11) UNSIGNED NOT NULL,
   `id_comunidad` int(11) UNSIGNED NOT NULL,
@@ -322,6 +380,20 @@ INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 -- Estructura de tabla para la tabla `votacion`
 --
 
+--
+-- Volcado de datos para la tabla `vivienda`
+--
+
+INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
+(4, 1, 'Planta 1 1ºC'),
+(2, 1, 'Planta 2-1B');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votacion`
+--
+
 CREATE TABLE `votacion` (
   `id_votacion` int(11) UNSIGNED NOT NULL,
   `id_comunidad` int(11) UNSIGNED NOT NULL,
@@ -331,6 +403,19 @@ CREATE TABLE `votacion` (
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
   `activa` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `votacion`
+--
+
+INSERT INTO `votacion` (`id_votacion`, `id_comunidad`, `titulo`, `descripcion`, `fecha_limite`, `fecha_creacion`, `activa`) VALUES
+(1, 1, 'Presidente de la Comunidad', 'Votos a favor de Antonio Recio presidente, viva el rey y viva España!!!', '2026-04-23 15:08:00', '2026-04-16 15:08:42', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `votacion_opcion`
+--
 
 --
 -- Volcado de datos para la tabla `votacion`
@@ -360,6 +445,20 @@ INSERT INTO `votacion_opcion` (`id_opcion`, `id_votacion`, `texto`) VALUES
 (2, 1, 'Enrique Pastor'),
 (3, 2, 'asd'),
 (4, 2, 'dfg');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `voto`
+--
+
+--
+-- Volcado de datos para la tabla `votacion_opcion`
+--
+
+INSERT INTO `votacion_opcion` (`id_opcion`, `id_votacion`, `texto`) VALUES
+(1, 1, 'Antonio Recio'),
+(2, 1, 'Enrique Pastor');
 
 -- --------------------------------------------------------
 
