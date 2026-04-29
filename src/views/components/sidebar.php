@@ -1,6 +1,6 @@
 <?php
 // Blindaje de variables: si no existen, las sacamos de la sesión por defecto
-$rolReal = $rolReal ?? $_SESSION['user']['rol'] ?? 'vecino';
+$rolReal = $rolReal ?? $_SESSION['vivienda']['rol'] ?? 'vecino';
 $rol = $rol ?? $rolReal;
 
 // 🟢 LÓGICA DE RUTAS Y MENÚ ACTIVO 🟢

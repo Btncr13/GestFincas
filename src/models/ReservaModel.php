@@ -78,7 +78,7 @@ class ReservaModel extends BaseModel
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_espacios_comunidad', $id_espacios_comunidad, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
         } catch (PDOException $e) {
             error_log("Error en getNormasByEspacio: " . $e->getMessage());
             return [];
@@ -237,7 +237,7 @@ class ReservaModel extends BaseModel
     {
         try {
             $sql = "SELECT r.id_reservas as id_reserva, r.fecha_reserva, r.hora_inicio, r.hora_fin, r.estado_reserva, r.asistentes, 
-                           ec.nombre_espacio,
+                           ec.nombre_espacio, ec.bloqueado as espacio_bloqueado, ec.motivo as motivo_espacio,
                            GROUP_CONCAT(en.descripcion ORDER BY en.id_espacios_normas ASC SEPARATOR '|||') AS normas_str
                     FROM reservas r 
                     JOIN espacios_comunidad ec ON r.id_espacios_comunidad = ec.id_espacios_comunidad 
@@ -281,20 +281,26 @@ class ReservaModel extends BaseModel
     {
         try {
             $sql = "SELECT r.id_reservas as id_reserva, r.fecha_reserva as fecha, r.hora_inicio, r.hora_fin, r.estado_reserva, r.asistentes,
-                           ec.nombre_espacio, u.nombre as vecino_nombre, u.apellidos 
+                           ec.nombre_espacio, ec.bloqueado as espacio_bloqueado, ec.motivo as motivo_espacio, u.nombre as vecino_nombre, u.apellidos, v.nombre as nombre_vivienda,
+                           GROUP_CONCAT(en.descripcion ORDER BY en.id_espacios_normas ASC SEPARATOR '|||') AS normas_str
                     FROM reservas r
                     JOIN espacios_comunidad ec ON r.id_espacios_comunidad = ec.id_espacios_comunidad
                     JOIN usuario u ON r.id_usuario = u.id_usuario
-                    WHERE ec.id_comunidad = :id_comunidad 
-                      AND (
-                        YEARWEEK(r.fecha_reserva, 1) = YEARWEEK(CURDATE(), 1)
-                        OR (r.estado_reserva = 'inactivo' AND YEARWEEK(r.fecha_reserva, 1) = YEARWEEK(DATE_SUB(CURDATE(), INTERVAL 1 WEEK), 1))
-                      )
+                    JOIN vivienda v ON u.id_vivienda = v.id_vivienda
+                    LEFT JOIN espacios_normas en ON ec.id_espacios_comunidad = en.id_espacios_comunidad
+                    WHERE ec.id_comunidad = :id_comunidad
+                    GROUP BY r.id_reservas
                     ORDER BY r.fecha_reserva DESC, r.hora_inicio DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id_comunidad', $id_comunidad, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $reservas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($reservas as &$r) {
+                $r['normas'] = !empty($r['normas_str']) ? explode('|||', $r['normas_str']) : [];
+                unset($r['normas_str']);
+            }
+            return $reservas;
         } catch (PDOException $e) {
             error_log("Error en getTodasLasReservasComunidad: " . $e->getMessage());
             return [];

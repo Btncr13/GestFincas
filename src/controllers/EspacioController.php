@@ -163,6 +163,7 @@ class EspacioController
     // API: BLOQUEAR/DESBLOQUEAR (Soft Delete / Inactivar)
     public function toggleEstado()
     {
+        if (ob_get_length()) ob_clean();
         header('Content-Type: application/json');
 
         $id_espacios_comunidad = $_POST['id_espacios_comunidad'] ?? null;
@@ -185,6 +186,7 @@ class EspacioController
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al cambiar el estado del espacio.']);
         }
+        exit;
     }
 
     // API: ELIMINAR ESPACIO
@@ -197,12 +199,7 @@ class EspacioController
         if (!$id) {
             echo json_encode(['success' => false, 'message' => 'ID de espacio no proporcionado.']);
             return;
-        }
-
-        // Validación de reglas de negocio: No eliminar si hay compromisos activos
-        if ($this->espacioModel->tieneReservasPendientes($id)) {
-            echo json_encode(['success' => false, 'message' => 'No se puede eliminar el espacio: tiene reservas activas o pendientes asociadas.']);
-            return;
+            exit;
         }
 
         if ($this->espacioModel->eliminarEspacio($id)) {
@@ -211,5 +208,6 @@ class EspacioController
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'No se pudo eliminar el espacio.']);
         }
+        exit;
     }
 }

@@ -49,7 +49,7 @@
                 <div class="d-flex justify-content-end mb-3">
                     <select class="form-select w-auto shadow-sm fw-semibold text-dark border-0" style="background-color: var(--color-fondo-formularios, #f8f9fa); border-radius: var(--radio-md, 0.375rem); font-size: 14px; cursor: pointer;" onchange="switchSubTab(this.value)">
                         <option value="activas">Reservas Activas</option>
-                        <option value="inactivas">Reservas Inactivas (Últ. 2 sem)</option>
+                        <option value="inactivas">Reservas Inactivas</option>
                     </select>
                 </div>
 
@@ -61,33 +61,47 @@
                             <h5 class="text-muted">No hay reservas activas</h5>
                         </div>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle border shadow-sm rounded">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Vecino</th>
-                                        <th>Instalación</th>
-                                        <th>Fecha</th>
-                                        <th>Horario</th>
-                                        <th class="text-center">Asist.</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($reservasActivas as $res): ?>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-bold"><?php echo htmlspecialchars($res['vecino_nombre'] . ' ' . $res['apellidos']); ?></div>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($res['nombre_espacio']); ?></td>
-                                            <td><?php echo date('d/m/Y', strtotime($res['fecha'])); ?></td>
-                                            <td><span class="badge bg-light text-dark border"><?php echo substr($res['hora_inicio'], 0, 5); ?> - <?php echo substr($res['hora_fin'], 0, 5); ?></span></td>
-                                            <td class="text-center"><?php echo $res['asistentes']; ?></td>
-                                            <td><span class="badge bg-success">Activa</span></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                        <div class="d-flex flex-column gap-3">
+                            <?php foreach ($reservasActivas as $res): ?>
+                                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-<?php echo $res['id_reserva']; ?>">
+                                    <div class="card-body p-3 p-md-4">
+                                        <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                                    <span style="font-size:15px; font-weight:700; color:var(--bs-dark); font-family: var(--fuente-titulos);"><?php echo htmlspecialchars($res['nombre_espacio']); ?></span>
+                                                    <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Activa</span>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-house text-success"></i> <span class="fw-bold"><?php echo htmlspecialchars($res['nombre_vivienda'] ?? ''); ?></span></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> <?php echo date('d/m/Y', strtotime($res['fecha'])); ?></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> <span class="badge bg-light text-dark border"><?php echo substr($res['hora_inicio'], 0, 5); ?> - <?php echo substr($res['hora_fin'], 0, 5); ?></span></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: <?php echo $res['asistentes']; ?></span>
+                                                </div>
+
+                                                <div class="mt-3">
+                                                    <details style="font-size:13px; color:var(--color-texto);">
+                                                        <summary class="fw-semibold cursor-pointer text-success">
+                                                            <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                                                        </summary>
+                                                        <ul class="list-unstyled ps-3 pt-2 mb-0">
+                                                            <?php foreach ($res['normas'] as $norma): ?>
+                                                                <li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i><?php echo htmlspecialchars($norma); ?></li>
+                                                            <?php endforeach;
+                                                            if (empty($res['normas'])) echo '<li>No hay normas definidas.</li>'; ?>
+                                                        </ul>
+                                                    </details>
+                                                </div>
+                                            </div>
+                                            <div class="ms-auto text-end">
+                                                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm px-3"
+                                                    onclick="if(confirm('¿Seguro que deseas eliminar esta reserva?')) eliminarReservaGen(<?php echo $res['id_reserva']; ?>)">
+                                                    <i class="fa-solid fa-trash me-2"></i>Eliminar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -101,33 +115,48 @@
                             <p class="text-muted small">Solo se muestran las reservas de las últimas 2 semanas.</p>
                         </div>
                     <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle border shadow-sm rounded bg-light">
-                                <thead class="table-secondary">
-                                    <tr>
-                                        <th>Vecino</th>
-                                        <th>Instalación</th>
-                                        <th>Fecha</th>
-                                        <th>Horario</th>
-                                        <th class="text-center">Asist.</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($reservasInactivas as $res): ?>
-                                        <tr class="text-muted">
-                                            <td>
-                                                <div class="fw-bold"><?php echo htmlspecialchars($res['vecino_nombre'] . ' ' . $res['apellidos']); ?></div>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($res['nombre_espacio']); ?></td>
-                                            <td><?php echo date('d/m/Y', strtotime($res['fecha'])); ?></td>
-                                            <td><span class="badge bg-light text-muted border"><?php echo substr($res['hora_inicio'], 0, 5); ?> - <?php echo substr($res['hora_fin'], 0, 5); ?></span></td>
-                                            <td class="text-center"><?php echo $res['asistentes']; ?></td>
-                                            <td><span class="badge bg-secondary">Inactiva</span></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                        <div class="d-flex flex-column gap-3">
+                            <?php foreach ($reservasInactivas as $res): ?>
+                                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid #d1d5db !important; background-color: var(--bs-light); opacity: 0.75;" id="reserva-<?php echo $res['id_reserva']; ?>">
+                                    <div class="card-body p-3 p-md-4">
+                                        <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                                    <span style="font-size:15px; font-weight:700; color:var(--bs-gray-600); font-family: var(--fuente-titulos);"><?php echo htmlspecialchars($res['nombre_espacio']); ?></span>
+                                                    <span class="badge bg-secondary px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Inactiva</span>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-house text-secondary"></i> <span class="fw-bold"><?php echo htmlspecialchars($res['nombre_vivienda'] ?? ''); ?></span></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-secondary"></i> <?php echo date('d/m/Y', strtotime($res['fecha'])); ?></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-secondary"></i> <span class="badge bg-light text-muted border"><?php echo substr($res['hora_inicio'], 0, 5); ?> - <?php echo substr($res['hora_fin'], 0, 5); ?></span></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-secondary"></i> Asistentes: <?php echo $res['asistentes']; ?></span>
+                                                </div>
+
+                                                <?php if ($res['estado_reserva'] === 'inactivo' && ($res['espacio_bloqueado'] ?? 0) == 1 && !empty($res['motivo_espacio'])): ?>
+                                                    <div class="alert alert-danger border-0 border-start border-4 border-danger shadow-sm mt-3 mb-0 py-2 px-3" style="font-size:12px;">
+                                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                                        <strong>Cancelada por bloqueo:</strong> <?php echo htmlspecialchars($res['motivo_espacio']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <div class="mt-3">
+                                                    <details style="font-size:13px; color:var(--color-texto);">
+                                                        <summary class="fw-semibold cursor-pointer text-secondary">
+                                                            <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                                                        </summary>
+                                                        <ul class="list-unstyled ps-3 pt-2 mb-0">
+                                                            <?php foreach ($res['normas'] as $norma): ?>
+                                                                <li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-secondary"></i><?php echo htmlspecialchars($norma); ?></li>
+                                                            <?php endforeach;
+                                                            if (empty($res['normas'])) echo '<li>No hay normas definidas.</li>'; ?>
+                                                        </ul>
+                                                    </details>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -146,10 +175,9 @@
                         <?php foreach ($espacios as $espacio): ?>
                             <?php
                             $isBloqueado = $espacio['bloqueado'] == 1;
-                            $colorClase = $isBloqueado ? 'border-danger' : 'border-primary';
                             $textClase = $isBloqueado ? 'text-danger' : 'text-primary';
                             ?>
-                            <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid <?php echo $colorClase; ?> !important;" id="espacio-<?php echo $espacio['id_espacios_comunidad']; ?>">
+                            <div class="card shadow-sm border module-card" style="border-left: 4px solid var(--color-borde) !important; border-color: var(--color-borde) !important;" id="espacio-<?php echo $espacio['id_espacios_comunidad']; ?>">
                                 <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
@@ -163,7 +191,7 @@
                                                 <?php if ($isBloqueado): ?>
                                                     <span class="badge bg-danger" style="font-size: 10px;">Bloqueado</span>
                                                 <?php else: ?>
-                                                    <span class="badge bg-primary" style="font-size: 10px;">Operativo</span>
+                                                    <span class="badge bg-success" style="font-size: 10px;">Operativo</span>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
@@ -174,21 +202,20 @@
                                             </div>
 
                                             <div class="mt-3">
-                                                <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('<?php echo $espacio['id_espacios_comunidad']; ?>')">
-                                                    <i class="bi bi-chevron-down" id="icon-normas-<?php echo $espacio['id_espacios_comunidad']; ?>"></i>
-                                                    Normas de Uso
-                                                </button>
-                                                <div id="normas-<?php echo $espacio['id_espacios_comunidad']; ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                                                    <ul class="list-unstyled mb-0">
+                                                <details style="font-size:13px; color:var(--color-texto);">
+                                                    <summary class="fw-semibold cursor-pointer <?php echo $textClase; ?>">
+                                                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                                                    </summary>
+                                                    <ul class="list-unstyled ps-3 pt-2 mb-0">
                                                         <?php if (!empty($espacio['normas'])): ?>
                                                             <?php foreach ($espacio['normas'] as $norma): ?>
-                                                                <li class="mb-1"><?php echo htmlspecialchars($norma); ?></li>
+                                                                <li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i><?php echo htmlspecialchars($norma); ?></li>
                                                             <?php endforeach; ?>
                                                         <?php else: ?>
-                                                            <li>No hay normas definidas.</li>
+                                                            <li>No hay normas definidas para este espacio.</li>
                                                         <?php endif; ?>
                                                     </ul>
-                                                </div>
+                                                </details>
                                             </div>
                                         </div>
                                     </div>
@@ -215,81 +242,9 @@
 </div>
 
 <?php include 'src/views/components/reservas/modalCrearEspacio.php'; ?>
+<?php include 'src/views/components/reservas/modalEditarEspacio.php'; ?>
+<?php include 'src/views/components/reservas/modalBloqueoEspacio.php'; ?>
 
-<!-- Modal Editar Espacio -->
-<div class="modal fade" id="modalEditarEspacio" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-secondary text-white">
-                <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Editar Instalación</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="formEditarEspacio">
-                <input type="hidden" name="id_espacios_comunidad" id="edit_id">
-                <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Nombre</label>
-                            <input type="text" id="edit_nombre" name="nombre_espacio" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Aforo Total</label>
-                            <input type="number" id="edit_aforo" name="aforo" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Max. Personas / Reserva</label>
-                            <input type="number" id="edit_max" name="max_personas" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Apertura</label>
-                            <input type="time" id="edit_apertura" name="hora_apertura" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Cierre</label>
-                            <input type="time" id="edit_cierre" name="hora_cierre" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Duración (min)</label>
-                            <input type="number" id="edit_duracion" name="duracion_uso" class="form-control">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-2">
-                                Normas de Uso
-                                <button type="button" class="btn btn-sm btn-outline-primary shadow-sm" onclick="crearInputNormaEdit()">
-                                    <i class="fa-solid fa-plus me-1"></i>Añadir Norma
-                                </button>
-                            </label>
-                            <div id="contenedor-normas-edit" class="d-flex flex-column gap-2"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4">Actualizar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Bloqueo -->
-<div class="modal fade" id="modalBloqueo" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title fw-bold text-dark">Bloquear Espacio</h5>
-            </div>
-            <div class="modal-body">
-                <p>Indica el motivo por el cual los vecinos no podrán reservar esta instalación:</p>
-                <input type="text" id="motivoBloqueo" class="form-control" placeholder="Ej: Limpieza de filtros">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="btnConfirmarBloqueo" class="btn btn-warning fw-bold">Confirmar Bloqueo</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Contenedor Global para Toasts (Notificaciones) -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
@@ -302,8 +257,9 @@
         </div>
     </div>
 </div>
-<!-- Lógica de ventana modal -->
+<!-- Lógica de gestión de espacios y reservas -->
 <script src="public/assets/js/reservas/modalEspacio.js"></script>
+<script src="public/assets/js/reservas/modalReserva.js"></script>
 
 <!-- Lógica de Pestañas tipo Switch -->
 <script src="public/assets/js/reservas/panelpresi.js"></script>

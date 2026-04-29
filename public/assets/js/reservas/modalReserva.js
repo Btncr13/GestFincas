@@ -115,6 +115,17 @@ document.addEventListener("DOMContentLoaded", () => {
   btnCrear.addEventListener("click", crearReserva);
 
   // Sincronización automática cada minuto mientras el modal está abierto
+  modalReservaEl.addEventListener("show.bs.modal", (event) => {
+    const button = event.relatedTarget; // Botón que disparó el modal
+    const idEspacio = button ? button.getAttribute('data-id-espacio') : null;
+    
+    if (idEspacio) {
+      selectEspacio.value = idEspacio;
+      // Disparar el evento change manualmente para que la lógica de state se actualice
+      selectEspacio.dispatchEvent(new Event('change'));
+    }
+  });
+
   modalReservaEl.addEventListener("shown.bs.modal", () => {
     state.refreshInterval = setInterval(() => {
       const { esHoy } = getFiltroTiempo();
@@ -325,6 +336,11 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        const hoyStr = new Date().toISOString().split('T')[0];
+        const isHoy = r.fecha_reserva === hoyStr;
+        const hInicio = r.hora_inicio.substring(0, 5);
+        const hFin = r.hora_fin.substring(0, 5);
+
         const html = `
 <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-${r.id_reserva}">
     <div class="card-body p-3 p-md-4">
@@ -335,25 +351,30 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Activa</span>
                 </div>
                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${r.fecha_reserva}</span>
-                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${r.hora_inicio} - ${r.hora_fin}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${formatoFechaJS(r.fecha_reserva)}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${hInicio} - ${hFin}</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: ${r.asistentes}</span>
                 </div>
                 <div class="mt-3">
-                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('${r.id_reserva}')">
-                        <i class="bi bi-chevron-down" id="icon-normas-${r.id_reserva}"></i> Normas de Uso
-                    </button>
-                    <div id="normas-${r.id_reserva}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                        <ul class="list-unstyled mb-0">
-                            ${r.normas && r.normas.length > 0 ?
-                                r.normas.map(norma => `<li class="mb-1">${norma}</li>`).join('')
+                    <details style="font-size:13px; color:var(--color-texto);">
+                        <summary class="fw-semibold cursor-pointer text-success">
+                            <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                        </summary>
+                        <ul class="list-unstyled ps-3 pt-2 mb-0">
+                            ${r.normas && r.normas.length > 0
+                                ? r.normas.map(norma => `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`).join('')
                                 : '<li>No hay normas definidas.</li>'}
                         </ul>
-                    </div>
+                    </details>
                 </div>
             </div>
-            <div class="ms-auto">
-                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(${r.id_reserva})">
+            <div class="ms-auto text-end">
+                ${isHoy ? `
+                    <button class="btn btn-sm btn-success btn-confirmar-reserva w-100 mb-2 shadow-sm fw-semibold" data-fecha="${r.fecha_reserva}">
+                        <i class="bi bi-check-circle me-1"></i> Confirmar Asistencia
+                    </button>
+                ` : ''}
+                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm w-100 btn-eliminar-reserva" data-fecha="${r.fecha_reserva}" onclick="eliminarReserva(${r.id_reserva})">
                     <i class="fa-solid fa-trash me-2"></i>Eliminar
                 </button>
             </div>
@@ -380,6 +401,124 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => console.error("Error en la petición:", err));
   }
 });
+
+// =====================================================
+// 📋 11. GESTIÓN DE RESERVAS PARA PRESIDENTE (AJAX)
+// =====================================================
+
+window.cargarReservasPresi = function () {
+  fetch("index.php?route=reserva/getTodasLasReservasComunidadAjax")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) renderReservasPresi(data.reservas);
+    });
+};
+
+function renderReservasPresi(reservas) {
+  const containerActivas = document.getElementById("lista-activas");
+  const containerInactivas = document.getElementById("lista-inactivas");
+  if (!containerActivas || !containerInactivas) return;
+
+  // Filtro de 14 días para inactivas (mismo que en PHP)
+  const limiteInactivas = new Date();
+  limiteInactivas.setDate(limiteInactivas.getDate() - 14);
+  limiteInactivas.setHours(0, 0, 0, 0);
+
+  let htmlActivas = "";
+  let htmlInactivas = "";
+
+  reservas.forEach((res) => {
+    const isActiva = res.estado_reserva === "activo";
+    const fechaRes = new Date(res.fecha);
+
+    if (!isActiva && fechaRes < limiteInactivas) return;
+
+    const color = isActiva ? "success" : "secondary";
+    const borderLeft = isActiva ? "var(--bs-success)" : "#d1d5db";
+    const bgCard = isActiva
+      ? ""
+      : "background-color: var(--bs-light); opacity: 0.75;";
+    const badgeText = isActiva ? "Activa" : "Inactiva";
+
+    const cardHTML = `
+            <div class="card shadow-sm border-0 module-card mb-3" style="border-left: 4px solid ${borderLeft} !important; ${bgCard}" id="reserva-${res.id_reserva}">
+                <div class="card-body p-3 p-md-4">
+                    <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                <span style="font-size:15px; font-weight:700; color:var(--bs-dark); font-family: var(--fuente-titulos);">${res.nombre_espacio}</span>
+                                <span class="badge bg-${color} px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">${badgeText}</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
+                                <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-house text-${color}"></i> <span class="fw-bold">${res.nombre_vivienda || ""}</span></span>
+                                <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-${color}"></i> ${formatoFechaJS(res.fecha)}</span>
+                                <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-${color}"></i> <span class="badge bg-light text-dark border">${res.hora_inicio.substring(0, 5)} - ${res.hora_fin.substring(0, 5)}</span></span>
+                                <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-${color}"></i> Asistentes: ${res.asistentes}</span>
+                            </div>
+                            ${
+                              !isActiva &&
+                              res.espacio_bloqueado == 1 &&
+                              res.motivo_espacio
+                                ? `
+                                <div class="alert alert-danger border-0 border-start border-4 border-danger shadow-sm mt-3 mb-0 py-2 px-3" style="font-size:12px;">
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                    <strong>Cancelada por bloqueo:</strong> ${res.motivo_espacio}
+                                </div>`
+                                : ""
+                            }
+                            <div class="mt-3">
+                                <details style="font-size:13px; color:var(--color-texto);">
+                                    <summary class="fw-semibold cursor-pointer text-${color}">
+                                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                                    </summary>
+                                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                                        ${
+                                          res.normas && res.normas.length > 0
+                                            ? res.normas
+                                                .map(
+                                                  (n) =>
+                                                    `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-${color}"></i>${n}</li>`,
+                                                )
+                                                .join("")
+                                            : "<li>No hay normas definidas.</li>"
+                                        }
+                                    </ul>
+                                </details>
+                            </div>
+                        </div>
+                        ${
+                          isActiva
+                            ? `
+                        <div class="ms-auto text-end">
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm px-3" onclick="if(confirm('¿Seguro que deseas eliminar esta reserva?')) eliminarReservaGen(${res.id_reserva})">
+                                <i class="fa-solid fa-trash me-2"></i>Eliminar
+                            </button>
+                        </div>`
+                            : ""
+                        }
+                    </div>
+                </div>
+            </div>`;
+
+    if (isActiva) htmlActivas += cardHTML;
+    else htmlInactivas += cardHTML;
+  });
+
+  containerActivas.innerHTML =
+    htmlActivas ||
+    '<div class="text-center py-5 w-100"><i class="fa-solid fa-clipboard-check fs-1 text-muted mb-3"></i><h5 class="text-muted">No hay reservas activas</h5></div>';
+  containerInactivas.innerHTML =
+    htmlInactivas ||
+    '<div class="text-center py-5 w-100"><i class="fa-solid fa-clipboard-check fs-1 text-muted mb-3"></i><h5 class="text-muted">No hay reservas inactivas recientes</h5></div>';
+}
+
+function formatoFechaJS(fechaStr) {
+  const d = new Date(fechaStr);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 // ------------------------- FUERA DEL DOMCONTENTLOADED
 
@@ -410,6 +549,11 @@ function renderReservas(reservas) {
   }
 
   reservas.forEach((r) => {
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const isHoy = r.fecha_reserva === hoyStr;
+    const hInicio = r.hora_inicio.substring(0, 5);
+    const hFin = r.hora_fin.substring(0, 5);
+
     const html = `
 <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-success) !important;" id="reserva-${r.id_reserva}">
     <div class="card-body p-3 p-md-4">
@@ -420,25 +564,30 @@ function renderReservas(reservas) {
                     <span class="badge bg-success px-2 py-1 rounded-2 shadow-sm text-white" style="font-size:11px;">Activa</span>
                 </div>
                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${r.fecha_reserva}</span>
-                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${r.hora_inicio} - ${r.hora_fin}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> ${formatoFechaJS(r.fecha_reserva)}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> ${hInicio} - ${hFin}</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: ${r.asistentes}</span>
                 </div>
                 <div class="mt-3">
-                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('${r.id_reserva}')">
-                        <i class="bi bi-chevron-down" id="icon-normas-${r.id_reserva}"></i> Normas de Uso
-                    </button>
-                    <div id="normas-${r.id_reserva}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                        <ul class="list-unstyled mb-0">
-                            ${r.normas && r.normas.length > 0 ?
-                                r.normas.map(norma => `<li class="mb-1">${norma}</li>`).join('')
+                    <details style="font-size:13px; color:var(--color-texto);">
+                        <summary class="fw-semibold cursor-pointer text-success">
+                            <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                        </summary>
+                        <ul class="list-unstyled ps-3 pt-2 mb-0">
+                            ${r.normas && r.normas.length > 0
+                                ? r.normas.map(norma => `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`).join('')
                                 : '<li>No hay normas definidas.</li>'}
                         </ul>
-                    </div>
+                    </details>
                 </div>
             </div>
-            <div class="ms-auto">
-                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm" onclick="eliminarReserva(${r.id_reserva})">
+            <div class="ms-auto text-end">
+                ${isHoy ? `
+                    <button class="btn btn-sm btn-success btn-confirmar-reserva w-100 mb-2 shadow-sm fw-semibold" data-fecha="${r.fecha_reserva}">
+                        <i class="bi bi-check-circle me-1"></i> Confirmar Asistencia
+                    </button>
+                ` : ''}
+                <button type="button" class="btn btn-outline-danger btn-sm fw-semibold shadow-sm w-100 btn-eliminar-reserva" data-fecha="${r.fecha_reserva}" onclick="eliminarReserva(${r.id_reserva})">
                     <i class="fa-solid fa-trash me-2"></i>Eliminar
                 </button>
             </div>
@@ -454,51 +603,55 @@ function renderReservas(reservas) {
 // ----------------------------------------------------------------------------------
 
 function eliminarReserva(idReserva) {
-    // 1. Confirmación de seguridad (UX básica)
-    if (!confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
-        return;
-    }
-
-    // 2. Preparamos los datos para el POST
-    const formData = new FormData();
-    formData.append('id_reserva', idReserva);
-    // Idealmente aquí también añadiríamos: formData.append('csrf_token', tuTokenGlobal);
-
-    // 3. Petición AJAX al controlador (ReservaController::destroy)
-    fetch('index.php?route=reserva/destroy', {
-        method: 'POST',
-        body: formData
-    })
-    .then(async response => {
-        // En lugar de hacer throw inmediato, parseamos la respuesta
-        const data = await response.json().catch(() => null); 
-        
-        if (!response.ok) {
-            // Si hay un error HTTP, lanzamos el mensaje del backend o uno por defecto
-            throw new Error(data?.message || `Error del servidor HTTP ${response.status}`);
-        }
-        
-        return data; // Si todo va bien (200 OK), pasamos la data al siguiente then
-    })
-    .then(data => {
-        if (data && data.success) {
-            const cardReserva = document.getElementById(`reserva-${idReserva}`);
-            if (cardReserva) {
-                cardReserva.style.transition = "opacity 0.3s ease";
-                cardReserva.style.opacity = "0";
-                setTimeout(() => { cardReserva.remove(); }, 300); 
-            }
-        } else {
-            // Uso de Optional Chaining (?.) para evitar el crasheo si data es null
-            alert(data?.message || 'No se pudo cancelar la reserva.');
-        }
-    })
-    .catch(error => {
-        console.error('Detalle del error:', error);
-        // Ahora el alert mostrará el motivo real (ej: "No tienes permisos")
-        alert(`Fallo en la operación: ${error.message}`);
-    });
+  // 1. Confirmación de seguridad (UX básica)
+  if (!confirm("¿Estás seguro de que deseas cancelar esta reserva?")) {
+    return;
   }
+
+  // 2. Preparamos los datos para el POST
+  const formData = new FormData();
+  formData.append("id_reserva", idReserva);
+  // Idealmente aquí también añadiríamos: formData.append('csrf_token', tuTokenGlobal);
+
+  // 3. Petición AJAX al controlador (ReservaController::destroy)
+  fetch("index.php?route=reserva/destroy", {
+    method: "POST",
+    body: formData,
+  })
+    .then(async (response) => {
+      // En lugar de hacer throw inmediato, parseamos la respuesta
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        // Si hay un error HTTP, lanzamos el mensaje del backend o uno por defecto
+        throw new Error(
+          data?.message || `Error del servidor HTTP ${response.status}`,
+        );
+      }
+
+      return data; // Si todo va bien (200 OK), pasamos la data al siguiente then
+    })
+    .then((data) => {
+      if (data && data.success) {
+        const cardReserva = document.getElementById(`reserva-${idReserva}`);
+        if (cardReserva) {
+          cardReserva.style.transition = "opacity 0.3s ease";
+          cardReserva.style.opacity = "0";
+          setTimeout(() => {
+            cardReserva.remove();
+          }, 300);
+        }
+      } else {
+        // Uso de Optional Chaining (?.) para evitar el crasheo si data es null
+        alert(data?.message || "No se pudo cancelar la reserva.");
+      }
+    })
+    .catch((error) => {
+      console.error("Detalle del error:", error);
+      // Ahora el alert mostrará el motivo real (ej: "No tienes permisos")
+      alert(`Fallo en la operación: ${error.message}`);
+    });
+}
 // =====================================================
 // 🍞 10. SISTEMA DE NOTIFICACIONES (TOAST)
 // =====================================================
@@ -520,12 +673,12 @@ window.toggleNormas = (id) => {
   const el = document.getElementById(`normas-${id}`);
   const icon = document.getElementById(`icon-normas-${id}`);
   if (!el || !icon) return;
-  
-  if (el.classList.contains('d-none')) {
-    el.classList.remove('d-none');
-    icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+
+  if (el.classList.contains("d-none")) {
+    el.classList.remove("d-none");
+    icon.classList.replace("bi-chevron-down", "bi-chevron-up");
   } else {
-    el.classList.add('d-none');
-    icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+    el.classList.add("d-none");
+    icon.classList.replace("bi-chevron-up", "bi-chevron-down");
   }
 };

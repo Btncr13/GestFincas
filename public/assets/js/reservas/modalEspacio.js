@@ -1,6 +1,5 @@
 /**
  * Gestión de Modal para Creación de Espacios Comunitarios
- * Archivo: public/assets/js/reservas/modalEspacio.js
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -121,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- 6. ENVÍO DE DATOS (FETCH) ---
-  // --- 6. ENVÍO DE DATOS (FETCH) ---
   btnGuardar.addEventListener("click", async () => {
     if (!state.isValid) return;
 
@@ -188,8 +186,11 @@ document.addEventListener("DOMContentLoaded", () => {
       ? '<i class="fa-solid fa-check me-1"></i>Activar'
       : '<i class="fa-solid fa-ban me-1"></i>Bloquear';
 
+    // Escapamos el objeto para evitar errores de comillas
+    const espacioJson = JSON.stringify(data).replace(/'/g, "&apos;");
+
     const cardHTML = `
-<div class="card shadow-sm border-0 module-card" style="border-left: 4px solid ${colorClase} !important;" id="espacio-${data.id_espacios_comunidad}">
+<div class="card shadow-sm border module-card" style="border-left: 4px solid var(--color-borde) !important; border-color: var(--color-borde) !important;" id="espacio-${data.id_espacios_comunidad}">
     <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div class="d-flex align-items-center gap-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center bg-light shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
@@ -203,14 +204,32 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${badgeHTML}
                 </div>
                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
-                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users ${textClase}"></i> Aforo: ${data.aforo}</span>
-                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Máx: ${data.duracion_uso} min</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users ${textClase}"></i> Aforo Total: ${data.aforo}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-group ${textClase}"></i> Máx. Personas/Reserva: ${data.max_personas}</span>
+                    <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Duración: ${data.duracion_uso} min</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock ${textClase}"></i> ${data.hora_apertura.substring(0, 5)} a ${data.hora_cierre.substring(0, 5)}</span>
                 </div>
+                <details class="mt-3" style="font-size:13px; color:var(--color-texto);">
+                    <summary class="fw-semibold cursor-pointer ${textClase}">
+                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                    </summary>
+                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                        ${
+                          data.normas && data.normas.length > 0
+                            ? data.normas
+                                .map(
+                                  (norma) =>
+                                    `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`,
+                                )
+                                .join("")
+                            : "<li>No hay normas definidas para este espacio.</li>"
+                        }
+                    </ul>
+                </details>
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 ms-md-auto">
-            <button class="btn btn-outline-secondary btn-sm fw-semibold shadow-sm" onclick='abrirModalEditar(${JSON.stringify(data)})'>
+            <button class="btn btn-outline-secondary btn-sm fw-semibold shadow-sm" onclick='abrirModalEditar(${espacioJson})'>
                 <i class="fa-solid fa-pen-to-square me-1"></i>Editar
             </button>
             <button class="btn btn-sm ${toggleBtnClass} fw-semibold shadow-sm" onclick="toggleEstadoEspacio(${data.id_espacios_comunidad}, ${isBloqueado ? 0 : 1})">
@@ -229,21 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Insertamos la card al principio del contenedor
     contenedorEspacios.insertAdjacentHTML("afterbegin", cardHTML);
-  };
-
-  // Lógica para alternar la visibilidad de las normas (estilo reuniones)
-  window.toggleNormas = (id) => {
-    const el = document.getElementById(`normas-${id}`);
-    const icon = document.getElementById(`icon-normas-${id}`);
-    if (!el || !icon) return;
-    
-    if (el.classList.contains('d-none')) {
-      el.classList.remove('d-none');
-      icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
-    } else {
-      el.classList.add('d-none');
-      icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
-    }
   };
 
   // --- 8. FUNCIONALIDADES DE ACCIÓN (EDITAR, BLOQUEAR, ELIMINAR) ---
@@ -353,14 +357,27 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("bloqueado", estado);
     if (motivo) formData.append("motivo", motivo);
 
-    const res = await fetch("index.php?route=espacio/toggleEstado", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (data.success) {
-      actualizarCardUI(data.espacio);
-      showToast(data.message);
+    try {
+      const res = await fetch("index.php?route=espacio/toggleEstado", {
+        method: "POST",
+        body: formData,
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        actualizarCardUI(data.espacio);
+        showToast(data.message);
+        // Refrescamos la pestaña de reservas para reflejar cancelaciones/reactivaciones
+        if (typeof window.cargarReservasPresi === 'function') {
+            window.cargarReservasPresi();
+        }
+      } else {
+        showToast(data.message || "Error al cambiar el estado", "error");
+      }
+    } catch (error) {
+      console.error("Error en toggleEstado:", error);
+      showToast("Error de conexión con el servidor", "error");
     }
   };
 
@@ -436,9 +453,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Escapamos el objeto para evitar errores de comillas en el atributo onclick
     const espacioJson = JSON.stringify(data).replace(/'/g, "&apos;");
 
+    colContainer.classList.remove("border-0");
+    colContainer.classList.add("border");
     colContainer.setAttribute(
       "style",
-      `border-left: 4px solid ${colorClase} !important;`,
+      `border-left: 4px solid var(--color-borde) !important; border-color: var(--color-borde) !important;`,
     );
     colContainer.innerHTML = `
     <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
@@ -459,18 +478,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch ${textClase}"></i> Duración: ${data.duracion_uso} min</span>
                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock ${textClase}"></i> ${data.hora_apertura.substring(0, 5)} a ${data.hora_cierre.substring(0, 5)}</span>
                 </div>
-                <div class="mt-3">
-                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('${data.id_espacios_comunidad}')">
-                        <i class="bi bi-chevron-down" id="icon-normas-${data.id_espacios_comunidad}"></i> Normas de Uso
-                    </button>
-                    <div id="normas-${data.id_espacios_comunidad}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                        <ul class="list-unstyled mb-0">
-                            ${data.normas && data.normas.length > 0 ?
-                                data.normas.map(norma => `<li class="mb-1">${norma}</li>`).join('')
-                                : '<li>No hay normas definidas.</li>'}
-                        </ul>
-                    </div>
-                </div>
+                <details class="mt-3" style="font-size:13px; color:var(--color-texto);">
+                    <summary class="fw-semibold cursor-pointer ${textClase}">
+                        <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                    </summary>
+                    <ul class="list-unstyled ps-3 pt-2 mb-0">
+                        ${
+                          data.normas && data.normas.length > 0
+                            ? data.normas
+                                .map(
+                                  (norma) =>
+                                    `<li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i>${norma}</li>`,
+                                )
+                                .join("")
+                            : "<li>No hay normas definidas para este espacio.</li>"
+                        }
+                    </ul>
+                </details>
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 ms-md-auto">
@@ -496,12 +520,12 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Muestra una notificación visual en pantalla
    */
-  function showToast(message, type = "success") {
+  window.showToast = (message, type = "success") => {
     if (!toastInstance) return;
     toastBody.textContent = message;
     toastEl.classList.remove("bg-success", "bg-danger", "text-white");
     const bgClass = type === "success" ? "bg-success" : "bg-danger";
     toastEl.classList.add(bgClass, "text-white");
     toastInstance.show();
-  }
+  };
 });

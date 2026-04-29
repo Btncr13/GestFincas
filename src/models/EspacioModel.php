@@ -115,16 +115,43 @@ class EspacioModel extends BaseModel
     public function bloquearEspacio($id_espacios_comunidad, $bloqueado, $motivo = null)
     {
         try {
+            $this->db->beginTransaction();
+
+            // 1. Actualizar el estado y motivo en el espacio
             $sql = "UPDATE espacios_comunidad 
-                    SET bloqueado = :bloqueado, motivo = :motivo 
+                    SET bloqueado = :bloqueado, motivo = :motivo, fecha_actualizacion = NOW()
                     WHERE id_espacios_comunidad = :id_espacios_comunidad";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':bloqueado', $bloqueado, PDO::PARAM_INT);
-            $stmt->bindParam(':motivo', $motivo, PDO::PARAM_STR);
+            $stmt->bindValue(':motivo', ($bloqueado == 1 ? $motivo : null), PDO::PARAM_STR);
             $stmt->bindParam(':id_espacios_comunidad', $id_espacios_comunidad, PDO::PARAM_INT);
+            $stmt->execute();
 
-            return $stmt->execute();
-        } catch (PDOException $e) {
+            // 2. Gestionar las reservas asociadas según el estado de bloqueo
+            $sqlRes = "UPDATE reservas 
+                       SET estado_reserva = :nuevo_estado 
+                       WHERE id_espacios_comunidad = :id 
+                       AND estado_reserva = :estado_actual 
+                       AND CONCAT(fecha_reserva, ' ', hora_fin) >= NOW()";
+            $stmtRes = $this->db->prepare($sqlRes);
+            $stmtRes->bindParam(':id', $id_espacios_comunidad, PDO::PARAM_INT);
+
+            if ($bloqueado == 1) {
+                // Si se bloquea, inactivar reservas activas futuras
+                $stmtRes->bindValue(':nuevo_estado', 'inactivo', PDO::PARAM_STR);
+                $stmtRes->bindValue(':estado_actual', 'activo', PDO::PARAM_STR);
+                $stmtRes->execute();
+            } elseif ($bloqueado == 0) {
+                // Si se desbloquea, reactivar reservas inactivas futuras (que fueron inactivadas por el bloqueo)
+                $stmtRes->bindValue(':nuevo_estado', 'activo', PDO::PARAM_STR);
+                $stmtRes->bindValue(':estado_actual', 'inactivo', PDO::PARAM_STR);
+                $stmtRes->execute();
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
             error_log("Error en bloquearEspacio: " . $e->getMessage());
             return false;
         }
@@ -218,6 +245,8 @@ class EspacioModel extends BaseModel
     {
         try {
             $this->db->beginTransaction();
+            // 1. Eliminamos las reservas asociadas (necesario por integridad referencial)
+            $this->db->prepare("DELETE FROM reservas WHERE id_espacios_comunidad = ?")->execute([$id_espacio]);
             // Primero eliminamos las normas asociadas por integridad referencial
             $this->db->prepare("DELETE FROM espacios_normas WHERE id_espacios_comunidad = ?")->execute([$id_espacio]);
             // Luego el espacio

@@ -19,11 +19,12 @@ $titulo_pagina = "Reservas"; ?>
         <main class="container py-4 py-md-5">
 
             <!-- Título + botón -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <h1 class="fw-bold mb-0 text-dark" style="font-family: var(--fuente-titulos);">
-                    Reservas de Espacios
-                </h1>
 
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <div>
+                    <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 28px; font-weight: 700; color: var(--bs-dark);">Reservas de espacios</h1>
+                    <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Tablón para la gestión de reservas</p>
+                </div>
                 <button type="button" class="btn btn-brand fw-semibold shadow-sm"
                     data-bs-toggle="modal" data-bs-target="#modalReserva">
                     <i class="fa-solid fa-plus me-2"></i> Nueva Reserva
@@ -96,26 +97,25 @@ $titulo_pagina = "Reservas"; ?>
                                                 </div>
                                                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-success"></i> <?= htmlspecialchars($reserva['fecha_reserva']) ?></span>
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> <?= htmlspecialchars($reserva['hora_inicio']) ?> - <?= htmlspecialchars($reserva['hora_fin']) ?></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-success"></i> <?= substr($reserva['hora_inicio'], 0, 5) ?> - <?= substr($reserva['hora_fin'], 0, 5) ?></span>
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-success"></i> Asistentes: <?= htmlspecialchars($reserva['asistentes']) ?></span>
                                                 </div>
 
                                                 <div class="mt-3">
-                                                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('<?= $reserva['id_reserva'] ?>')">
-                                                        <i class="bi bi-chevron-down" id="icon-normas-<?= $reserva['id_reserva'] ?>"></i>
-                                                        Normas de Uso
-                                                    </button>
-                                                    <div id="normas-<?= $reserva['id_reserva'] ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                                                        <ul class="list-unstyled mb-0">
+                                                    <details style="font-size:13px; color:var(--color-texto);">
+                                                        <summary class="fw-semibold cursor-pointer text-success">
+                                                            <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                                                        </summary>
+                                                        <ul class="list-unstyled ps-3 pt-2 mb-0">
                                                             <?php if (!empty($reserva['normas'])): ?>
                                                                 <?php foreach ($reserva['normas'] as $norma): ?>
-                                                                    <li class="mb-1"><?php echo htmlspecialchars($norma); ?></li>
+                                                                    <li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-success"></i><?php echo htmlspecialchars($norma); ?></li>
                                                                 <?php endforeach; ?>
                                                             <?php else: ?>
                                                                 <li>No hay normas definidas.</li>
                                                             <?php endif; ?>
                                                         </ul>
-                                                    </div>
+                                                    </details>
                                                 </div>
                                             </div>
                                             <div class="ms-auto text-end">
@@ -157,26 +157,32 @@ $titulo_pagina = "Reservas"; ?>
                                                 </div>
                                                 <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-calendar text-secondary"></i> <?= htmlspecialchars($reserva['fecha_reserva']) ?></span>
-                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-secondary"></i> <?= htmlspecialchars($reserva['hora_inicio']) ?> - <?= htmlspecialchars($reserva['hora_fin']) ?></span>
+                                                    <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-secondary"></i> <?= substr($reserva['hora_inicio'], 0, 5) ?> - <?= substr($reserva['hora_fin'], 0, 5) ?></span>
                                                     <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-secondary"></i> Asistentes: <?= htmlspecialchars($reserva['asistentes']) ?></span>
                                                 </div>
 
+                                                <?php if ($reserva['estado_reserva'] === 'inactivo' && ($reserva['espacio_bloqueado'] ?? 0) == 1 && !empty($reserva['motivo_espacio'])): ?>
+                                                    <div class="alert alert-danger border-0 border-start border-4 border-danger shadow-sm mt-3 mb-0 py-2 px-3" style="font-size:12px;">
+                                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                                                        <strong>Espacio bloqueado:</strong> <?= htmlspecialchars($reserva['motivo_espacio']) ?>
+                                                    </div>
+                                                <?php endif; ?>
+
                                                 <div class="mt-3">
-                                                    <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="toggleNormas('<?= $reserva['id_reserva'] ?>')">
-                                                        <i class="bi bi-chevron-down" id="icon-normas-<?= $reserva['id_reserva'] ?>"></i>
-                                                        Normas de Uso
-                                                    </button>
-                                                    <div id="normas-<?= $reserva['id_reserva'] ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                                                        <ul class="list-unstyled mb-0">
+                                                    <details style="font-size:13px; color:var(--color-texto);">
+                                                        <summary class="fw-semibold cursor-pointer text-secondary">
+                                                            <i class="fa-solid fa-circle-info me-1"></i> Ver Normas de Uso
+                                                        </summary>
+                                                        <ul class="list-unstyled ps-3 pt-2 mb-0">
                                                             <?php if (!empty($reserva['normas'])): ?>
                                                                 <?php foreach ($reserva['normas'] as $norma): ?>
-                                                                    <li class="mb-1"><?php echo htmlspecialchars($norma); ?></li>
+                                                                    <li class="mb-1"><i class="fa-solid fa-check-circle me-2 text-secondary"></i><?php echo htmlspecialchars($norma); ?></li>
                                                                 <?php endforeach; ?>
                                                             <?php else: ?>
                                                                 <li>No hay normas definidas.</li>
                                                             <?php endif; ?>
                                                         </ul>
-                                                    </div>
+                                                    </details>
                                                 </div>
                                             </div>
                                         </div>
@@ -212,13 +218,16 @@ $titulo_pagina = "Reservas"; ?>
                                             <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:13px; color:var(--color-texto);">
                                                 <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-users text-primary"></i> Aforo: <?= htmlspecialchars($espacio['aforo']) ?></span>
                                                 <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-group text-primary"></i> Máx/reserva: <?= htmlspecialchars($espacio['max_personas']) ?></span>
-                                                <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-primary"></i> <?= htmlspecialchars($espacio['hora_apertura']) ?> a <?= htmlspecialchars($espacio['hora_cierre']) ?></span>
+                                                <span class="d-flex align-items-center gap-1"><i class="fa-regular fa-clock text-primary"></i> <?= substr($espacio['hora_apertura'], 0, 5) ?> a <?= substr($espacio['hora_cierre'], 0, 5) ?></span>
                                                 <span class="d-flex align-items-center gap-1"><i class="fa-solid fa-stopwatch text-primary"></i> Máx: <?= htmlspecialchars($espacio['duracion_uso']) ?> min</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center ms-md-auto">
-                                        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalReserva">
+                                        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm px-4" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalReserva"
+                                                data-id-espacio="<?= $espacio['id_espacios_comunidad'] ?>">
                                             <i class="fa-solid fa-calendar-check me-2"></i>Reservar
                                         </button>
                                     </div>
@@ -240,63 +249,27 @@ $titulo_pagina = "Reservas"; ?>
 </div>
 
 <!-- Modal Crear Reserva -->
-<?php include 'src/views/components/reservas/modalCrear.php'; ?>
+<?php include 'src/views/components/reservas/modalCrearReserva.php'; ?>
+
+<!-- Contenedor Global para Toasts (Notificaciones) -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">
+                <!-- Mensaje dinámico -->
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
 
 <!-- Espacios disponibles para JS -->
 <script>
     const espaciosDisponibles = <?= json_encode($espaciosDisponibles) ?>;
 </script>
 
-<!-- JS del modal -->
-<script src="public/assets/js/reservas/modalCrear.js"></script>
+<!-- Lógica de gestión de reservas -->
+<script src="public/assets/js/reservas/modalReserva.js"></script>
 
 <!-- JS de Pestañas tipo Switch -->
 <script src="public/assets/js/reservas/panelvecino.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // 1. Al cargar la página, inicializar botones (Toggle State)
-        document.querySelectorAll('.btn-confirmar-reserva').forEach(btn => {
-            const fecha = btn.getAttribute('data-fecha');
-            if (localStorage.getItem('reserva_confirmada_' + fecha)) {
-                btn.classList.replace('btn-success', 'btn-warning');
-                btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
-            }
-        });
-
-        // 2. Delegación de eventos para Confirmar/Anular y Eliminar
-        document.body.addEventListener('click', function(e) {
-            const btn = e.target.closest('.btn-confirmar-reserva');
-            if (btn) {
-                const fecha = btn.getAttribute('data-fecha');
-                const isConfirmada = localStorage.getItem('reserva_confirmada_' + fecha);
-
-                if (isConfirmada) {
-                    // Revertir a no confirmada (limpiar memoria)
-                    localStorage.removeItem('reserva_confirmada_' + fecha);
-                    document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
-                        b.classList.replace('btn-warning', 'btn-success');
-                        b.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirmar Asistencia';
-                    });
-                } else {
-                    // Marcar como confirmada (guardar memoria)
-                    localStorage.setItem('reserva_confirmada_' + fecha, 'true');
-                    document.querySelectorAll('.btn-confirmar-reserva[data-fecha="' + fecha + '"]').forEach(b => {
-                        b.classList.replace('btn-success', 'btn-warning');
-                        b.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
-                    });
-                }
-            }
-
-            // 3. Limpiar caché automáticamente al pulsar Eliminar
-            const btnEliminar = e.target.closest('.btn-eliminar-reserva');
-            if (btnEliminar) {
-                const fecha = btnEliminar.getAttribute('data-fecha');
-                if (fecha) {
-                    localStorage.removeItem('reserva_confirmada_' + fecha);
-                }
-            }
-        });
-    });
-</script>

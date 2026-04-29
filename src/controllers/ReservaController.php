@@ -37,6 +37,7 @@ class ReservaController
         $nombreComunidad = $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
         $nombreVivienda  = $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
         $direccion       = trim($calle . ' ' . $numero);
+        $rolReal         = $_SESSION['vivienda']['rol'] ?? 'vecino';
 
         // 3. DECISIÓN DE VISTA SEGÚN EL ROL ACTIVO
         if ($rol === 'presidente') {
@@ -195,6 +196,20 @@ class ReservaController
             'success' => true,
             'reservas' => $reservas
         ]);
+        exit;
+    }
+
+    public function getTodasLasReservasComunidadAjax()
+    {
+        if (ob_get_length()) ob_clean();
+        header('Content-Type: application/json');
+        
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'];
+        
+        $this->reservaModel->actualizarReservasVencidas();
+        $reservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
+        
+        echo json_encode(['success' => true, 'reservas' => $reservas]);
         exit;
     }
 
