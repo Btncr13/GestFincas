@@ -6,24 +6,37 @@
 
 :root {
     /* ===== Colores sobreescritos de Bootstrap ===== */
-    --bs-primary: #221C35;   /*Header, botones principales, enlaces, acentos*/
-    --bs-secondary: #F9FAFB; /*Fondo general de la app detrás de cards*/
-    --bs-success: #5CB244;   /*Confirmaciones*/
-    --bs-danger: #A41E34;    /*Alertas, errores*/
-    --bs-warning: #DB912F;   /*Comunicados importantes, incidencias en curso, avisos*/
-    --bs-info: #ECECF0;      /*Fondo secundario, areas informativas*/
-    --bs-light: #FFFFFF;     /*Fondo principal de la app y fondo tarjetas*/
-    --bs-dark: #121111;      /*Texto principal*/
+    --bs-primary: #221C35;
+    /*Header, botones principales, enlaces, acentos*/
+    --bs-secondary: #F9FAFB;
+    /*Fondo general de la app detrás de cards*/
+    --bs-success: #5CB244;
+    /*Confirmaciones*/
+    --bs-danger: #A41E34;
+    /*Alertas, errores*/
+    --bs-warning: #DB912F;
+    /*Comunicados importantes, incidencias en curso, avisos*/
+    --bs-info: #ECECF0;
+    /*Fondo secundario, areas informativas*/
+    --bs-light: #FFFFFF;
+    /*Fondo principal de la app y fondo tarjetas*/
+    --bs-dark: #121111;
+    /*Texto principal*/
 
     /* ===== Colores personalizados se usan como clases en css===== */
-    --color-fondo-formularios: #F3F3F5; /*Fondo inputs formularios*/
-    --color-texto: #565656;             /*Texto secundario y descripciones*/
+    --color-fondo-formularios: #F3F3F5;
+    /*Fondo inputs formularios*/
+    --color-texto: #565656;
+    /*Texto secundario y descripciones*/
     --color-borde: #e0e0e0;
-    --color--hover: #E9EBEF;            /*Hover en botones ghost/outline*/
+    --color--hover: #E9EBEF;
+    /*Hover en botones ghost/outline*/
 
     /* ===== Tipografías ===== */
-    --fuente-base: 'Lato', sans-serif; /* para h1, h2, h3*/
-    --fuente-titulos: 'Montserrat', sans-serif; /*body, parrafos, labels, botones, inputs*/
+    --fuente-base: 'Lato', sans-serif;
+    /* para h1, h2, h3*/
+    --fuente-titulos: 'Montserrat', sans-serif;
+    /*body, parrafos, labels, botones, inputs*/
 
     /* ===== Espaciados ===== */
     --espacio-xs: 4px;
@@ -38,8 +51,8 @@
     --radio-lg: 12px;
 
     /* ===== Sombras ===== */
-    --sombra-suave: 0 2px 6px rgba(0,0,0,0.08);
-    --sombra-media: 0 4px 12px rgba(0,0,0,0.12);
+    --sombra-suave: 0 2px 6px rgba(0, 0, 0, 0.08);
+    --sombra-media: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 /* =========================================
@@ -49,23 +62,31 @@
 .bg-primary {
     background-color: var(--bs-primary) !important;
 }
+
 .text-primary {
     color: var(--bs-primary) !important;
 }
+
 .btn-primary {
     background-color: var(--bs-primary) !important;
     border-color: var(--bs-primary) !important;
     color: #FFFFFF !important;
 }
-.btn-primary:hover, .btn-primary:focus {
-    background-color: #382f5c !important; /* Tono más claro para el hover */
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #382f5c !important;
+    /* Tono más claro para el hover */
     border-color: #382f5c !important;
 }
+
 .btn-outline-primary {
     color: var(--bs-primary) !important;
     border-color: var(--bs-primary) !important;
 }
-.btn-outline-primary:hover, .btn-outline-primary:focus {
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
     background-color: var(--bs-primary) !important;
     color: #FFFFFF !important;
 }
@@ -123,15 +144,18 @@
        Nota: No tocamos --bs-primary para que el Header (Topbar) 
        mantenga su color original como solicitaste. */
 
-    --bs-light: #1E1E2E;      /* Fondo de tarjetas y sidebar */
-    --bs-secondary: #11111B;  /* Fondo general del body */
-    --bs-dark: #CDD6F4;       /* Texto principal blanco/azulado */
-    
-    --color-fondo-formularios: #313244; 
-    --color-texto: #A6ADC8;             
-    --color-borde: #313244;             
-    --color--hover: #45475A;            
-    
+    --bs-light: #1E1E2E;
+    /* Fondo de tarjetas y sidebar */
+    --bs-secondary: #11111B;
+    /* Fondo general del body */
+    --bs-dark: #CDD6F4;
+    /* Texto principal blanco/azulado */
+
+    --color-fondo-formularios: #313244;
+    --color-texto: #A6ADC8;
+    --color-borde: #313244;
+    --color--hover: #45475A;
+
     /* Forzamos a Bootstrap a usar nuestros textos oscuros globalmente */
     --bs-body-color: var(--bs-dark);
     color: var(--bs-dark);
@@ -142,7 +166,7 @@
    ========================================= */
 
 /* Forzamos el fondo del body y main cuando usan la clase bg-light de Bootstrap */
-[data-theme="dark"] body.bg-light, 
+[data-theme="dark"] body.bg-light,
 [data-theme="dark"] main.bg-light {
     background-color: var(--bs-secondary) !important;
 }
@@ -150,14 +174,16 @@
 /* Aseguramos que los botones primarios sean visibles y contrasten en el Login */
 [data-theme="dark"] .btn-primary,
 [data-theme="dark"] .btn-brand {
-    background-color: #4c407a !important; /* Un tono ligeramente más vibrante */
+    background-color: #4c407a !important;
+    /* Un tono ligeramente más vibrante */
     color: #FFFFFF !important;
     border: none;
 }
 
 [data-theme="dark"] .btn-primary:hover,
 [data-theme="dark"] .btn-primary:focus {
-    background-color: #5d4f96 !important; /* Hover un poco más claro en oscuro */
+    background-color: #5d4f96 !important;
+    /* Hover un poco más claro en oscuro */
 }
 
 [data-theme="dark"] .bg-primary {
@@ -165,7 +191,8 @@
 }
 
 [data-theme="dark"] .text-primary {
-    color: #b5a8d5 !important; /* Morado claro para que resalte en el modal oscuro */
+    color: #b5a8d5 !important;
+    /* Morado claro para que resalte en el modal oscuro */
 }
 
 [data-theme="dark"] .btn-outline-primary {
@@ -190,8 +217,12 @@
 /* Arreglo para que las tarjetas y títulos hereden el color blanco */
 [data-theme="dark"] .card,
 [data-theme="dark"] .metric-value,
-[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, 
-[data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 {
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
     color: var(--bs-dark) !important;
 }
 
@@ -204,15 +235,19 @@
 /* CORRECCIÓN: Hover de los botones de navegación en modo oscuro */
 [data-theme="dark"] .nav-card:hover {
     border-color: var(--bs-dark) !important;
-    color: #FFFFFF !important; /* Forzamos a que el texto sea blanco puro al pasar el ratón */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4) !important; /* Una sombra un poco más fuerte para que resalte en la oscuridad */
+    color: #FFFFFF !important;
+    /* Forzamos a que el texto sea blanco puro al pasar el ratón */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4) !important;
+    /* Una sombra un poco más fuerte para que resalte en la oscuridad */
 }
 
 /* CORRECCIÓN: Hover de los enlaces del menú desplegable en modo oscuro */
 [data-theme="dark"] .dropdown-item:hover,
 [data-theme="dark"] .dropdown-item:focus {
-    background-color: var(--color--hover) !important; /* Un gris oscuro suave */
-    color: #FFFFFF !important; /* Texto blanco puro para máximo contraste */
+    background-color: var(--color--hover) !important;
+    /* Un gris oscuro suave */
+    color: #FFFFFF !important;
+    /* Texto blanco puro para máximo contraste */
 }
 
 /* Y ya que estamos, arreglamos también los iconos dentro del dropdown en el hover */
@@ -227,13 +262,16 @@
 
 .dropdown-item:hover,
 .dropdown-item:focus {
-    background-color: var(--color--hover) !important; /* Nuestro gris claro */
-    border-radius: var(--radio-sm); /* Queda más moderno con bordes redondeados */
+    background-color: var(--color--hover) !important;
+    /* Nuestro gris claro */
+    border-radius: var(--radio-sm);
+    /* Queda más moderno con bordes redondeados */
 }
 
 /* Hover especial para el botón de Cerrar Sesión en Modo Claro */
 .dropdown-item.text-danger:hover {
-    background-color: #ffeef0 !important; /* Fondo rojizo muy suave */
+    background-color: #ffeef0 !important;
+    /* Fondo rojizo muy suave */
     color: var(--bs-danger) !important;
 }
 
@@ -241,20 +279,26 @@
 /* Evita el efecto "blanco sobre blanco" y le da un toque semitransparente premium */
 .navbar .btn-outline-light:hover,
 .navbar .btn-outline-light:focus {
-    background-color: rgba(255, 255, 255, 0.1) !important; /* Fondo blanco casi transparente */
-    color: #FFFFFF !important; /* Mantenemos el texto blanco */
-    border-color: #FFFFFF !important; /* Iluminamos un poco el borde */
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    /* Fondo blanco casi transparente */
+    color: #FFFFFF !important;
+    /* Mantenemos el texto blanco */
+    border-color: #FFFFFF !important;
+    /* Iluminamos un poco el borde */
 }
 
 /* Feedback visual para acciones destructivas en modo oscuro */
 [data-theme="dark"] .dropdown-item.text-danger:hover,
 [data-theme="dark"] .dropdown-item.text-danger:focus {
-    background-color: rgba(164, 30, 52, 0.2) !important; /* Fondo rojizo muy oscuro y sutil */
-    color: #ff7383 !important; /* Rojo/rosado claro para que contraste perfecto con el fondo */
+    background-color: rgba(164, 30, 52, 0.2) !important;
+    /* Fondo rojizo muy oscuro y sutil */
+    color: #ff7383 !important;
+    /* Rojo/rosado claro para que contraste perfecto con el fondo */
 }
 
 [data-theme="dark"] .dropdown-item.text-danger:hover * {
-    color: #ff7383 !important; /* Aseguramos que el icono también cambie de color */
+    color: #ff7383 !important;
+    /* Aseguramos que el icono también cambie de color */
 }
 
 /* CORRECCIÓN: Botón de cerrar (X) en el menú móvil para el Modo Oscuro */
@@ -264,37 +308,44 @@
 }
 
 [data-theme="dark"] .btn-close:hover {
-    opacity: 1; /* Que brille un poco más al pasar el dedo/ratón */
+    opacity: 1;
+    /* Que brille un poco más al pasar el dedo/ratón */
 }
 
 .dropdown-divider {
-    opacity: 1 !important; /* Quitamos la transparencia de Bootstrap */
+    opacity: 1 !important;
+    /* Quitamos la transparencia de Bootstrap */
     border-top: 1px solid var(--color-borde) !important;
     margin: 0.5rem 0;
 }
 
 [data-theme="dark"] .dropdown-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important; /* Una línea sutil pero visible */
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    /* Una línea sutil pero visible */
 }
 
 /* Arreglo para la zona de Bienvenida en Modo Oscuro */
-[data-theme="dark"] .h4, 
+[data-theme="dark"] .h4,
 [data-theme="dark"] h2 {
-    color: #FFFFFF !important; /* Blanco puro para el nombre del usuario */
+    color: #FFFFFF !important;
+    /* Blanco puro para el nombre del usuario */
 }
 
 [data-theme="dark"] .text-muted.small {
-    color: #A6ADC8 !important; /* Gris claro azulado para la descripción */
+    color: #A6ADC8 !important;
+    /* Gris claro azulado para la descripción */
 }
 
 [data-theme="dark"] .card {
-    background-color: var(--bs-light) !important; /* Usa el fondo oscuro de tarjeta */
+    background-color: var(--bs-light) !important;
+    /* Usa el fondo oscuro de tarjeta */
     border: 1px solid var(--color-borde) !important;
 }
 
 [data-theme="dark"] .card h3,
 [data-theme="dark"] .card h6 {
-    color: var(--bs-dark) !important; /* Asegura que los números y textos dentro de mini-cards se vean */
+    color: var(--bs-dark) !important;
+    /* Asegura que los números y textos dentro de mini-cards se vean */
 }
 
 /* Estilo para el botón Cerrar Sesión en esa zona específica */
@@ -318,9 +369,9 @@
    REFUERZO DE COMPONENTES ESPECÍFICOS
    ========================================= */
 
-[data-theme="dark"] .text-dark, 
+[data-theme="dark"] .text-dark,
 [data-theme="dark"] .form-label,
-[data-theme="dark"] h1, 
+[data-theme="dark"] h1,
 [data-theme="dark"] p:not(.text-primary) {
     color: var(--bs-dark) !important;
 }
@@ -427,14 +478,18 @@
    MEJORAS DE CONTRASTE PARA MENSAJES DE ESTADO
    ========================================= */
 [data-theme="dark"] .badge.bg-info {
-    background-color: rgba(236, 236, 240, 0.1) !important; /* Usamos el color info con transparencia para que sea oscuro */
-    color: var(--bs-dark) !important; /* Texto claro */
+    background-color: rgba(236, 236, 240, 0.1) !important;
+    /* Usamos el color info con transparencia para que sea oscuro */
+    color: var(--bs-dark) !important;
+    /* Texto claro */
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="dark"] .alert-warning {
-    background-color: rgba(219, 145, 47, 0.1) !important; /* Ajuste para el aviso de votación cerrada */
-    color: #ffb86c !important; /* Un tono naranja claro para legibilidad */
+    background-color: rgba(219, 145, 47, 0.1) !important;
+    /* Ajuste para el aviso de votación cerrada */
+    color: #ffb86c !important;
+    /* Un tono naranja claro para legibilidad */
     border-color: rgba(219, 145, 47, 0.2) !important;
 }
 
