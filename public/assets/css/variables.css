@@ -91,6 +91,23 @@
     color: #FFFFFF !important;
 }
 
+/* =========================================
+   CORRECCIÓN DEFINITIVA: ALERTAS E INSIGNIAS (MODO CLARO)
+   Evita el azul clarito por defecto de Bootstrap 5 en los mensajes 
+   como el de "Ya has participado" en Votaciones.
+   ========================================= */
+.alert-primary,
+.alert-info {
+    --bs-alert-bg: var(--bs-primary) !important;
+    --bs-alert-color: #FFFFFF !important;
+    --bs-alert-border-color: var(--bs-primary) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--bs-primary) !important;
+    color: #FFFFFF !important;
+}
+
 /* Ajustes específicos para dispositivos ultra-estrechos (como el Fold plegado) */
 @media (max-width: 400px) {
     .navbar {
@@ -376,6 +393,27 @@
     border-top-color: var(--color-borde) !important;
 }
 
+/* Estilos para Acordeones (Listas desplegables de comunicados) */
+[data-theme="dark"] .accordion-item {
+    background-color: var(--bs-light) !important;
+    border-color: var(--color-borde) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .accordion-button {
+    background-color: var(--bs-light) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .accordion-button::after {
+    filter: brightness(0) invert(1);
+}
+
 /* Ajuste para el resumen de participación (el cuadro pequeño) */
 [data-theme="dark"] .bg-light.border.rounded-3.small {
     background-color: var(--color-fondo-formularios) !important;
@@ -386,13 +424,15 @@
 /* Ajuste para Modales y Formularios en Modo Oscuro */
 [data-theme="dark"] .modal-content,
 [data-theme="dark"] .modal-header,
-[data-theme="dark"] .modal-footer {
+[data-theme="dark"] .modal-footer,
+[data-theme="dark"] .modal-body {
     background-color: var(--bs-light) !important;
     border-color: var(--color-borde) !important;
     color: var(--bs-dark) !important;
 }
 
-[data-theme="dark"] .form-control {
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
     background-color: var(--color-fondo-formularios) !important;
     border-color: var(--color-borde) !important;
     color: var(--bs-dark) !important;
@@ -400,6 +440,38 @@
 
 [data-theme="dark"] .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* =========================================
+   ADAPTACIÓN DE LISTAS Y TABLAS (MODO OSCURO)
+   Ideal para Historial de Avisos y Lista de Vecinos
+   ========================================= */
+[data-theme="dark"] .list-group-item {
+    background-color: var(--bs-light) !important;
+    border-color: var(--color-borde) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .table {
+    color: var(--bs-dark) !important;
+    border-color: var(--color-borde) !important;
+}
+
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table td {
+    background-color: var(--bs-light) !important;
+    border-color: var(--color-borde) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+    background-color: var(--color--hover) !important;
+    color: var(--bs-dark) !important;
 }
 
 /* =========================================
@@ -419,4 +491,46 @@
     color: #ffb86c !important;
     /* Un tono naranja claro para legibilidad */
     border-color: rgba(219, 145, 47, 0.2) !important;
+}
+
+/* =========================================
+   ADAPTACIÓN DE PESTAÑAS (NAV-TABS)
+   ========================================= */
+[data-theme="dark"] .nav-tabs {
+    border-bottom-color: var(--color-borde) !important;
+}
+
+[data-theme="dark"] .nav-tabs .nav-link {
+    color: var(--color-texto) !important;
+}
+
+[data-theme="dark"] .nav-tabs .nav-link:hover {
+    border-color: transparent transparent var(--color-borde) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .nav-tabs .nav-link.active {
+    background-color: var(--bs-light) !important;
+    color: var(--bs-dark) !important;
+    border-color: var(--color-borde) var(--color-borde) transparent !important;
+}
+
+/* =========================================
+   FONDOS CLAROS/BLANCOS Y FRANJAS HORARIAS
+   ========================================= */
+[data-theme="dark"] .bg-white {
+    background-color: var(--bs-light) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .bg-light:not(body):not(main) {
+    background-color: var(--color-fondo-formularios) !important;
+    color: var(--bs-dark) !important;
+}
+
+[data-theme="dark"] .btn-check:checked + .btn-outline-primary,
+[data-theme="dark"] .btn-check:active + .btn-outline-primary {
+    background-color: #4c407a !important;
+    color: #FFFFFF !important;
+    border-color: #4c407a !important;
 }

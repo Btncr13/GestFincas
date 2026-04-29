@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-04-2026 a las 13:33:37
+-- Tiempo de generación: 29-04-2026 a las 13:40:06
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -65,6 +65,32 @@ CREATE TABLE `codigo_validacion` (
 
 INSERT INTO `codigo_validacion` (`id_codigo`, `id_vivienda`, `codigo`, `usado`, `fecha_creacion`) VALUES
 (1, 2, 'LF0012', 1, '2026-04-09 17:35:15');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `comunicados`
+--
+
+CREATE TABLE `comunicados` (
+  `id_comunicado` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `cuerpo` text NOT NULL,
+  `tipo` enum('normal','urgente') NOT NULL DEFAULT 'normal',
+  `fecha_publicacion` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `comunicado_lectura`
+--
+
+CREATE TABLE `comunicado_lectura` (
+  `id_comunicado` int(11) UNSIGNED NOT NULL,
+  `id_usuario` int(11) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -296,9 +322,9 @@ INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `a
 (1, 3, 3, 4, '2026-04-22', '10:00:00', '10:30:00', 'inactivo'),
 (2, 1, 3, 13, '2026-04-21', '18:00:00', '18:30:00', 'inactivo'),
 (3, 3, 3, 2, '2026-04-21', '18:30:00', '19:00:00', 'inactivo'),
-(4, 3, 3, 15, '2026-04-23', '18:00:00', '18:30:00', 'activo'),
+(4, 3, 3, 15, '2026-04-23', '18:00:00', '18:30:00', 'inactivo'),
 (5, 1, 3, 15, '2026-04-22', '18:00:00', '18:30:00', 'inactivo'),
-(6, 1, 3, 14, '2026-04-23', '17:30:00', '18:00:00', 'activo');
+(6, 1, 3, 14, '2026-04-23', '17:30:00', '18:00:00', 'inactivo');
 
 -- --------------------------------------------------------
 
@@ -468,6 +494,21 @@ ALTER TABLE `codigo_validacion`
   ADD KEY `id_vivienda` (`id_vivienda`);
 
 --
+-- Indices de la tabla `comunicados`
+--
+ALTER TABLE `comunicados`
+  ADD PRIMARY KEY (`id_comunicado`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `comunicado_lectura`
+--
+ALTER TABLE `comunicado_lectura`
+  ADD PRIMARY KEY (`id_comunicado`,`id_usuario`),
+  ADD KEY `id_comunicado` (`id_comunicado`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
 -- Indices de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
@@ -602,6 +643,12 @@ ALTER TABLE `codigo_validacion`
   MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
+-- AUTO_INCREMENT de la tabla `comunicados`
+--
+ALTER TABLE `comunicados`
+  MODIFY `id_comunicado` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
@@ -707,6 +754,19 @@ ALTER TABLE `asistencia_reunion`
 --
 ALTER TABLE `codigo_validacion`
   ADD CONSTRAINT `fk_codigo_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `comunicados`
+--
+ALTER TABLE `comunicados`
+  ADD CONSTRAINT `fk_comunicados_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `comunicado_lectura`
+--
+ALTER TABLE `comunicado_lectura`
+  ADD CONSTRAINT `fk_lectura_comunicado` FOREIGN KEY (`id_comunicado`) REFERENCES `comunicados` (`id_comunicado`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_lectura_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `comunidad`

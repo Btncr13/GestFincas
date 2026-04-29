@@ -2,7 +2,6 @@
 $titulo_pagina = "Votaciones - GestFincas";
 
 // Elegimos el topbar adecuado según el rol
-$rol = $_SESSION['vivienda']['rol'] ?? 'vecino';
 if ($rol === 'presidente') {
     include "src/views/components/topbar.php";
 } else {

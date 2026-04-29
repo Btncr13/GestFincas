@@ -43,18 +43,18 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                 <li class="nav-item">
                     <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'micomunidad/index') ? 'active fw-bold' : '' ?>"
                         href="index.php?route=micomunidad/index"
-                        style="background-color: <?= ($ruta_actual == 'micomunidad/index') ? 'var(--bs-primary)' : 'transparent' ?>;
-                        color: <?= ($ruta_actual == 'miComunidad/index') ? 'white' : 'var(--color-texto)' ?>;">
+                        style="background-color: <?= ($ruta_actual == 'micomunidad/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'micomunidad/index') ? 'white' : 'var(--color-texto)' ?>;">
                         <i class="fa-solid fa-users me-2"></i> Mi Comunidad
                     </a>
                 </li>
             <?php endif; ?>
 
             <li class="nav-item">
-                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/comunicaciones') ? 'active fw-bold' : '' ?>"
-                    href="index.php?route=auth/comunicaciones"
-                    style="background-color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                          color: <?= ($ruta_actual == 'auth/comunicaciones') ? 'white' : 'var(--color-texto)' ?>;">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'comunicaciones/index') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=comunicaciones/index"
+                    style="background-color: <?= ($ruta_actual == 'comunicaciones/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'comunicaciones/index') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-bullhorn me-2"></i> Comunicaciones
                 </a>
             </li>
@@ -69,10 +69,10 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
             </li>
 
             <li class="nav-item">
-                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'auth/reservas') ? 'active fw-bold' : '' ?>"
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'reserva/index') ? 'active fw-bold' : '' ?>"
                     href="index.php?route=reserva/index"
-                    style="background-color: <?= ($ruta_actual == 'auth/reservas') ? 'var(--bs-primary)' : 'transparent' ?>; 
-                          color: <?= ($ruta_actual == 'auth/reservas') ? 'white' : 'var(--color-texto)' ?>;">
+                    style="background-color: <?= ($ruta_actual == 'reserva/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'reserva/index') ? 'white' : 'var(--color-texto)' ?>;">
                     <i class="fa-solid fa-calendar-check me-2"></i> Reservas
                 </a>
             </li>

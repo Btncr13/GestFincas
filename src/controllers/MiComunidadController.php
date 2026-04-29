@@ -74,7 +74,7 @@ class MiComunidadController
     public function crearViviendaAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SESSION['vivienda']['rol'] !== 'presidente') {
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
             exit;
         }
 
@@ -86,7 +86,7 @@ class MiComunidadController
         // Validación de formato
         if (!preg_match('/^Planta \d+-[A-Z0-9]+$/i', $nombre_vivienda)) {
             $_SESSION['error_vivienda'] = "El formato de vivienda debe ser 'Planta X-PisoLetra' (ej: Planta 2-1B)";
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
             exit;
         }
 
@@ -135,9 +135,9 @@ class MiComunidadController
             }
             // --- FIN DE LÓGICA PHPMAILER ---
 
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
         } else {
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
         }
         exit;
     }
@@ -147,7 +147,7 @@ class MiComunidadController
     {
         // 1. Verificamos que sea POST y que el usuario sea el presidente
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SESSION['vivienda']['rol'] !== 'presidente') {
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
             exit;
         }
 
@@ -159,17 +159,17 @@ class MiComunidadController
         // 3. Validación estricta del formato "Planta X-PisoY"
         if (!preg_match('/^Planta \d+-[A-Z0-9]+$/i', $nombre_vivienda)) {
             $_SESSION['error_vivienda'] = "El formato de la vivienda debe ser 'Planta X-PisoLetra' (ej: Planta 2-1B)";
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
             exit;
         }
 
         // 4. Llamamos al modelo para ejecutar el UPDATE en la BBDD
         if ($id_vivienda && $this->miComunidadModel->modificarVivienda($id_vivienda, $id_comunidad, $nombre_vivienda)) {
             // Éxito: volvemos pasando 'edit=success' para que salte el Toast verde en JS
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
         } else {
             // Error: volvemos pasando 'edit=error'
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
         }
         exit;
     }
@@ -185,9 +185,9 @@ class MiComunidadController
         $id_vivienda = $_POST['id_vivienda_eliminar'] ?? null;
 
         if ($id_vivienda && $this->miComunidadModel->eliminarViviendaCompleta($id_vivienda)) {
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
         } else {
-            header("Location: index.php?route=miComunidad/index");
+            header("Location: index.php?route=micomunidad/index");
         }
         exit;
     }

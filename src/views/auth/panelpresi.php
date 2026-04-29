@@ -70,7 +70,7 @@
 
                     <!-- Mi Comunidad (Usuarios) -->
                     <div class="col">
-                        <a href="index.php?route=miComunidad/index" class="text-decoration-none h-100 d-block">
+                        <a href="index.php?route=micomunidad/index" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(92, 178, 68, 0.1);">
@@ -85,7 +85,7 @@
 
                     <!-- Comunicaciones -->
                     <div class="col">
-                        <a href="index.php?route=auth/comunicaciones" class="text-decoration-none h-100 d-block">
+                        <a href="index.php?route=comunicaciones/index" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card">
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(111, 66, 193, 0.1);">
@@ -132,8 +132,6 @@
                             </div>
                         </a>
                     </div>
-
-
                     <!-- Reuniones -->
                     <div class="col">
                         <a href="index.php?route=reunion/reuniones" class="text-decoration-none h-100 d-block">
@@ -166,7 +164,7 @@
 
                 </div>
 
-            </div>
+
         </main>
     </div>
 </div>
