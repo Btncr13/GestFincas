@@ -148,6 +148,21 @@
                             </div>
                         </a>
                     </div>
+                    
+                    <!-- Incidencias -->
+                    <div class="col">
+                        <a href="index.php?route=incidencias/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(164, 30, 52, 0.1);">
+                                        <i class="fa-solid fa-triangle-exclamation text-danger fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Incidencias</h5>
+                                    <p class="card-text text-muted small mb-0">Gestión de averías</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
 
                 </div>
 
