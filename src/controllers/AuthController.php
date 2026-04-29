@@ -4,6 +4,7 @@ require_once "src/models/UsuarioModel.php";
 require_once "src/models/EspacioModel.php";
 require_once "src/models/VotacionModel.php";
 require_once "src/models/ReservaModel.php";
+require_once "src/models/ComunicacionesModel.php";
 
 class AuthController
 {
@@ -11,12 +12,15 @@ class AuthController
     private $votacionModel;
     private $reservaModel;
     private $espacioModel;
+    private $comunicacionesModel;
+
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->votacionModel = new VotacionModel($pdo);
         $this->reservaModel = new ReservaModel($pdo);
         $this->espacioModel = new EspacioModel($pdo);
+        $this->comunicacionesModel = new ComunicacionesModel($pdo);
     }
 
     // 🟢 ENRUTAMIENTO INICIAL 🟢
@@ -223,6 +227,12 @@ class AuthController
         // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
         $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
         $tieneReservaManana = $this->reservaModel->tieneReservaManana($id_usuario);
+        // Obtener comunicaciones pendientes
+        $comunicacionesPendientes = $this->comunicacionesModel->contarNoLeidos($id_comunidad, $id_usuario);
+
+        // Último comunicado real (No Mock)
+        $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
+        $ultimoComunicadoBD = !empty($listaComs) ? $listaComs[0] : null;
 
         require "src/views/auth/panelvecino.php";
     }
@@ -266,6 +276,8 @@ class AuthController
 
         // Obtener todos los espacios de la comunidad con sus normas
         $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
+        // Obtener comunicaciones reales de la BBDD para el panel del presidente
+        $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
 
         require "src/views/auth/panelpresi.php";
     }

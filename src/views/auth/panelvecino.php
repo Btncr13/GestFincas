@@ -59,8 +59,14 @@ include 'src/views/components/topbar.php'; ?>
 
                     <!-- Tarjeta 1 - Comunicaciones -->
                     <div class="col">
-                        <a href="index.php?route=auth/comunicaciones" class="text-decoration-none h-100 d-block">
-                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                        <a href="index.php?route=comunicaciones/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
+                                <?php if (isset($comunicacionesPendientes) && $comunicacionesPendientes > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                                        <?= $comunicacionesPendientes ?>
+                                        <span class="visually-hidden">avisos nuevos</span>
+                                    </span>
+                                <?php endif; ?>
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(34, 28, 53, 0.1);">
                                         <i class="bi bi-megaphone-fill text-primary fs-2"></i>
@@ -127,35 +133,77 @@ include 'src/views/components/topbar.php'; ?>
                         </a>
                     </div>
 
+                    <!-- Tarjeta 5 - Incidencias -->
+                    <div class="col">
+                        <a href="index.php?route=incidencias/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(164, 30, 52, 0.1);">
+                                        <i class="fa-solid fa-triangle-exclamation text-danger fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Incidencias</h5>
+                                    <p class="card-text text-muted small mb-0">Reportar averías</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
                 </div>
 
                 <!-- 4. PANELES INFERIORES -->
                 <div class="row g-3 mb-4">
 
                     <!-- ÚLTIMO COMUNICADO -->
-                    <div class="col-12">
-                        <div class="card shadow-sm h-100 border-0" style="border-left: 4px solid var(--bs-primary) !important;">
-                            <div class="card-body p-4 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-bell-fill text-primary fs-5"></i>
-                                        <span class="fw-bold text-primary" style="font-family: var(--fuente-titulos);">Último Comunicado</span>
+                    <div class="card module-card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom border-light d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-megaphone me-2 text-primary"></i> Comunicados Recientes
+        </h5>
+        <a href="index.php?route=comunicaciones/index" class="btn btn-sm btn-outline-primary">Ver todos</a>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($listaComs)): ?>
+            <!-- ACORDEÓN DE BOOTSTRAP -->
+            <div class="accordion accordion-flush" id="accordionComunicaciones">
+                <!-- Mostramos solo los 5 comunicados más recientes para no saturar el dashboard -->
+                <?php foreach (array_slice($listaComs, 0, 5) as $index => $com): ?>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCom-<?= $com['id_comunicado'] ?>">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCom-<?= $com['id_comunicado'] ?>" aria-expanded="false" aria-controls="collapseCom-<?= $com['id_comunicado'] ?>">
+                                <div class="d-flex flex-column w-100 me-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <div class="d-flex align-items-center text-truncate" style="max-width: 80%;">
+                                                        <span class="fw-bold text-truncate">
+                                                            <?= htmlspecialchars($com['titulo']) ?>
+                                                        </span>
+                                                        <?php if (($com['tipo'] ?? '') === 'urgente'): ?>
+                                                            <i class="bi bi-exclamation-triangle-fill text-danger ms-2" title="Urgente"></i>
+                                                        <?php endif; ?>
+                                                    </div>
+                                        <small class="text-muted text-nowrap" style="font-size: 0.8rem;">
+                                            <?= date('d/m/Y', strtotime($com['fecha_creacion'] ?? $com['fecha_publicacion'])) ?>
+                                        </small>
                                     </div>
-                                    <?php
-                                    $badgeClass = 'bg-secondary';
-                                    if ($ultimoComunicado['prioridad'] === 'importante') $badgeClass = 'bg-warning text-dark';
-                                    if ($ultimoComunicado['prioridad'] === 'urgente') $badgeClass = 'bg-danger text-white';
-                                    ?>
-                                    <span class="badge <?= $badgeClass ?> px-2 py-1">
-                                        <?= ucfirst(htmlspecialchars($ultimoComunicado['prioridad'])) ?>
-                                    </span>
                                 </div>
-                                <h4 class="card-title fw-bold text-dark mb-2" style="font-family: var(--fuente-titulos);"><?= htmlspecialchars($ultimoComunicado['titulo']) ?></h4>
-                                <p class="card-text text-muted mb-3"><?= htmlspecialchars($ultimoComunicado['contenido']) ?></p>
-                                <p class="card-text mb-0 mt-auto"><small class="text-muted"><?= htmlspecialchars($ultimoComunicado['fechaPublicacion']) ?></small></p>
+                            </button>
+                        </h2>
+                        <div id="collapseCom-<?= $com['id_comunicado'] ?>" class="accordion-collapse collapse" aria-labelledby="headingCom-<?= $com['id_comunicado'] ?>" data-bs-parent="#accordionComunicaciones">
+                            <div class="accordion-body text-secondary" style="font-size: 0.95rem;">
+                                <?= nl2br(htmlspecialchars($com['cuerpo'] ?? 'No hay descripción disponible.')) ?>
                             </div>
                         </div>
                     </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-inbox fs-2 mb-2 d-block opacity-50"></i>
+                <p class="mb-0">No hay comunicados recientes.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
                 </div>
 
             </div>

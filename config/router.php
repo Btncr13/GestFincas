@@ -26,9 +26,11 @@ function runRouter($config)
     $route = $_GET['route'] ?? 'auth/login';
     $parts = explode('/', trim($route, '/'));
 
-    // Controlador y método por defecto adaptados
-    $controllerName = ucfirst($parts[0] ?? 'Auth') . "Controller";
-    $methodName = $parts[1] ?? "login";
+    // Normalizamos el nombre del controlador (Ej: miComunidad -> MiComunidadController)
+    $controllerName = ucfirst($parts[0]) . "Controller";
+    
+    // Si no se especifica método, usamos 'login' para Auth y 'index' para el resto de módulos (como Comunicaciones)
+    $methodName = $parts[1] ?? ($controllerName === 'AuthController' ? 'login' : 'index');
 
     // 2. Quitamos el "../" de la ruta del controlador porque ya estamos en la raíz:
     $controllerFile = "src/controllers/$controllerName.php";

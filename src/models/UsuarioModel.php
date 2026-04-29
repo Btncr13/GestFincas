@@ -131,5 +131,44 @@ class UsuarioModel extends BaseModel
         $stmt->execute([$email]);
         return $stmt->fetch() !== false;
     }
+
+     // ------------------------------------------- OBTENER VECINOS POR COMUNIDAD
+    /**
+     * Recupera la lista de usuarios asociados a una comunidad específica.
+     * Realiza un JOIN con la tabla vivienda para mostrar la ubicación de cada vecino.
+     */
+    public function getUsuariosByComunidad($id_comunidad)
+    {
+        try {
+            // Usamos LEFT JOIN para que aparezcan las viviendas que aún no tienen un usuario registrado
+            $sql = "SELECT u.nombre, u.apellidos, u.dni, u.email, u.rol, v.nombre as nombre_vivienda, u.id_usuario, v.id_vivienda 
+                    FROM vivienda v
+                    LEFT JOIN usuario u ON v.id_vivienda = u.id_vivienda
+                    WHERE v.id_comunidad = :id_comunidad
+                    ORDER BY v.nombre ASC, u.apellidos ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id_comunidad' => $id_comunidad]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    // ------------------------------------------- OBTENER DETALLES POR CÓDIGO
+    public function getDetallesCodigo($codigo)
+    {
+        try {
+            $sql = "SELECT v.nombre as nombre_vivienda, c.nombre as nombre_comunidad 
+                    FROM codigo_validacion cv
+                    JOIN vivienda v ON cv.id_vivienda = v.id_vivienda
+                    JOIN comunidad c ON v.id_comunidad = c.id_comunidad
+                    WHERE cv.codigo = :codigo AND cv.usado = 0 LIMIT 1";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['codigo' => trim($codigo)]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
 }
 ?>
