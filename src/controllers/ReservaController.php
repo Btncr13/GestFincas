@@ -46,7 +46,7 @@ class ReservaController
             $this->reservaModel->actualizarReservasVencidas();
 
             // Cambiamos a la función que recupera los espacios junto con sus normas
-            $espacios = $this->espacioModel->getNormasByEspacio($id_comunidad);
+            $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
             $todasLasReservas = $this->reservaModel->getTodasLasReservasComunidad($id_comunidad);
 
             require_once __DIR__ . '/../views/reservas/presidente.php';

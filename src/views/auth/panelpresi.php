@@ -1,4 +1,11 @@
-<?php include 'src/views/components/topbar.php'; ?>
+<?php 
+/**
+ * @var string $nombreComunidad
+ * @var string $direccion
+ * @var string $nombreVivienda
+ * @var int $votacionesPendientes
+ */
+include 'src/views/components/topbar.php'; ?>
 
 <div class="container-fluid p-0">
     <div class="row flex-nowrap m-0">
@@ -101,7 +108,12 @@
                     <!-- Reservas -->
                     <div class="col">
                         <a href="index.php?route=reserva/index" class="text-decoration-none h-100 d-block">
-                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
+                                <?php if (isset($tieneReservaHoy) && $tieneReservaHoy): ?>
+                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                        <span class="visually-hidden">Reserva para hoy</span>
+                                    </span>
+                                <?php endif; ?>
                                 <div class="card-body p-4 d-flex flex-column align-items-center">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(32, 201, 151, 0.1);">
                                         <i class="bi bi-calendar-check-fill fs-2" style="color: #20c997;"></i>

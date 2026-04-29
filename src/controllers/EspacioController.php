@@ -68,6 +68,8 @@ class EspacioController
 
                     // 2. Usamos tu función getEspacioById a través del reservaModel
                     $espacioCreado = $this->reservaModel->getEspacioById($idNuevoEspacio);
+                    // Añadimos las normas para que el JS pueda renderizarlas en la card
+                    $espacioCreado['normas'] = $this->espacioModel->getNormasByEspacio($idNuevoEspacio);
 
                     // 3. Devolvemos el éxito y pasamos los datos reales recién extraídos de la BD
                     echo json_encode([
@@ -87,9 +89,28 @@ class EspacioController
         }
     }
     // API: MODIFICAR ESPACIO
+    /**
+     * Actualiza los datos de un espacio comunitario y sus normas asociadas.
+     * Requiere que el usuario sea presidente.
+     */
     public function update()
     {
+        // Limpiamos la salida para asegurar que solo enviamos JSON y evitar errores HTML
+        ob_clean();
         header('Content-Type: application/json');
+
+        // RBAC: Validar que sea Presidente (redundante pero buena práctica para APIs)
+        if (
+            !isset($_SESSION['vivienda']['id_usuario']) || !isset($_SESSION['vivienda']['rol']) ||
+            $_SESSION['vivienda']['rol'] !== 'presidente'
+        ) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado. Solo el Presidente puede realizar esta acción.']);
+            exit;
+        }
+
+        // Aseguramos que id_comunidad esté presente en la sesión
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'] ?? null;
 
         $data = [
             'id_espacios_comunidad' => $_POST['id_espacios_comunidad'] ?? null,
@@ -99,21 +120,50 @@ class EspacioController
             'max_personas'          => (int)($_POST['max_personas'] ?? 1),
             'hora_apertura'         => $_POST['hora_apertura'] ?? '08:00:00',
             'hora_cierre'           => $_POST['hora_cierre'] ?? '22:00:00',
-            'duracion_uso'          => (int)($_POST['duracion_uso'] ?? 60)
+            'duracion_uso'          => (int)($_POST['duracion_uso'] ?? 60),
+            'normas'                => $_POST['normas'] ?? ''
         ];
 
-        if ($this->espacioModel->modificarEspacio($data)) {
+        // Validaciones básicas
+        if (empty($data['id_espacios_comunidad']) || empty($data['nombre_espacio']) || !$id_comunidad) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Datos incompletos para la actualización.']);
+            exit;
+        }
+
+        if ($this->espacioModel->modificarEspacio($data)) { // El modelo ahora maneja las normas también
             $espacioActualizado = $this->reservaModel->getEspacioById($data['id_espacios_comunidad']);
+            // Añadimos las normas actualizadas a la respuesta
+            $espacioActualizado['normas'] = $this->espacioModel->getNormasByEspacio($data['id_espacios_comunidad']);
             echo json_encode(['success' => true, 'message' => 'Espacio actualizado.', 'espacio' => $espacioActualizado]);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al modificar el espacio.']);
         }
+        exit;
+    }
+
+    // API: Obtiene las normas de un espacio específico para ser mostradas en el frontend.
+    public function getNormasForEspacio()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        $id_espacios_comunidad = $_GET['id'] ?? null;
+
+        if (!$id_espacios_comunidad) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'ID de espacio no proporcionado.']);
+            exit;
+        }
+        $normas = $this->espacioModel->getNormasByEspacio($id_espacios_comunidad);
+        echo json_encode(['success' => true, 'normas' => $normas]);
+        exit;
     }
 
     // API: BLOQUEAR/DESBLOQUEAR (Soft Delete / Inactivar)
     public function toggleEstado()
     {
+        if (ob_get_length()) ob_clean();
         header('Content-Type: application/json');
 
         $id_espacios_comunidad = $_POST['id_espacios_comunidad'] ?? null;
@@ -126,12 +176,17 @@ class EspacioController
 
         if ($this->espacioModel->bloquearEspacio($id_espacios_comunidad, $bloqueado, $motivo)) {
             $espacio = $this->reservaModel->getEspacioById($id_espacios_comunidad);
+
+            // Es vital incluir las normas aquí para que el JS pueda re-renderizar la card correctamente
+            $espacio['normas'] = $this->espacioModel->getNormasByEspacio($id_espacios_comunidad);
+
             $msg = $bloqueado == 1 ? 'Espacio bloqueado.' : 'Espacio operativo.';
             echo json_encode(['success' => true, 'message' => $msg, 'espacio' => $espacio]);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al cambiar el estado del espacio.']);
         }
+        exit;
     }
 
     // API: ELIMINAR ESPACIO
@@ -144,12 +199,7 @@ class EspacioController
         if (!$id) {
             echo json_encode(['success' => false, 'message' => 'ID de espacio no proporcionado.']);
             return;
-        }
-
-        // Validación de reglas de negocio: No eliminar si hay compromisos activos
-        if ($this->espacioModel->tieneReservasPendientes($id)) {
-            echo json_encode(['success' => false, 'message' => 'No se puede eliminar el espacio: tiene reservas activas o pendientes asociadas.']);
-            return;
+            exit;
         }
 
         if ($this->espacioModel->eliminarEspacio($id)) {
@@ -158,5 +208,6 @@ class EspacioController
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'No se pudo eliminar el espacio.']);
         }
+        exit;
     }
 }

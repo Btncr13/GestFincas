@@ -1,19 +1,25 @@
 <?php
 
 require_once "src/models/UsuarioModel.php";
+require_once "src/models/EspacioModel.php";
 require_once "src/models/VotacionModel.php";
+require_once "src/models/ReservaModel.php";
 require_once "src/models/ComunicacionesModel.php";
 
 class AuthController
 {
     private $usuarioModel;
     private $votacionModel;
+    private $reservaModel;
+    private $espacioModel;
     private $comunicacionesModel;
 
     public function __construct($pdo)
     {
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->votacionModel = new VotacionModel($pdo);
+        $this->reservaModel = new ReservaModel($pdo);
+        $this->espacioModel = new EspacioModel($pdo);
         $this->comunicacionesModel = new ComunicacionesModel($pdo);
     }
 
@@ -175,7 +181,9 @@ class AuthController
     // 🟢 HELPER: RESPUESTAS JSON PARA AJAX 🟢
     private function jsonResponse($success, $message = null)
     {
-        ob_clean();
+        if (ob_get_length()) {
+            ob_clean();
+        }
         header('Content-Type: application/json');
         echo json_encode(['success' => $success, 'message' => $message]);
         exit;
@@ -216,6 +224,9 @@ class AuthController
             }
         }
 
+        // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
+        $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
+        $tieneReservaManana = $this->reservaModel->tieneReservaManana($id_usuario);
         // Obtener comunicaciones pendientes
         $comunicacionesPendientes = $this->comunicacionesModel->contarNoLeidos($id_comunidad, $id_usuario);
 
@@ -259,6 +270,12 @@ class AuthController
             }
         }
 
+        // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
+        $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
+        $tieneReservaManana = $this->reservaModel->tieneReservaManana($id_usuario);
+
+        // Obtener todos los espacios de la comunidad con sus normas
+        $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
         // Obtener comunicaciones reales de la BBDD para el panel del presidente
         $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
 

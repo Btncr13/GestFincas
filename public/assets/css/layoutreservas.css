@@ -3,3 +3,15 @@
    ========================================= */
 /* Actualmente la vista de reservas utiliza clases utilitarias de Bootstrap. 
    Añade aquí únicamente estilos personalizados que Bootstrap no pueda cubrir. */
+
+/* Posicionamiento relativo para las tarjetas para poder anclar elementos absolutos */
+.module-card {
+    position: relative;
+    overflow: visible; /* Asegura que la burbuja no sea cortada por los límites de la tarjeta */
+}
+
+/* Ajuste para la burbuja de notificación nativa de Bootstrap 5 */
+.badge-reserva-hoy {
+    z-index: 10;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
