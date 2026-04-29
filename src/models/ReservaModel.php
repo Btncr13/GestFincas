@@ -277,6 +277,23 @@ class ReservaModel extends BaseModel
         }
     }
 
+    public function tieneReservaManana($id_usuario)
+    {
+        try {
+            $sql = "SELECT COUNT(*) FROM reservas 
+                    WHERE id_usuario = :id_usuario 
+                    AND fecha_reserva = DATE_ADD(CURDATE(), INTERVAL 1 DAY) 
+                    AND estado_reserva = 'activo'";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Error en tieneReservaManana: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getTodasLasReservasComunidad($id_comunidad)
     {
         try {

@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * @var bool $tieneReservaHoy
  * @var int|null $votacionesPendientes
@@ -165,12 +166,40 @@ include 'src/views/components/topbar.php'; ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const hoy = new Date().toISOString().split('T')[0];
+        const manana = new Date();
+        manana.setDate(manana.getDate() + 1);
+        const mananaStr = manana.toISOString().split('T')[0];
+
+        // 1. Lógica de la burbuja roja (Hoy)
+        // Se oculta si el usuario ya confirmó asistencia hoy
         if (localStorage.getItem('reserva_confirmada_' + hoy)) {
             const burbuja = document.getElementById('burbuja-reservas-hoy');
-            if (burbuja) {
-                burbuja.style.display = 'none';
-            }
+            if (burbuja) burbuja.style.display = 'none';
         }
+
+        // 2. Lógica de Toasts (Hoy y Mañana)
+        const toastHoy = document.getElementById('toast_reserva');
+        const toastManana = document.getElementById('toast_reserva_manana');
+
+        // Si ya se vio el toast de hoy, no lo mostramos (vía Bootstrap o eliminando el nodo)
+        if (localStorage.getItem('reserva_hoy_' + hoy) && toastHoy) {
+            toastHoy.remove();
+        }
+
+        // Si ya se vio el toast de mañana, no lo mostramos
+        if (localStorage.getItem('reserva_manana_' + mananaStr) && toastManana) {
+            toastManana.remove();
+        }
+
+        // 3. Capturar el cierre de los toasts para guardar en localStorage
+        document.body.addEventListener('hidden.bs.toast', function(e) {
+            const targetId = e.target.id;
+            if (targetId === 'toast_reserva') {
+                localStorage.setItem('reserva_hoy_' + hoy, 'true');
+            } else if (targetId === 'toast_reserva_manana') {
+                localStorage.setItem('reserva_manana_' + mananaStr, 'true');
+            }
+        });
     });
 </script>
 
@@ -182,6 +211,19 @@ include 'src/views/components/topbar.php'; ?>
     $toastMsg     = 'Tienes una reserva programada para hoy.';
     $toastLink    = 'index.php?route=reserva/index';
     $toastBtnText = 'Ir a mis reservas';
+    include 'src/views/components/toast_notification.php';
+    ?>
+<?php endif; ?>
+
+<!-- TOAST NOTIFICACIÓN ANTICIPADA (MAÑANA) -->
+<?php if (isset($tieneReservaManana) && $tieneReservaManana): ?>
+    <?php
+    $toastKey     = 'reserva_manana';
+    $toastTitle   = 'Recordatorio de reserva';
+    $toastMsg     = 'Mañana tienes una reserva programada.';
+    $toastLink    = 'index.php?route=reserva/index';
+    $toastBtnText = 'Ver detalles';
+    // Asumimos que el componente usa $toastKey para generar el ID del elemento
     include 'src/views/components/toast_notification.php';
     ?>
 <?php endif; ?>

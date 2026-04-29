@@ -640,6 +640,10 @@ function eliminarReserva(idReserva) {
           setTimeout(() => {
             cardReserva.remove();
           }, 300);
+          
+          // Limpiar claves de localStorage asociadas a alertas
+          const fechaReserva = cardReserva.getAttribute('data-fecha') || new Date().toISOString().split('T')[0];
+          limpiarKeysReserva(fechaReserva);
         }
       } else {
         // Uso de Optional Chaining (?.) para evitar el crasheo si data es null
@@ -651,6 +655,14 @@ function eliminarReserva(idReserva) {
       // Ahora el alert mostrará el motivo real (ej: "No tienes permisos")
       alert(`Fallo en la operación: ${error.message}`);
     });
+}
+
+function limpiarKeysReserva(fecha) {
+    localStorage.removeItem('reserva_confirmada_' + fecha);
+    localStorage.removeItem('reserva_toast_hoy_' + fecha);
+    
+    // También intentamos limpiar la de mañana por si acaso
+    localStorage.removeItem('reserva_toast_manana_' + fecha);
 }
 // =====================================================
 // 🍞 10. SISTEMA DE NOTIFICACIONES (TOAST)

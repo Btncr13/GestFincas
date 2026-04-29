@@ -222,6 +222,7 @@ class AuthController
 
         // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
         $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
+        $tieneReservaManana = $this->reservaModel->tieneReservaManana($id_usuario);
 
         require "src/views/auth/panelvecino.php";
     }
@@ -261,6 +262,7 @@ class AuthController
 
         // Comprobar si tiene reserva hoy para mostrar la burbuja en la card
         $tieneReservaHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
+        $tieneReservaManana = $this->reservaModel->tieneReservaManana($id_usuario);
 
         // Obtener todos los espacios de la comunidad con sus normas
         $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
