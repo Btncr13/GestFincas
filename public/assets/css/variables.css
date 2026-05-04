@@ -534,3 +534,41 @@
     color: #FFFFFF !important;
     border-color: #4c407a !important;
 }
+
+/* =========================================
+   ANIMACIONES Y UTILIDADES (FORO)
+   ========================================= */
+@keyframes flash-highlight {
+    0% { box-shadow: 0 0 0 0 transparent; }
+    15% { box-shadow: 0 0 0 4px var(--bs-primary); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+.highlight-flash {
+    animation: flash-highlight 2s ease-out;
+}
+
+/* =========================================
+   UTILIDADES GLOBALES Y FORO (BOOTSTRAP EXT)
+   ========================================= */
+.font-title { font-family: var(--fuente-titulos) !important; }
+.bg-fondo { background-color: var(--color-fondo-formularios) !important; }
+.bg-soft { background-color: var(--color--hover) !important; }
+.border-custom { border-color: var(--color-borde) !important; border-style: solid; border-width: 1px; }
+
+.line-clamp-2 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+.ws-pre-wrap { white-space: pre-wrap !important; }
+.max-w-200 { max-width: 200px !important; }
+.lh-14 { line-height: 1.4 !important; }
+
+.icon-box-lg { width: 64px !important; height: 64px !important; }
+.icon-box-md { width: 40px !important; height: 40px !important; }
+.avatar-md { width: 42px !important; height: 42px !important; min-width: 42px !important; flex-shrink: 0 !important; font-size: 1rem !important; line-height: 1 !important; }
+.avatar-sm { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; font-size: 0.8rem !important; line-height: 1 !important; }
+.badge-sm { font-size: 0.65rem !important; padding: 0.2em 0.4em !important; }
+.text-xs { font-size: 0.75rem !important; }
+.text-sm-custom { font-size: 0.85rem !important; }

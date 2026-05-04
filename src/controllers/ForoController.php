@@ -17,8 +17,11 @@ class ForoController
         }
     }
 
-    // Helper para extraer las variables comunes del topbar/sidebar
-    private function getViewData()
+    /**
+     * Helper para extraer las variables comunes del topbar/sidebar.
+     * @return array{nombreComunidad: string, nombreVivienda: string, direccion: string, rolReal: string, rol: string, id_comunidad: int, id_usuario: int}
+     */
+    private function getViewData(): array
     {
         $calle = $_SESSION['vivienda']['calle'] ?? 'Dirección desconocida';
         $numero = $_SESSION['vivienda']['numero'] ?? '';
@@ -37,7 +40,8 @@ class ForoController
     public function index()
     {
         extract($this->getViewData());
-        $temas = $this->model->getTemasByComunidad($id_comunidad);
+        $categoria = $_GET['cat'] ?? null;
+        $temas = $this->model->getTemasByComunidad($id_comunidad, $categoria);
         
         require_once __DIR__ . '/../views/foro/index.php';
     }
@@ -68,9 +72,10 @@ class ForoController
             extract($this->getViewData());
             $titulo = trim($_POST['titulo'] ?? '');
             $descripcion = trim($_POST['descripcion'] ?? '');
+            $categoria = $_POST['categoria'] ?? 'general';
 
             if (!empty($titulo) && !empty($descripcion)) {
-                $this->model->crearTema($id_comunidad, $id_usuario, $titulo, $descripcion);
+                $this->model->crearTema($id_comunidad, $id_usuario, $titulo, $descripcion, $categoria);
             }
             header('Location: index.php?route=foro/index');
             exit;

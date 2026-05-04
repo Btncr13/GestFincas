@@ -11,19 +11,27 @@ class ForoModel extends BaseModel
     /**
      * Obtiene todos los temas, ASEGURANDO que solo sean de la comunidad especificada.
      */
-    public function getTemasByComunidad($id_comunidad)
+    public function getTemasByComunidad($id_comunidad, $categoria = null)
     {
+        $params = ['id_comunidad' => $id_comunidad];
+        $filtroCategoria = "";
+        
+        if ($categoria) {
+            $filtroCategoria = " AND t.categoria = :categoria ";
+            $params['categoria'] = $categoria;
+        }
+
         $sql = "SELECT t.*, u.nombre, u.apellidos, u.rol, v.nombre as nombre_vivienda,
                        (SELECT COUNT(*) FROM foro_mensaje m WHERE m.id_tema = t.id_tema) as total_respuestas,
                        (SELECT MAX(fecha_creacion) FROM foro_mensaje m WHERE m.id_tema = t.id_tema) as ultimo_mensaje
                 FROM foro_tema t
                 JOIN usuario u ON t.id_usuario = u.id_usuario
                 JOIN vivienda v ON u.id_vivienda = v.id_vivienda
-                WHERE t.id_comunidad = :id_comunidad
+                WHERE t.id_comunidad = :id_comunidad" . $filtroCategoria . "
                 ORDER BY COALESCE(ultimo_mensaje, t.fecha_creacion) DESC";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id_comunidad' => $id_comunidad]);
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -43,16 +51,17 @@ class ForoModel extends BaseModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearTema($id_comunidad, $id_usuario, $titulo, $descripcion)
+    public function crearTema($id_comunidad, $id_usuario, $titulo, $descripcion, $categoria = 'general')
     {
-        $sql = "INSERT INTO foro_tema (id_comunidad, id_usuario, titulo, descripcion, estado, fecha_creacion) 
-                VALUES (:id_comunidad, :id_usuario, :titulo, :descripcion, 'abierto', NOW())";
+        $sql = "INSERT INTO foro_tema (id_comunidad, id_usuario, titulo, descripcion, categoria, estado, fecha_creacion) 
+                VALUES (:id_comunidad, :id_usuario, :titulo, :descripcion, :categoria, 'abierto', NOW())";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'id_comunidad' => $id_comunidad,
             'id_usuario' => $id_usuario,
             'titulo' => $titulo,
-            'descripcion' => $descripcion
+            'descripcion' => $descripcion,
+            'categoria' => $categoria
         ]);
         return $this->db->lastInsertId();
     }
