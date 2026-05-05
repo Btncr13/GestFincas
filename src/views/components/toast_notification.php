@@ -26,12 +26,28 @@ $toastBtnText = $toastBtnText ?? 'Ver detalles';
 
 <script>
     function marcarToastComoVisto_<?= $toastKey ?>() {
-        const hoy = new Date().toISOString().split('T')[0];
+        const getLocalYYYYMMDD = (d) => {
+            return d.getFullYear() + '-' + 
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(d.getDate()).padStart(2, '0');
+        };
+        const hoy = getLocalYYYYMMDD(new Date());
         localStorage.setItem('<?= $toastKey ?>_' + hoy, 'true');
+        
+        // Ocultar la burbuja roja del dashboard al hacer clic
+        if ('<?= $toastKey ?>' === 'reserva') {
+            const burbujas = document.querySelectorAll('.badge-reserva-hoy');
+            burbujas.forEach(burbuja => burbuja.classList.add('d-none'));
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const hoy = new Date().toISOString().split('T')[0];
+        const getLocalYYYYMMDD = (d) => {
+            return d.getFullYear() + '-' + 
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(d.getDate()).padStart(2, '0');
+        };
+        const hoy = getLocalYYYYMMDD(new Date());
         if (!localStorage.getItem('<?= $toastKey ?>_' + hoy)) {
             const toastEl = document.getElementById('toast_<?= $toastKey ?>');
             if (toastEl) {
@@ -39,6 +55,12 @@ $toastBtnText = $toastBtnText ?? 'Ver detalles';
                     autohide: false
                 });
                 toast.show();
+            }
+        } else {
+            // Si el aviso ya fue visto hoy, ocultamos la burbuja al recargar la página
+            if ('<?= $toastKey ?>' === 'reserva') {
+                const burbujas = document.querySelectorAll('.badge-reserva-hoy');
+                burbujas.forEach(burbuja => burbuja.classList.add('d-none'));
             }
         }
     });

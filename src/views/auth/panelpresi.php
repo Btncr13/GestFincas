@@ -110,7 +110,7 @@ include 'src/views/components/topbar.php'; ?>
                         <a href="index.php?route=reserva/index" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
                                 <?php if (isset($tieneReservaHoy) && $tieneReservaHoy): ?>
-                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle badge-reserva-hoy">
                                         <span class="visually-hidden">Reserva para hoy</span>
                                     </span>
                                 <?php endif; ?>
@@ -180,3 +180,5 @@ include 'src/views/components/topbar.php'; ?>
         </main>
     </div>
 </div>
+
+<script src="public/assets/js/dashboard_vecino.js"></script>
