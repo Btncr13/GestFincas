@@ -33,12 +33,6 @@ $toastBtnText = $toastBtnText ?? 'Ver detalles';
         };
         const hoy = getLocalYYYYMMDD(new Date());
         localStorage.setItem('<?= $toastKey ?>_' + hoy, 'true');
-        
-        // Ocultar la burbuja roja del dashboard al hacer clic
-        if ('<?= $toastKey ?>' === 'reserva') {
-            const burbujas = document.querySelectorAll('.badge-reserva-hoy');
-            burbujas.forEach(burbuja => burbuja.classList.add('d-none'));
-        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -55,12 +49,6 @@ $toastBtnText = $toastBtnText ?? 'Ver detalles';
                     autohide: false
                 });
                 toast.show();
-            }
-        } else {
-            // Si el aviso ya fue visto hoy, ocultamos la burbuja al recargar la página
-            if ('<?= $toastKey ?>' === 'reserva') {
-                const burbujas = document.querySelectorAll('.badge-reserva-hoy');
-                burbujas.forEach(burbuja => burbuja.classList.add('d-none'));
             }
         }
     });
