@@ -64,6 +64,15 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
             </li>
 
             <li class="nav-item">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'foro/index') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=foro/index"
+                    style="background-color: <?= ($ruta_actual == 'foro/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'foro/index') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-comments me-2"></i> Foro Vecinal
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'votacion/index') ? 'active fw-bold' : '' ?>"
                     href="index.php?route=votacion/index"
                     style="background-color: <?= ($ruta_actual == 'votacion/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
