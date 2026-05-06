@@ -105,6 +105,21 @@ include 'src/views/components/topbar.php'; ?>
                         </a>
                     </div>
 
+                    <!-- Foro Vecinal -->
+                    <div class="col">
+                        <a href="index.php?route=foro/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(34, 28, 53, 0.1);">
+                                        <i class="fa-solid fa-comments text-primary fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Foro Vecinal</h5>
+                                    <p class="card-text text-muted small mb-0">Moderación y debate</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
                     <!-- Reservas -->
                     <div class="col">
                         <a href="index.php?route=reserva/index" class="text-decoration-none h-100 d-block">
@@ -169,6 +184,21 @@ include 'src/views/components/topbar.php'; ?>
                                     </div>
                                     <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Incidencias</h5>
                                     <p class="card-text text-muted small mb-0">Gestión de averías</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Finanzas -->
+                    <div class="col">
+                        <a href="index.php?route=finanzas/index" class="text-decoration-none h-100 d-block">
+                            <div class="card shadow-sm h-100 border-0 text-center module-card">
+                                <div class="card-body p-4 d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; background-color: rgba(34, 28, 53, 0.1);">
+                                        <i class="fa-solid fa-wallet text-primary fs-2"></i>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Finanzas</h5>
+                                    <p class="card-text text-muted small mb-0">Contabilidad y cuotas</p>
                                 </div>
                             </div>
                         </a>
