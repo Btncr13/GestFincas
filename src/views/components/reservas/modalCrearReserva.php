@@ -20,7 +20,8 @@
                 <!-- Espacio -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Espacio</label>
-                    <select name="id_espacio" id="id_espacio" class="form-select">
+                    <!-- Añadido custom-input aquí -->
+                    <select name="id_espacio" id="id_espacio" class="form-select custom-input">
                         <option value="">Selecciona un espacio</option>
                         <?php foreach ($espaciosDisponibles as $espacio): ?>
                             <option value="<?= $espacio['id_espacios_comunidad'] ?>">
@@ -33,14 +34,16 @@
                 <!-- Fecha de la reserva -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Fecha</label>
-                    <input type="date" id="inputFecha" class="form-control shadow-sm">
+                    <!-- Añadido custom-input aquí -->
+                    <input type="date" id="inputFecha" class="form-control custom-input shadow-sm">
                 </div>
 
 
                 <!-- Tramo horario -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Tramo horario</label>
-                    <select id="selectTramo" class="form-select shadow-sm">
+                    <!-- Añadido custom-input aquí -->
+                    <select id="selectTramo" class="form-select custom-input shadow-sm">
                         <option value="">Selecciona un tramo...</option>
                     </select>
                 </div>
@@ -48,7 +51,8 @@
                 <!-- Número de personas -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold text-dark">Asistentes</label>
-                    <select id="selectPersonas" class="form-select shadow-sm">
+                    <!-- Añadido custom-input aquí -->
+                    <select id="selectPersonas" class="form-select custom-input shadow-sm">
                         <option value="">Máximo asistentes...</option>
                     </select>
                 </div>
