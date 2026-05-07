@@ -572,3 +572,39 @@
 .badge-sm { font-size: 0.65rem !important; padding: 0.2em 0.4em !important; }
 .text-xs { font-size: 0.75rem !important; }
 .text-sm-custom { font-size: 0.85rem !important; }
+
+
+/* =========================================
+   ARREGLO PARA EL INPUT DE SUBIR ARCHIVOS (FILE)
+========================================= */
+[data-theme="dark"] .form-control::file-selector-button {
+    background-color: var(--bs-light) !important; /* Fondo del botón adaptado al modo oscuro */
+    color: var(--bs-dark) !important; /* Texto claro legible */
+    border-right: 1px solid var(--color-borde) !important; /* Separador sutil */
+}
+
+/* Efecto hover para el botón de seleccionar archivo */
+[data-theme="dark"] .form-control:hover::file-selector-button {
+    background-color: var(--color--hover) !important;
+}
+
+/* =========================================
+   MODO OSCURO (Dark Mode)
+   Se activa cuando <html> tiene data-theme="dark"
+========================================= */
+[data-theme="dark"] {
+    --bs-light: #1E1E2E;      /* Fondo de tarjetas y sidebar */
+    --bs-secondary: #11111B;  /* Fondo general del body */
+    --bs-dark: #CDD6F4;       /* Texto principal blanco/azulado */
+    --color-fondo-formularios: #313244;
+    --color-texto: #A6ADC8;
+    --color-borde: #313244;
+    --color--hover: #45475A;
+
+    /* Forzamos a Bootstrap a usar nuestros textos oscuros globalmente */
+    --bs-body-color: var(--bs-dark);
+    color: var(--bs-dark);
+
+    /* ✨ LA LÍNEA MÁGICA PARA LOS CALENDARIOS NATIVOS ✨ */
+    color-scheme: dark;
+}
