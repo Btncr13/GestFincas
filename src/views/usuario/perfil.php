@@ -78,9 +78,9 @@ include 'src/views/components/topbar.php';
                                 <hr class="my-4" style="opacity: 0.1;">
 
                                 <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-outline-primary btn-sm px-4" disabled title="Función en desarrollo">
+                                    <a href="index.php?route=usuario/cambiarPassword" class="btn btn-outline-primary btn-sm px-4">
                                         <i class="fa-solid fa-key me-2"></i> Cambiar Contraseña
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>

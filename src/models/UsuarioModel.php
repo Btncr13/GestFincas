@@ -4,7 +4,7 @@ require_once "config/BaseModel.php";
 
 class UsuarioModel extends BaseModel
 {
-    
+
     // ------------------------------------------ VALIDA SI UN CODIGO EXISTE Y NO HA SIDO USADO
     public function validarCodigo($codigo)
     {
@@ -54,7 +54,7 @@ class UsuarioModel extends BaseModel
         }
     }
 
-//  -------------------------------------------------- LOGIN DE USUARIO POR MAIL
+    //  -------------------------------------------------- LOGIN DE USUARIO POR MAIL
 
     public function login($nombreVivienda, $email, $password)
     {
@@ -107,11 +107,11 @@ class UsuarioModel extends BaseModel
                     JOIN comunidad c ON v.id_comunidad = c.id_comunidad
                     JOIN direccion d ON c.id_direccion = d.id_direccion
                     WHERE u.id_usuario = :id_usuario LIMIT 1";
-                    
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id_usuario' => $id_usuario]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($usuario) {
                 unset($usuario['password']); // Limpiamos la contraseña por seguridad
                 return $usuario;
@@ -170,5 +170,32 @@ class UsuarioModel extends BaseModel
             return false;
         }
     }
+
+    /**
+     * Obtiene el hash de la contraseña de un usuario por su ID.
+     */
+    public function getPasswordHash($id_usuario)
+    {
+        $sql = "SELECT password FROM usuario WHERE id_usuario = :id LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id' => $id_usuario]);
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $res ? $res['password'] : null;
+    }
+
+    /**
+     * Actualiza la contraseña de un usuario con un nuevo hash.
+     */
+    public function actualizarPassword($id_usuario, $nueva_password)
+    {
+        try {
+            $hash = password_hash($nueva_password, PASSWORD_BCRYPT);
+            $sql = "UPDATE usuario SET password = :hash WHERE id_usuario = :id";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute(['hash' => $hash, 'id' => $id_usuario]);
+        } catch (PDOException $e) {
+            error_log("Error al actualizar password: " . $e->getMessage());
+            return false;
+        }
+    }
 }
-?>
