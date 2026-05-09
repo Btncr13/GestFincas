@@ -5,6 +5,7 @@ require_once "src/models/EspacioModel.php";
 require_once "src/models/VotacionModel.php";
 require_once "src/models/ReservaModel.php";
 require_once "src/models/ComunicacionesModel.php";
+require_once "src/controllers/NotificationController.php";
 
 class AuthController
 {
@@ -13,9 +14,11 @@ class AuthController
     private $reservaModel;
     private $espacioModel;
     private $comunicacionesModel;
+    private $pdo;
 
     public function __construct($pdo)
     {
+        $this->pdo = $pdo;
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->votacionModel = new VotacionModel($pdo);
         $this->reservaModel = new ReservaModel($pdo);
@@ -234,6 +237,10 @@ class AuthController
         $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
         $ultimoComunicadoBD = !empty($listaComs) ? $listaComs[0] : null;
 
+        // Instanciamos el controlador y preparamos las notificaciones
+        $notificationController = new NotificationController($this->pdo);
+        $notificaciones = $notificationController->getNotificationsForView($id_usuario, $id_comunidad, $_SESSION['modo_vista'] ?? 'vecino');
+
         require "src/views/auth/panelvecino.php";
     }
 
@@ -278,6 +285,10 @@ class AuthController
         $espacios = $this->espacioModel->getEspaciosByComunidadConNormas($id_comunidad);
         // Obtener comunicaciones reales de la BBDD para el panel del presidente
         $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
+
+        // Instanciamos el controlador y preparamos las notificaciones
+        $notificationController = new NotificationController($this->pdo);
+        $notificaciones = $notificationController->getNotificationsForView($id_usuario, $id_comunidad, 'presidente');
 
         require "src/views/auth/panelpresi.php";
     }

@@ -212,6 +212,3 @@ include 'src/views/components/topbar.php'; ?>
 </div>
 
 <script src="public/assets/js/dashboard_vecino.js"></script>
-
-<!-- COMPONENTE TOASTS DE RESERVAS -->
-<?php include 'src/views/components/toasts_reservas.php'; ?>
