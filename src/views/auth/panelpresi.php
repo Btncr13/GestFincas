@@ -46,29 +46,23 @@ include 'src/views/components/topbar.php'; ?>
                     </div>
 
                     <div class="action-list">
-                        <div class="action-item" style="border-left-color: var(--bs-success);">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-person-plus-fill text-success fs-5"></i>
-                                <span class="text-sm-custom">Nuevo vecino registrado: María López (Planta 2-1B)</span>
+                        <?php if (!empty($notificaciones)): ?>
+                            <?php foreach ($notificaciones as $notif): ?>
+                                <a href="<?= htmlspecialchars($notif['link']) ?>" class="text-decoration-none d-block mb-2">
+                                    <div class="action-item" style="border-left-color: <?= htmlspecialchars($notif['border_color'] ?? 'var(--bs-primary)') ?>;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i class="<?= htmlspecialchars($notif['icon'] ?? 'bi-bell-fill') ?> fs-5 <?= htmlspecialchars($notif['text_color'] ?? 'text-primary') ?>"></i>
+                                            <span class="text-sm-custom text-dark fw-medium"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                        </div>
+                                        <i class="bi bi-arrow-right text-muted"></i>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="p-3 text-center text-muted border rounded bg-white shadow-sm">
+                                <p class="mb-0 small">No hay notificaciones pendientes.</p>
                             </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                        </div>
-
-                        <div class="action-item" style="border-left-color: #20c997;">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-calendar-check-fill fs-5" style="color: #20c997;"></i>
-                                <span class="text-sm-custom">Nueva reserva: Pista de Pádel (Planta 1-2A)</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                        </div>
-
-                        <div class="action-item" style="border-left-color: var(--bs-warning);">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-megaphone-fill text-warning fs-5"></i>
-                                <span class="text-sm-custom">Recordatorio: Junta Ordinaria mañana a las 19:00h</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

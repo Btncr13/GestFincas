@@ -19,16 +19,16 @@ if (empty($notificaciones) || !is_array($notificaciones)) {
                     <?= htmlspecialchars($notif['titulo']) ?>
                 </strong>
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" 
-                        onclick="marcarToastComoVisto('<?= htmlspecialchars($notif['key']) ?>')"></button>
+                        onclick="marcarToastComoVisto('<?= htmlspecialchars($notif['key']) ?>', this)"></button>
             </div>
             
             <div class="toast-body bg-white text-dark rounded-bottom">
                 <p class="mb-3"><?= htmlspecialchars($notif['mensaje']) ?></p>
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-secondary btn-sm fw-semibold" data-bs-dismiss="toast" 
-                            onclick="marcarToastComoVisto('<?= htmlspecialchars($notif['key']) ?>')">Entendido</button>
+                            onclick="marcarToastComoVisto('<?= htmlspecialchars($notif['key']) ?>', this)">Entendido</button>
                     <a href="<?= htmlspecialchars($notif['link']) ?>" class="btn btn-outline-primary btn-sm fw-semibold" 
-                       onclick="marcarToastComoVisto('<?= htmlspecialchars($notif['key']) ?>')">
+                       onclick="marcarToastComoVisto('<?= htmlspecialchars($notif['key']) ?>', this)">
                         <?= htmlspecialchars($notif['btn_text']) ?>
                     </a>
                 </div>
@@ -39,7 +39,7 @@ if (empty($notificaciones) || !is_array($notificaciones)) {
 
 <script>
     // Centralizamos la función pasándole la key en lugar de crear múltiples funciones en PHP
-    function marcarToastComoVisto(toastKey) {
+    function marcarToastComoVisto(toastKey, elementoClick) {
         const getLocalYYYYMMDD = (d) => {
             return d.getFullYear() + '-' + 
                    String(d.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -47,6 +47,15 @@ if (empty($notificaciones) || !is_array($notificaciones)) {
         };
         const hoy = getLocalYYYYMMDD(new Date());
         localStorage.setItem('toast_' + toastKey + '_' + hoy, 'true');
+
+        // Ocultar el toast dinámicamente de la vista si se pasa el elemento que activó el evento
+        if (elementoClick) {
+            const toastEl = elementoClick.closest('.toast');
+            if (toastEl) {
+                const toastInstance = bootstrap.Toast.getOrCreateInstance(toastEl);
+                toastInstance.hide();
+            }
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -62,7 +71,7 @@ if (empty($notificaciones) || !is_array($notificaciones)) {
         toastElements.forEach(function(toastEl) {
             const toastKey = toastEl.getAttribute('data-toast-key');
             if (!localStorage.getItem('toast_' + toastKey + '_' + hoy)) {
-                const toast = new bootstrap.Toast(toastEl, {
+                const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
                     autohide: false // Mantenemos los avisos vitales visibles hasta interaccionar
                 });
                 toast.show();
