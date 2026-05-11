@@ -281,4 +281,10 @@ class AuthController
 
         require "src/views/auth/panelpresi.php";
     }
+
+    // 🟢 VISTA: PANTALLA RESTABLECER CONTRASEÑA (Solo visual) 🟢
+    public function resetPassword()
+    {
+        require "src/views/auth/reset_password.php";
+    }
 }
