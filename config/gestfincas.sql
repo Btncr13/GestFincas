@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-05-2026 a las 10:16:03
+-- Tiempo de generación: 11-05-2026 a las 12:33:43
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -359,7 +359,8 @@ CREATE TABLE `matriculas` (
   `matricula` varchar(20) NOT NULL,
   `uso_matricula` enum('habitual','invitado') NOT NULL,
   `marca_vehículo` varchar(20) NOT NULL,
-  `nombre_invitado` varchar(40) DEFAULT NULL
+  `nombre_invitado` varchar(40) DEFAULT NULL,
+  `fecha_entrada` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
