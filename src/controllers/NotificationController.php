@@ -30,34 +30,30 @@ class NotificationController
         $notificaciones = [];
 
         try {
-            // 1. Reservas
-            $reservasHoy = $this->reservaModel->tieneReservaHoy($id_usuario);
-            if ($reservasHoy) {
-                $notificaciones[] = [
-                    'key'      => 'reservas',
-                    'titulo'   => 'Reserva para hoy',
-                    'mensaje'  => 'Tienes una reserva programada para hoy.',
-                    'color'    => 'bg-success',
-                    'text_color' => 'text-success',
-                    'border_color' => 'var(--bs-success)',
-                    'icon'     => 'bi bi-calendar-check-fill',
-                    'link'     => 'index.php?route=reserva/index',
-                    'btn_text' => 'Ir a mis reservas'
-                ];
-            } else {
-                $reservasManana = $this->reservaModel->tieneReservaManana($id_usuario);
-                if ($reservasManana) {
-                    $notificaciones[] = [
-                        'key'      => 'reservas',
-                        'titulo'   => 'Reserva para mañana',
-                        'mensaje'  => 'Mañana tienes una reserva programada.',
-                        'color'    => 'bg-success',
-                        'text_color' => 'text-success',
-                        'border_color' => 'var(--bs-success)',
-                        'icon'     => 'bi bi-calendar-check-fill',
-                        'link'     => 'index.php?route=reserva/index',
-                        'btn_text' => 'Ir a mis reservas'
-                    ];
+            // 1. Reservas (Específicas del usuario para cumplir con Privacidad)
+            $reservas = $this->reservaModel->getReservasUsuario($id_usuario);
+            if (is_array($reservas)) {
+                foreach ($reservas as $res) {
+                    $fecha_reserva = strtotime($res['fecha_reserva']);
+                    $hoy = strtotime('today');
+                    $manana = strtotime('+1 day', $hoy);
+                    
+                    if ($res['estado_reserva'] === 'activo' && ($fecha_reserva == $hoy || $fecha_reserva == $manana)) {
+                        $dia_texto = ($fecha_reserva == $hoy) ? 'hoy' : 'mañana';
+                        $hora = date('H:i', strtotime($res['hora_inicio']));
+                        $notificaciones[] = [
+                            'key'      => 'reserva_' . $res['id_reserva'],
+                            'titulo'   => "Reserva para $dia_texto",
+                            'mensaje'  => "Reserva en " . htmlspecialchars($res['nombre_espacio']) . " a las $hora.",
+                            'color'    => 'bg-success',
+                            'text_color' => 'text_success',
+                            'border_color' => 'var(--bs-success)',
+                            'icon'     => 'bi bi-calendar-check-fill',
+                            'link'     => 'index.php?route=reserva/index',
+                            'btn_text' => 'Ir a mis reservas',
+                            'badge'    => null
+                        ];
+                    }
                 }
             }
 
@@ -73,24 +69,41 @@ class NotificationController
                     'border_color' => 'var(--bs-primary)',
                     'icon'     => 'bi bi-megaphone-fill',
                     'link'     => 'index.php?route=comunicaciones/index',
-                    'btn_text' => 'Leer avisos'
+                    'btn_text' => 'Leer avisos',
+                    'badge'    => null
                 ];
             }
 
-            // 3. Incidencias
-            $incidenciasUrgentes = $this->incidenciasModel->contarUrgentes($id_comunidad, $id_usuario, $rol);
-            if ($incidenciasUrgentes > 0) {
-                $notificaciones[] = [
-                    'key'      => 'incidencias',
-                    'titulo'   => 'Incidencias Urgentes',
-                    'mensaje'  => "Hay $incidenciasUrgentes incidencia(s) urgente(s) reportada(s).",
-                    'color'    => 'bg-danger',
-                    'text_color' => 'text-danger',
-                    'border_color' => 'var(--bs-danger)',
-                    'icon'     => 'fa-solid fa-triangle-exclamation',
-                    'link'     => 'index.php?route=incidencias/index',
-                    'btn_text' => 'Revisar'
-                ];
+            // 3. Incidencias (Ahora entidades individuales y muestran estado actual en tiempo real)
+            $incidencias = $this->incidenciasModel->obtenerIncidenciasPorComunidad($id_comunidad);
+            if (is_array($incidencias)) {
+                foreach ($incidencias as $inc) {
+                    // Evitamos cargar las resueltas para no llenar el panel
+                    if (in_array(strtolower($inc['estado']), ['pendiente', 'abierta', 'urgente'])) {
+                        
+                        $estado = strtolower($inc['estado']);
+                        $badgeClass = 'bg-secondary';
+                        if ($estado === 'pendiente') $badgeClass = 'bg-warning text-dark';
+                        if ($estado === 'abierta') $badgeClass = 'bg-primary';
+                        if ($estado === 'urgente') $badgeClass = 'bg-danger';
+
+                        $notificaciones[] = [
+                            'key'      => 'incidencia_' . $inc['id_incidencias'],
+                            'titulo'   => 'Incidencia de Comunidad',
+                            'mensaje'  => 'Incidencia: ' . htmlspecialchars($inc['titulo']),
+                            'color'    => 'bg-danger',
+                            'text_color' => 'text-danger',
+                            'border_color' => 'var(--bs-danger)',
+                            'icon'     => 'fa-solid fa-triangle-exclamation',
+                            'link'     => 'index.php?route=incidencias/index',
+                            'btn_text' => 'Revisar',
+                            'badge'    => [
+                                'text'  => ucfirst($estado),
+                                'class' => $badgeClass
+                            ]
+                        ];
+                    }
+                }
             }
 
             // 4. Votaciones
@@ -115,32 +128,31 @@ class NotificationController
                     'border_color' => 'var(--bs-warning)',
                     'icon'     => 'fa-solid fa-check-to-slot',
                     'link'     => 'index.php?route=votacion/index',
-                    'btn_text' => 'Votar'
+                    'btn_text' => 'Votar',
+                    'badge'    => null
                 ];
             }
 
             // 5. Reuniones
             $reuniones = $this->reunionModel->getReunionesComunidad($id_comunidad);
-            $reunionesPendientes = 0;
             if (is_array($reuniones)) {
                 foreach ($reuniones as $r) {
                     if (isset($r['fecha']) && strtotime($r['fecha']) >= strtotime('today')) {
-                        $reunionesPendientes++;
+                        $fecha_formateada = date('d/m/Y', strtotime($r['fecha']));
+                        $notificaciones[] = [
+                            'key'      => 'reunion_' . $r['id_reunion'],
+                            'titulo'   => 'Próxima Reunión',
+                            'mensaje'  => htmlspecialchars($r['titulo']) . " el $fecha_formateada.",
+                            'color'    => 'bg-warning',
+                            'text_color' => 'text-warning',
+                            'border_color' => 'var(--bs-warning)',
+                            'icon'     => 'bi bi-calendar-event-fill',
+                            'link'     => 'index.php?route=reunion/reuniones',
+                            'btn_text' => 'Ver convocatorias',
+                            'badge'    => null
+                        ];
                     }
                 }
-            }
-            if ($reunionesPendientes > 0) {
-                $notificaciones[] = [
-                    'key'      => 'reuniones',
-                    'titulo'   => 'Reuniones Próximas',
-                    'mensaje'  => "Hay $reunionesPendientes convocatoria(s) de reunión activa(s).",
-                    'color'    => 'bg-warning',
-                    'text_color' => 'text-warning',
-                    'border_color' => 'var(--bs-warning)',
-                    'icon'     => 'bi bi-calendar-event-fill',
-                    'link'     => 'index.php?route=reunion/reuniones',
-                    'btn_text' => 'Ver convocatorias'
-                ];
             }
 
         } catch (Exception $e) {

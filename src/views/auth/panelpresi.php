@@ -47,17 +47,53 @@ include 'src/views/components/topbar.php'; ?>
 
                     <div class="action-list">
                         <?php if (!empty($notificaciones)): ?>
-                            <?php foreach ($notificaciones as $notif): ?>
+                            <?php 
+                            $visible_count = 4;
+                            $total_notifs = count($notificaciones);
+                            $visible_notifs = array_slice($notificaciones, 0, $visible_count);
+                            $hidden_notifs = array_slice($notificaciones, $visible_count);
+                            ?>
+
+                            <?php foreach ($visible_notifs as $notif): ?>
                                 <a href="<?= htmlspecialchars($notif['link']) ?>" class="text-decoration-none d-block mb-2">
                                     <div class="action-item" style="border-left-color: <?= htmlspecialchars($notif['border_color'] ?? 'var(--bs-primary)') ?>;">
-                                        <div class="d-flex align-items-center gap-3">
+                                        <div class="d-flex align-items-center gap-3 w-100">
                                             <i class="<?= htmlspecialchars($notif['icon'] ?? 'bi-bell-fill') ?> fs-5 <?= htmlspecialchars($notif['text_color'] ?? 'text-primary') ?>"></i>
-                                            <span class="text-sm-custom text-dark fw-medium"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                            <span class="text-sm-custom text-dark fw-medium flex-grow-1"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                            <?php if (!empty($notif['badge'])): ?>
+                                                <span class="badge <?= htmlspecialchars($notif['badge']['class']) ?> ms-2"><?= htmlspecialchars($notif['badge']['text']) ?></span>
+                                            <?php else: ?>
+                                                <i class="bi bi-arrow-right text-muted ms-2"></i>
+                                            <?php endif; ?>
                                         </div>
-                                        <i class="bi bi-arrow-right text-muted"></i>
                                     </div>
                                 </a>
                             <?php endforeach; ?>
+
+                            <?php if ($total_notifs > $visible_count): ?>
+                                <div class="collapse" id="collapseNotificaciones">
+                                    <?php foreach ($hidden_notifs as $notif): ?>
+                                        <a href="<?= htmlspecialchars($notif['link']) ?>" class="text-decoration-none d-block mb-2">
+                                            <div class="action-item" style="border-left-color: <?= htmlspecialchars($notif['border_color'] ?? 'var(--bs-primary)') ?>;">
+                                                <div class="d-flex align-items-center gap-3 w-100">
+                                                    <i class="<?= htmlspecialchars($notif['icon'] ?? 'bi-bell-fill') ?> fs-5 <?= htmlspecialchars($notif['text_color'] ?? 'text-primary') ?>"></i>
+                                                    <span class="text-sm-custom text-dark fw-medium flex-grow-1"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                                    <?php if (!empty($notif['badge'])): ?>
+                                                        <span class="badge <?= htmlspecialchars($notif['badge']['class']) ?> ms-2"><?= htmlspecialchars($notif['badge']['text']) ?></span>
+                                                    <?php else: ?>
+                                                        <i class="bi bi-arrow-right text-muted ms-2"></i>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <button class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNotificaciones" aria-expanded="false" aria-controls="collapseNotificaciones" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Ver más (<?= $total_notifs - $visible_count ?>)' : 'Ocultar';">
+                                        Ver más (<?= $total_notifs - $visible_count ?>)
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                         <?php else: ?>
                             <div class="p-3 text-center text-muted border rounded bg-white shadow-sm">
                                 <p class="mb-0 small">No hay notificaciones pendientes.</p>
