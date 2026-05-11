@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-05-2026 a las 13:03:55
+-- Tiempo de generación: 11-05-2026 a las 10:16:03
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -268,7 +268,8 @@ INSERT INTO `foro_tema` (`id_tema`, `id_comunidad`, `id_usuario`, `titulo`, `des
 (1, 1, 3, 'Horario piscina', 'Alguien sabe el horario de la piscina?', '2026-04-29 13:16:30', 'abierto', 'general'),
 (3, 1, 3, 'Busco pareja para league of legends', 'asdasdasdasdasd', '2026-05-04 09:10:47', 'abierto', 'general'),
 (5, 1, 3, 'Vendo Boli Bic y regalo entradas para la Final de la Champions', 'Vendo boli Bic de color azul y regalo 2 entradas para la final de la Champions.\r\nPrecio: 1500 € (no negociable)', '2026-05-04 10:54:48', 'abierto', 'mercadillo'),
-(6, 1, 1, 'prueba', 'asdasdasd', '2026-05-04 11:26:30', 'abierto', 'general');
+(6, 1, 1, 'prueba', 'asdasdasd', '2026-05-04 11:26:30', 'abierto', 'general'),
+(7, 1, 1, 'Fiesta Halloween', 'Sería buena idea que la comunidad celebre la fiesta de Halloween, y a Pepe lo vestimos de esqueleto repartiendo caramelos', '2026-05-06 01:51:46', 'abierto', 'propuestas');
 
 -- --------------------------------------------------------
 
@@ -349,6 +350,21 @@ CREATE TABLE `mancomunidad` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `matriculas`
+--
+
+CREATE TABLE `matriculas` (
+  `id_matricula` int(10) UNSIGNED NOT NULL,
+  `id_vivienda` int(10) UNSIGNED NOT NULL,
+  `matricula` varchar(20) NOT NULL,
+  `uso_matricula` enum('habitual','invitado') NOT NULL,
+  `marca_vehículo` varchar(20) NOT NULL,
+  `nombre_invitado` varchar(40) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `reservas`
 --
 
@@ -425,7 +441,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id_usuario`, `id_vivienda`, `nombre`, `apellidos`, `dni`, `email`, `password`, `fecha_registro`, `es_propietario`, `rol`) VALUES
-(1, 2, 'Maria', 'Pelaez', '42034567R', 'mariapelaez@gmail.com', '$2y$10$XyV7m6OAZ8IdECKxvEYEt.7Waw1b4VNY4fNWGfHb6/p4rwdzWDjmS', '2026-04-09 17:37:13', 1, 'vecino'),
+(1, 2, 'Maria', 'Pelaez', '42034567R', 'mariapelaez@gmail.com', '$2y$10$CocFmYgtUl2IBq.rLJZJs.JdUrVKGs8nOo/DIKL47PW/.rczKX4JS', '2026-04-09 17:37:13', 1, 'vecino'),
 (3, 4, 'pepe', 'perez', '28394873E', 'pepe@gmail.com', '$2y$10$qCYoCjYbtUazNP7W1pifwOFfHDJPT6A7bgGLqilyQ3STqWHwl1og.', '2026-04-15 02:18:47', 1, 'presidente');
 
 -- --------------------------------------------------------
@@ -611,6 +627,13 @@ ALTER TABLE `mancomunidad`
   ADD KEY `id_direccion` (`id_direccion`);
 
 --
+-- Indices de la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  ADD PRIMARY KEY (`id_matricula`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+
+--
 -- Indices de la tabla `reservas`
 --
 ALTER TABLE `reservas`
@@ -721,7 +744,7 @@ ALTER TABLE `foro_mensaje`
 -- AUTO_INCREMENT de la tabla `foro_tema`
 --
 ALTER TABLE `foro_tema`
-  MODIFY `id_tema` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_tema` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `gasto`
@@ -734,6 +757,12 @@ ALTER TABLE `gasto`
 --
 ALTER TABLE `mancomunidad`
   MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  MODIFY `id_matricula` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
@@ -830,6 +859,12 @@ ALTER TABLE `gasto`
 --
 ALTER TABLE `mancomunidad`
   ADD CONSTRAINT `fk_mancomunidad_direccion` FOREIGN KEY (`id_direccion`) REFERENCES `direccion` (`id_direccion`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  ADD CONSTRAINT `fk_matriculas_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `reservas`
