@@ -18,8 +18,14 @@
                 <p class="text-muted small mb-0">Crea una nueva contraseña para tu cuenta.</p>
             </div>
 
-            <!-- FORMULARIO VISUAL -->
-            <form id="resetPasswordForm">
+            <!-- FORMULARIO REAL CONECTADO AL BACKEND -->
+            <form id="resetPasswordForm" onsubmit="event.preventDefault();">
+                <!-- Capturamos el token de la URL de forma oculta -->
+                <input type="hidden" id="token_secreto" value="<?= htmlspecialchars($_GET['token'] ?? '') ?>">
+                
+                <!-- Contenedor para mensajes de error del servidor -->
+                <div id="errorMensaje" class="alert alert-danger d-none py-2 text-center small mb-3" style="border-radius: var(--radio-md);"></div>
+
                 <div class="mb-3">
                     <label class="form-label fw-medium text-dark text-sm-custom">Nueva Contraseña</label>
                     <div class="input-group">
@@ -40,8 +46,8 @@
                     </div>
                 </div>
 
-                <button type="button" id="btnGuardarFalso" class="btn btn-brand w-100 mb-2 fw-semibold border-0 shadow-sm" style="background-color: var(--bs-primary); color: white; padding: 10px; border-radius: var(--radio-md);">
-                    Guardar contraseña
+                <button type="submit" id="btnGuardarPassword" class="btn btn-brand w-100 mb-2 fw-semibold border-0 shadow-sm" style="background-color: var(--bs-primary); color: white; padding: 10px; border-radius: var(--radio-md);">
+                    Guardar nueva contraseña
                 </button>
             </form>
 
@@ -60,8 +66,12 @@
     </div>
 </main>
 
+<!-- ==============================================
+     AQUÍ EMPIEZA EL SCRIPT DE JAVASCRIPT Y AJAX
+     Se ejecuta en el navegador del usuario 
+=============================================== -->
 <script>
-// Función para el ojo (Mostrar/Ocultar contraseña) en ambos campos
+// Función para el ojo (Mostrar/Ocultar contraseña)
 function toggleVisibilidad(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
@@ -74,14 +84,78 @@ function toggleVisibilidad(inputId, iconId) {
     }
 }
 
-// Simulación Visual Front-End: Ocultar formulario y mostrar botón de volver al login
-document.getElementById('btnGuardarFalso').addEventListener('click', function() {
-    document.getElementById('resetPasswordForm').classList.add('d-none');
-    document.getElementById('successBlock').classList.remove('d-none');
-});
+// Lógica AJAX real asegurada para enviar la nueva contraseña
+document.addEventListener('DOMContentLoaded', function() {
+    const formReset = document.getElementById('resetPasswordForm');
+    
+    if (formReset) {
+        formReset.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Doble seguro para evitar que la página recargue
+            
+            const btn = document.getElementById('btnGuardarPassword');
+            const errorMsg = document.getElementById('errorMensaje');
+            
+            const pass1 = document.getElementById('pass1').value;
+            const pass2 = document.getElementById('pass2').value;
+            const token = document.getElementById('token_secreto').value;
 
-// Lógica básica Modo Oscuro
-document.addEventListener('DOMContentLoaded', () => {
+            // Reiniciamos el mensaje de error
+            errorMsg.classList.add('d-none');
+
+            // Validación front-end rápida
+            if(pass1 !== pass2) {
+                errorMsg.textContent = "Las contraseñas no coinciden.";
+                errorMsg.classList.remove('d-none');
+                return;
+            }
+
+            if(pass1.length < 6) {
+                errorMsg.textContent = "La contraseña debe tener al menos 6 caracteres.";
+                errorMsg.classList.remove('d-none');
+                return;
+            }
+
+            // Efecto de carga en el botón
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Guardando...';
+            btn.disabled = true;
+
+            // Preparamos los datos para enviar al servidor
+            const formData = new FormData();
+            formData.append('token', token);
+            formData.append('pass1', pass1);
+            formData.append('pass2', pass2);
+
+            try {
+                // Hacemos la petición POST a nuestro endpoint PHP sin recargar
+                const response = await fetch('index.php?route=auth/actualizarPasswordAjax', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+
+                if(data.success) {
+                    // ¡Éxito! Ocultamos formulario y mostramos mensaje verde
+                    formReset.classList.add('d-none');
+                    document.getElementById('successBlock').classList.remove('d-none');
+                } else {
+                    // El token caducó o error de DB
+                    errorMsg.textContent = data.message;
+                    errorMsg.classList.remove('d-none');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch(err) {
+                errorMsg.textContent = "Error de conexión con el servidor.";
+                errorMsg.classList.remove('d-none');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // Lógica básica Modo Oscuro
     const themeBtn = document.getElementById('themeToggleBtn');
     const themeIcon = document.getElementById('themeIcon');
     const htmlElement = document.documentElement;
