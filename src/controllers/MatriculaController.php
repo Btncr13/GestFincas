@@ -52,6 +52,7 @@ class MatriculaController
             $uso = $_POST['uso_matricula'] ?? 'habitual';
             $marca = $_POST['marca'] ?? '';
             $nombre_invitado = $_POST['nombre_invitado'] ?? null;
+            $fecha_entrada = $_POST['fecha_entrada'] ?? null;
 
             // Validaciones de negocio
             if (empty($matricula) || empty($marca)) {
@@ -79,9 +80,15 @@ class MatriculaController
                     header("Location: index.php?route=matricula/index");
                     exit;
                 }
+
+                if (empty($fecha_entrada)) {
+                    $_SESSION['parking_error'] = "La fecha de entrada es obligatoria para invitados.";
+                    header("Location: index.php?route=matricula/index");
+                    exit;
+                }
             }
 
-            if ($this->matriculaModel->registrar($id_vivienda, $matricula, $uso, $marca, $nombre_invitado)) {
+            if ($this->matriculaModel->registrar($id_vivienda, $matricula, $uso, $marca, $nombre_invitado, $fecha_entrada)) {
                 $_SESSION['parking_success'] = "Matrícula registrada correctamente.";
             } else {
                 $_SESSION['parking_error'] = "Error al registrar la matrícula.";

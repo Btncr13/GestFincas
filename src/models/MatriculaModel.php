@@ -19,18 +19,19 @@ class MatriculaModel extends BaseModel
         return (int)$stmt->fetchColumn();
     }
 
-    public function registrar($id_vivienda, $matricula, $uso, $marca, $nombre_invitado = null)
+    public function registrar($id_vivienda, $matricula, $uso, $marca, $nombre_invitado = null, $fecha_entrada = null)
     {
         try {
-            $sql = "INSERT INTO matriculas (id_vivienda, matricula, uso_matricula, marca_vehículo, nombre_invitado) 
-                    VALUES (:id_v, :mat, :uso, :marca, :nom_inv)";
+            $sql = "INSERT INTO matriculas (id_vivienda, matricula, uso_matricula, marca_vehículo, nombre_invitado, fecha_entrada) 
+                    VALUES (:id_v, :mat, :uso, :marca, :nom_inv, :f_ent)";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
                 'id_v'  => $id_vivienda,
                 'mat'   => strtoupper(trim($matricula)),
                 'uso'   => $uso,
                 'marca' => trim($marca),
-                'nom_inv' => ($uso === 'invitado') ? trim($nombre_invitado) : null
+                'nom_inv' => ($uso === 'invitado') ? trim($nombre_invitado) : null,
+                'f_ent' => ($uso === 'invitado') ? $fecha_entrada : date('Y-m-d H:i:s')
             ]);
         } catch (PDOException $e) {
             error_log("Error en MatriculaModel::registrar: " . $e->getMessage());
