@@ -41,7 +41,11 @@
 
                 <button type="submit" class="btn btn-primary w-100 mt-3 mb-4" style="background-color: var(--bs-primary); border: none;">Iniciar Sesión</button>
             </form>
-
+            <div class="text-end mb-4">
+                <span class="text-primary small fw-bold" style="cursor: pointer; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#modalRecuperarPassword">
+                    ¿Has olvidado tu contraseña?
+                </span>
+            </div>
             <div class="text-center border-top pt-3">
                 <p class="small text-muted mb-1">¿Es tu primera vez?</p>
                 <a href="index.php?route=auth/register" class="btn btn-link text-primary text-decoration-none p-0 text-sm-custom fw-bold">Darme de alta</a>
@@ -49,6 +53,40 @@
         </div>
     </div>
 </main>
+
+<!-- MODAL RECUPERAR CONTRASEÑA -->
+<div class="modal fade" id="modalRecuperarPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom py-3" style="background-color: var(--bs-light);">
+                <h5 class="modal-title fw-bold text-dark" style="font-family: var(--fuente-titulos);">
+                    <i class="fa-solid fa-unlock-keyhole me-2 text-primary"></i>Recuperar Contraseña
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" style="background-color: var(--bs-light);">
+                <p class="text-muted small mb-4">Introduce tu correo electrónico. Te enviaremos un enlace seguro para que puedas crear una nueva contraseña.</p>
+                
+                <!-- Alertas del modal -->
+                <div id="recuperarError" class="alert alert-danger d-none py-2 text-center small"></div>
+                <div id="recuperarExito" class="alert alert-success d-none py-2 text-center small"></div>
+
+                <form id="formRecuperarPassword">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark small">Correo electrónico</label>
+                        <input type="email" id="email_recuperacion" class="form-control custom-input" placeholder="usuario@ejemplo.com" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 py-3" style="background-color: var(--color-fondo-formularios);">
+                <button type="button" class="btn btn-secondary fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnEnviarRecuperacion" class="btn btn-brand fw-semibold shadow-sm">
+                    Enviar instrucciones
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -80,4 +118,54 @@
             updateUI();
         });
     });
+
+    // Lógica para enviar el correo de recuperación mediante AJAX
+    const btnEnviarRecuperacion = document.getElementById('btnEnviarRecuperacion');
+    if(btnEnviarRecuperacion) {
+        btnEnviarRecuperacion.addEventListener('click', async function() {
+            const email = document.getElementById('email_recuperacion').value.trim();
+            const errorAlert = document.getElementById('recuperarError');
+            const exitoAlert = document.getElementById('recuperarExito');
+            
+            errorAlert.classList.add('d-none');
+            exitoAlert.classList.add('d-none');
+
+            if(!email) {
+                errorAlert.textContent = 'Por favor, introduce tu correo electrónico.';
+                errorAlert.classList.remove('d-none');
+                return;
+            }
+
+            // Cambiamos el texto del botón mientras carga
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+            this.disabled = true;
+
+            const formData = new FormData();
+            formData.append('email', email);
+
+            try {
+                const response = await fetch('index.php?route=auth/enviarRecuperacionAjax', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if(data.success) {
+                    document.getElementById('formRecuperarPassword').reset();
+                    exitoAlert.textContent = data.message;
+                    exitoAlert.classList.remove('d-none');
+                } else {
+                    errorAlert.textContent = data.message; // "No existe ningún usuario con ese email"
+                    errorAlert.classList.remove('d-none');
+                }
+            } catch (error) {
+                errorAlert.textContent = 'Error de conexión con el servidor.';
+                errorAlert.classList.remove('d-none');
+            } finally {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }
+        });
+    }
 </script>

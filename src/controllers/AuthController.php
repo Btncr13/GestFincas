@@ -1,4 +1,9 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require_once 'libs/PHPMailer/src/Exception.php';
+require_once 'libs/PHPMailer/src/PHPMailer.php';
+require_once 'libs/PHPMailer/src/SMTP.php';
 
 require_once "src/models/UsuarioModel.php";
 require_once "src/models/EspacioModel.php";
@@ -280,5 +285,99 @@ class AuthController
         $listaComs = $this->comunicacionesModel->getComunicadosPorComunidad($id_comunidad);
 
         require "src/views/auth/panelpresi.php";
+    }
+
+    // 🟢 VISTA: PANTALLA RESTABLECER CONTRASEÑA (Solo visual) 🟢
+    public function resetPassword()
+    {
+        require "src/views/auth/reset_password.php";
+    }
+
+    // 🟢 ENDPOINT AJAX: Enviar correo de recuperación
+    public function enviarRecuperacionAjax() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+        
+        $email = $_POST['email'] ?? '';
+        $token = $this->usuarioModel->generarTokenRecuperacion($email);
+
+        if (!$token) {
+            // Utilizamos el jsonResponse que ya tienes en el AuthController
+            $this->jsonResponse(false, 'No existe ningún usuario registrado con ese correo.');
+        }
+
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com'; 
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'moisesmrobles@gmail.com'; // Tu cuenta real
+            $mail->Password   = 'xonw eroz tnke xszg'; // Tu contraseña de aplicación
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            $mail->setFrom('moisesmrobles@gmail.com', 'GestFincas Seguridad');
+            $mail->addAddress($email);
+
+            // Ajusta "ComunidadVecinos/JR_M26..." si la ruta de tu proyecto cambia
+            $enlaceReset = "http://localhost/ComunidadVecinos/JR_M26_ComunidadVecinos/index.php?route=auth/pantallaReset&token=" . $token;
+
+            $mail->isHTML(true);
+            $mail->Subject = mb_encode_mimeheader('Recuperar contraseña - GestFincas', 'UTF-8');
+            $mail->Body    = "
+                <div style='font-family: Arial, sans-serif; color: #333;'>
+                    <h2>Recuperación de contraseña</h2>
+                    <p>Has solicitado restablecer tu contraseña en GestFincas. Haz clic en el siguiente botón para crear una nueva (este enlace caducará en 1 hora):</p>
+                    <br>
+                    <a href='{$enlaceReset}' style='background-color: #221C35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;'>Restablecer Contraseña</a>
+                    <br><br>
+                    <p>Si no has solicitado este cambio, simplemente ignora este correo.</p>
+                </div>
+            ";
+            $mail->send();
+            
+            $this->jsonResponse(true, 'Te hemos enviado un correo con las instrucciones.');
+        } catch (Exception $e) {
+            $this->jsonResponse(false, 'Error al enviar el correo. Inténtalo más tarde.');
+        }
+    }
+
+    // 🟢 VISTA: Cargar la pantalla de Reset con validación
+    public function pantallaReset() {
+        $token = $_GET['token'] ?? '';
+        $usuarioValido = $this->usuarioModel->validarTokenRecuperacion($token);
+        
+        if (!$usuarioValido) {
+            // Variable que lee la vista reset_password.php que creamos ayer para mostrar el error
+            $errorToken = "El enlace no es válido o ha caducado. Vuelve a solicitar la recuperación.";
+        }
+        require "src/views/auth/reset_password.php";
+    }
+
+    // 🟢 ENDPOINT AJAX: Guardar la nueva contraseña en Base de Datos
+    public function actualizarPasswordAjax() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+        
+        $token = $_POST['token'] ?? '';
+        $pass1 = $_POST['pass1'] ?? '';
+        $pass2 = $_POST['pass2'] ?? '';
+
+        if ($pass1 !== $pass2) {
+            $this->jsonResponse(false, 'Las contraseñas no coinciden.');
+        }
+
+        if (strlen($pass1) < 6) {
+            $this->jsonResponse(false, 'La contraseña debe tener al menos 6 caracteres.');
+        }
+
+        $usuario = $this->usuarioModel->validarTokenRecuperacion($token);
+        if (!$usuario) {
+            $this->jsonResponse(false, 'El token ha caducado o no es válido.');
+        }
+
+        if ($this->usuarioModel->cambiarPasswordConToken($usuario['id_usuario'], $pass1)) {
+            $this->jsonResponse(true, 'Contraseña actualizada correctamente.');
+        } else {
+            $this->jsonResponse(false, 'Error de base de datos al actualizar.');
+        }
     }
 }
