@@ -38,19 +38,31 @@ include 'src/views/components/topbar.php'; ?>
                     </div>
                 </div>
 
-                <!-- 2. RECORDATORIO "PRÓXIMA REUNIÓN" -->
-                <div class="card border-0 mb-4 shadow-sm" style="border-left: 4px solid var(--bs-warning) !important;">
-                    <div class="card-body p-3 p-md-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: rgba(219, 145, 47, 0.1);">
-                                <i class="bi bi-calendar-event-fill text-warning fs-4"></i>
+                <!-- 2. NOTIFICACIONES RECIENTES -->
+                <div class="actions-container mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-bell-fill text-primary fs-5"></i>
+                        <h5 class="mb-0 fs-6" style="font-family: var(--fuente-titulos);">Notificaciones</h5>
+                    </div>
+
+                    <div class="action-list">
+                        <?php if (!empty($notificaciones)): ?>
+                            <?php foreach ($notificaciones as $notif): ?>
+                                <a href="<?= htmlspecialchars($notif['link']) ?>" class="text-decoration-none d-block mb-2">
+                                    <div class="action-item" style="border-left-color: <?= htmlspecialchars($notif['border_color'] ?? 'var(--bs-primary)') ?>;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i class="<?= htmlspecialchars($notif['icon'] ?? 'bi-bell-fill') ?> fs-5 <?= htmlspecialchars($notif['text_color'] ?? 'text-primary') ?>"></i>
+                                            <span class="text-sm-custom text-dark fw-medium"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                        </div>
+                                        <i class="bi bi-arrow-right text-muted"></i>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="p-3 text-center text-muted border rounded bg-white shadow-sm">
+                                <p class="mb-0 small">No tienes notificaciones pendientes.</p>
                             </div>
-                            <div>
-                                <h6 class="fw-bold text-dark mb-1" style="font-family: var(--fuente-titulos);">Reuniones y Juntas</h6>
-                                <p class="text-muted small mb-0">Gestiona tu asistencia a las convocatorias activas</p>
-                            </div>
-                        </div>
-                        <a href="index.php?route=reunion/reuniones" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold text-nowrap shadow-sm">Ir a Reuniones</a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -98,7 +110,7 @@ include 'src/views/components/topbar.php'; ?>
                         <a href="index.php?route=reserva/index" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
                                 <?php if (isset($tieneReservaHoy) && $tieneReservaHoy): ?>
-                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle badge-reserva-hoy">
                                         <span class="visually-hidden">Reserva para hoy</span>
                                     </span>
                                 <?php endif; ?>
@@ -180,128 +192,9 @@ include 'src/views/components/topbar.php'; ?>
 
                 </div>
 
-                <!-- 4. PANELES INFERIORES -->
-                <div class="row g-3 mb-4">
-
-                    <!-- ÚLTIMO COMUNICADO -->
-                    <div class="card module-card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white border-bottom border-light d-flex justify-content-between align-items-center py-3">
-        <h5 class="mb-0 fw-bold">
-            <i class="bi bi-megaphone me-2 text-primary"></i> Comunicados Recientes
-        </h5>
-        <a href="index.php?route=comunicaciones/index" class="btn btn-sm btn-outline-primary">Ver todos</a>
-    </div>
-    <div class="card-body p-0">
-        <?php if (!empty($listaComs)): ?>
-            <!-- ACORDEÓN DE BOOTSTRAP -->
-            <div class="accordion accordion-flush" id="accordionComunicaciones">
-                <!-- Mostramos solo los 5 comunicados más recientes para no saturar el dashboard -->
-                <?php foreach (array_slice($listaComs, 0, 5) as $index => $com): ?>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingCom-<?= $com['id_comunicado'] ?>">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCom-<?= $com['id_comunicado'] ?>" aria-expanded="false" aria-controls="collapseCom-<?= $com['id_comunicado'] ?>">
-                                <div class="d-flex flex-column w-100 me-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <div class="d-flex align-items-center text-truncate" style="max-width: 80%;">
-                                                        <span class="fw-bold text-truncate">
-                                                            <?= htmlspecialchars($com['titulo']) ?>
-                                                        </span>
-                                                        <?php if (($com['tipo'] ?? '') === 'urgente'): ?>
-                                                            <i class="bi bi-exclamation-triangle-fill text-danger ms-2" title="Urgente"></i>
-                                                        <?php endif; ?>
-                                                    </div>
-                                        <small class="text-muted text-nowrap" style="font-size: 0.8rem;">
-                                            <?= date('d/m/Y', strtotime($com['fecha_creacion'] ?? $com['fecha_publicacion'])) ?>
-                                        </small>
-                                    </div>
-                                </div>
-                            </button>
-                        </h2>
-                        <div id="collapseCom-<?= $com['id_comunicado'] ?>" class="accordion-collapse collapse" aria-labelledby="headingCom-<?= $com['id_comunicado'] ?>" data-bs-parent="#accordionComunicaciones">
-                            <div class="accordion-body text-secondary" style="font-size: 0.95rem;">
-                                <?= nl2br(htmlspecialchars($com['cuerpo'] ?? 'No hay descripción disponible.')) ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <div class="p-4 text-center text-muted">
-                <i class="bi bi-inbox fs-2 mb-2 d-block opacity-50"></i>
-                <p class="mb-0">No hay comunicados recientes.</p>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-                </div>
-
             </div>
         </main>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const hoy = new Date().toISOString().split('T')[0];
-        const manana = new Date();
-        manana.setDate(manana.getDate() + 1);
-        const mananaStr = manana.toISOString().split('T')[0];
-
-        // 1. Lógica de la burbuja roja (Hoy)
-        // Se oculta si el usuario ya confirmó asistencia hoy
-        if (localStorage.getItem('reserva_confirmada_' + hoy)) {
-            const burbuja = document.getElementById('burbuja-reservas-hoy');
-            if (burbuja) burbuja.style.display = 'none';
-        }
-
-        // 2. Lógica de Toasts (Hoy y Mañana)
-        const toastHoy = document.getElementById('toast_reserva');
-        const toastManana = document.getElementById('toast_reserva_manana');
-
-        // Si ya se vio el toast de hoy, no lo mostramos (vía Bootstrap o eliminando el nodo)
-        if (localStorage.getItem('reserva_hoy_' + hoy) && toastHoy) {
-            toastHoy.remove();
-        }
-
-        // Si ya se vio el toast de mañana, no lo mostramos
-        if (localStorage.getItem('reserva_manana_' + mananaStr) && toastManana) {
-            toastManana.remove();
-        }
-
-        // 3. Capturar el cierre de los toasts para guardar en localStorage
-        document.body.addEventListener('hidden.bs.toast', function(e) {
-            const targetId = e.target.id;
-            if (targetId === 'toast_reserva') {
-                localStorage.setItem('reserva_hoy_' + hoy, 'true');
-            } else if (targetId === 'toast_reserva_manana') {
-                localStorage.setItem('reserva_manana_' + mananaStr, 'true');
-            }
-        });
-    });
-</script>
-
-<!-- TOAST NOTIFICACIÓN DE RESERVAS -->
-<?php if (isset($tieneReservaHoy) && $tieneReservaHoy): ?>
-    <?php
-    $toastKey     = 'reserva';
-    $toastTitle   = '¡Tienes una reserva hoy!';
-    $toastMsg     = 'Tienes una reserva programada para hoy.';
-    $toastLink    = 'index.php?route=reserva/index';
-    $toastBtnText = 'Ir a mis reservas';
-    include 'src/views/components/toast_notification.php';
-    ?>
-<?php endif; ?>
-
-<!-- TOAST NOTIFICACIÓN ANTICIPADA (MAÑANA) -->
-<?php if (isset($tieneReservaManana) && $tieneReservaManana): ?>
-    <?php
-    $toastKey     = 'reserva_manana';
-    $toastTitle   = 'Recordatorio de reserva';
-    $toastMsg     = 'Mañana tienes una reserva programada.';
-    $toastLink    = 'index.php?route=reserva/index';
-    $toastBtnText = 'Ver detalles';
-    // Asumimos que el componente usa $toastKey para generar el ID del elemento
-    include 'src/views/components/toast_notification.php';
-    ?>
-<?php endif; ?>
+<script src="public/assets/js/dashboard_vecino.js"></script>

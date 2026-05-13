@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (localStorage.getItem('reserva_confirmada_' + fecha)) {
             btn.classList.replace('btn-success', 'btn-warning');
             btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
+            
+            // Si al cargar la página ya está confirmada, ocultamos la burbuja roja del dashboard
+            document.querySelectorAll('.badge-reserva-hoy').forEach(b => b.classList.add('d-none'));
         }
     });
 
@@ -23,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     b.classList.replace('btn-warning', 'btn-success');
                     b.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirmar Asistencia';
                 });
+            
+            // Volver a mostrar la burbuja roja
+            document.querySelectorAll('.badge-reserva-hoy').forEach(b => b.classList.remove('d-none'));
             } else {
                 // Marcar como confirmada (guardar memoria)
                 localStorage.setItem('reserva_confirmada_' + fecha, 'true');
@@ -30,6 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     b.classList.replace('btn-success', 'btn-warning');
                     b.innerHTML = '<i class="bi bi-x-circle me-1"></i> Anular Confirmación';
                 });
+            
+            // Ocultar la burbuja roja
+            document.querySelectorAll('.badge-reserva-hoy').forEach(b => b.classList.add('d-none'));
             }
         }
 

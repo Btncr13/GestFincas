@@ -46,29 +46,59 @@ include 'src/views/components/topbar.php'; ?>
                     </div>
 
                     <div class="action-list">
-                        <div class="action-item" style="border-left-color: var(--bs-success);">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-person-plus-fill text-success fs-5"></i>
-                                <span class="text-sm-custom">Nuevo vecino registrado: María López (Planta 2-1B)</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                        </div>
+                        <?php if (!empty($notificaciones)): ?>
+                            <?php 
+                            $visible_count = 4;
+                            $total_notifs = count($notificaciones);
+                            $visible_notifs = array_slice($notificaciones, 0, $visible_count);
+                            $hidden_notifs = array_slice($notificaciones, $visible_count);
+                            ?>
 
-                        <div class="action-item" style="border-left-color: #20c997;">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-calendar-check-fill fs-5" style="color: #20c997;"></i>
-                                <span class="text-sm-custom">Nueva reserva: Pista de Pádel (Planta 1-2A)</span>
-                            </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                        </div>
+                            <?php foreach ($visible_notifs as $notif): ?>
+                                <a href="<?= htmlspecialchars($notif['link']) ?>" class="text-decoration-none d-block mb-2">
+                                    <div class="action-item" style="border-left-color: <?= htmlspecialchars($notif['border_color'] ?? 'var(--bs-primary)') ?>;">
+                                        <div class="d-flex align-items-center gap-3 w-100">
+                                            <i class="<?= htmlspecialchars($notif['icon'] ?? 'bi-bell-fill') ?> fs-5 <?= htmlspecialchars($notif['text_color'] ?? 'text-primary') ?>"></i>
+                                            <span class="text-sm-custom text-dark fw-medium flex-grow-1"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                            <?php if (!empty($notif['badge'])): ?>
+                                                <span class="badge <?= htmlspecialchars($notif['badge']['class']) ?> ms-2"><?= htmlspecialchars($notif['badge']['text']) ?></span>
+                                            <?php else: ?>
+                                                <i class="bi bi-arrow-right text-muted ms-2"></i>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
 
-                        <div class="action-item" style="border-left-color: var(--bs-warning);">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-megaphone-fill text-warning fs-5"></i>
-                                <span class="text-sm-custom">Recordatorio: Junta Ordinaria mañana a las 19:00h</span>
+                            <?php if ($total_notifs > $visible_count): ?>
+                                <div class="collapse" id="collapseNotificaciones">
+                                    <?php foreach ($hidden_notifs as $notif): ?>
+                                        <a href="<?= htmlspecialchars($notif['link']) ?>" class="text-decoration-none d-block mb-2">
+                                            <div class="action-item" style="border-left-color: <?= htmlspecialchars($notif['border_color'] ?? 'var(--bs-primary)') ?>;">
+                                                <div class="d-flex align-items-center gap-3 w-100">
+                                                    <i class="<?= htmlspecialchars($notif['icon'] ?? 'bi-bell-fill') ?> fs-5 <?= htmlspecialchars($notif['text_color'] ?? 'text-primary') ?>"></i>
+                                                    <span class="text-sm-custom text-dark fw-medium flex-grow-1"><?= htmlspecialchars($notif['mensaje']) ?></span>
+                                                    <?php if (!empty($notif['badge'])): ?>
+                                                        <span class="badge <?= htmlspecialchars($notif['badge']['class']) ?> ms-2"><?= htmlspecialchars($notif['badge']['text']) ?></span>
+                                                    <?php else: ?>
+                                                        <i class="bi bi-arrow-right text-muted ms-2"></i>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <button class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNotificaciones" aria-expanded="false" aria-controls="collapseNotificaciones" onclick="this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? 'Ver más (<?= $total_notifs - $visible_count ?>)' : 'Ocultar';">
+                                        Ver más (<?= $total_notifs - $visible_count ?>)
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="p-3 text-center text-muted border rounded bg-white shadow-sm">
+                                <p class="mb-0 small">No hay notificaciones pendientes.</p>
                             </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -125,7 +155,7 @@ include 'src/views/components/topbar.php'; ?>
                         <a href="index.php?route=reserva/index" class="text-decoration-none h-100 d-block">
                             <div class="card shadow-sm h-100 border-0 text-center module-card position-relative">
                                 <?php if (isset($tieneReservaHoy) && $tieneReservaHoy): ?>
-                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                    <span id="burbuja-reservas-hoy" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle badge-reserva-hoy">
                                         <span class="visually-hidden">Reserva para hoy</span>
                                     </span>
                                 <?php endif; ?>
@@ -210,3 +240,5 @@ include 'src/views/components/topbar.php'; ?>
         </main>
     </div>
 </div>
+
+<script src="public/assets/js/dashboard_vecino.js"></script>

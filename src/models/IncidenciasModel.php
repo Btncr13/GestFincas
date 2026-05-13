@@ -194,4 +194,32 @@ class IncidenciasModel extends BaseModel
             return false;
         }
     }
+
+    /**
+     * Cuenta las incidencias urgentes para la comunidad actual usando RBAC.
+     */
+    public function contarUrgentes($id_comunidad, $id_usuario, $rol)
+    {
+        try {
+            $sql = "SELECT COUNT(*) FROM incidencias i 
+                    LEFT JOIN vivienda v ON i.id_vivienda = v.id_vivienda 
+                    WHERE v.id_comunidad = :id_comunidad AND i.estado = 'urgente'";
+
+            // RBAC: Si es vecino, solo cuenta las de áreas comunes o las de su propia vivienda
+            if (strtolower($rol) === 'vecino') {
+                $sql .= " AND (i.id_vivienda IS NULL OR i.id_vivienda = (SELECT id_vivienda FROM usuario WHERE id_usuario = :id_usuario))";
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id_comunidad', $id_comunidad, PDO::PARAM_INT);
+            if (strtolower($rol) === 'vecino') {
+                $stmt->bindValue(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return (int) $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Error en contarUrgentes: " . $e->getMessage());
+            return 0;
+        }
+    }
 }

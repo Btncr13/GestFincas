@@ -45,6 +45,28 @@ class ComunicacionesModel extends BaseModel
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
     }
 
+    /**
+     * Cuenta los comunicados no leídos que tienen un flag de importante o urgente.
+     */
+    public function contarNoLeidosImportantes($id_usuario)
+    {
+        try {
+            $sql = "SELECT COUNT(*) as total 
+                    FROM comunicados c 
+                    JOIN comunidad com ON c.id_comunidad = com.id_comunidad
+                    JOIN vivienda v ON com.id_comunidad = v.id_comunidad
+                    JOIN usuario u ON v.id_vivienda = u.id_vivienda
+                    WHERE u.id_usuario = :id_usuario AND c.tipo IN ('importante', 'urgente') 
+                    AND c.id_comunicado NOT IN (SELECT id_comunicado FROM comunicado_lectura WHERE id_usuario = :id_usuario_lectura)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id_usuario' => $id_usuario, 'id_usuario_lectura' => $id_usuario]);
+            return (int) ($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+        } catch (PDOException $e) {
+            error_log("Error en contarNoLeidosImportantes: " . $e->getMessage());
+            return 0;
+        }
+    }
+
     public function marcarComoLeido($id_comunicado, $id_usuario)
     {
         $sql = "INSERT IGNORE INTO comunicado_lectura (id_comunicado, id_usuario) VALUES (:id_c, :id_u)";
