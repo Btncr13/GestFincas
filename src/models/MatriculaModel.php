@@ -11,6 +11,18 @@ class MatriculaModel extends BaseModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getMatriculasComunidad($id_comunidad)
+    {
+        $sql = "SELECT m.*, v.nombre as vivienda 
+                FROM matriculas m 
+                JOIN vivienda v ON m.id_vivienda = v.id_vivienda 
+                WHERE v.id_comunidad = :id_comunidad 
+                ORDER BY v.nombre ASC, m.uso_matricula ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id_comunidad' => $id_comunidad]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function contarPorTipo($id_vivienda, $tipo)
     {
         $sql = "SELECT COUNT(*) FROM matriculas WHERE id_vivienda = :id AND uso_matricula = :tipo";
