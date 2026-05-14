@@ -198,4 +198,42 @@ class UsuarioModel extends BaseModel
             return false;
         }
     }
+
+    // Generar un token único y guardarlo con 1 hora de validez
+    public function generarTokenRecuperacion($email) {
+        $stmt = $this->db->prepare("SELECT id_usuario FROM usuario WHERE email = :email");
+        $stmt->execute(['email' => trim($email)]);
+        if(!$stmt->fetch()) return false; // El usuario no existe
+
+        // Generar token seguro y fecha de expiración
+        $token = bin2hex(random_bytes(32));
+        $expiracion = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        $sql = "UPDATE usuario SET token_recuperacion = :token, expiracion_token = :expiracion WHERE email = :email";
+        $this->db->prepare($sql)->execute([
+            'token' => $token,
+            'expiracion' => $expiracion,
+            'email' => trim($email)
+        ]);
+
+        return $token;
+    }
+
+    // Comprobar si el token que viene por la URL es válido y no ha caducado
+    public function validarTokenRecuperacion($token) {
+        $sql = "SELECT id_usuario FROM usuario WHERE token_recuperacion = :token AND expiracion_token > NOW()";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['token' => $token]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Actualizar la contraseña y limpiar el token para que no se pueda reusar
+    public function cambiarPasswordConToken($id_usuario, $nuevaPassword) {
+        $hash = password_hash($nuevaPassword, PASSWORD_BCRYPT);
+        $sql = "UPDATE usuario SET password = :hash, token_recuperacion = NULL, expiracion_token = NULL WHERE id_usuario = :id";
+        return $this->db->prepare($sql)->execute([
+            'hash' => $hash,
+            'id' => $id_usuario
+        ]);
+    }
 }
