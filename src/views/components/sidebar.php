@@ -108,6 +108,14 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'matricula/index') ? 'active fw-bold' : '' ?>"
+                    href="index.php?route=matricula/index"
+                    style="background-color: <?= ($ruta_actual == 'matricula/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
+                          color: <?= ($ruta_actual == 'matricula/index') ? 'white' : 'var(--color-texto)' ?>;">
+                    <i class="fa-solid fa-car me-2"></i> Parking
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link sidebar-link text-decoration-none py-2 px-3 rounded-2 mb-1 <?= ($ruta_actual == 'finanzas/index') ? 'active fw-bold' : '' ?>"
                 href="index.php?route=finanzas/index"
                 style="background-color: <?= ($ruta_actual == 'finanzas/index') ? 'var(--bs-primary)' : 'transparent' ?>;

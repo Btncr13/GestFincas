@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-05-2026 a las 23:59:44
+-- Tiempo de generación: 11-05-2026 a las 12:33:43
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -300,6 +300,7 @@ INSERT INTO `foro_tema` (`id_tema`, `id_comunidad`, `id_usuario`, `titulo`, `des
 (3, 1, 3, 'Busco pareja para league of legends', 'asdasdasdasdasd', '2026-05-04 09:10:47', 'abierto', 'general'),
 (5, 1, 3, 'Vendo Boli Bic y regalo entradas para la Final de la Champions', 'Vendo boli Bic de color azul y regalo 2 entradas para la final de la Champions.\r\nPrecio: 1500 € (no negociable)', '2026-05-04 10:54:48', 'abierto', 'mercadillo'),
 (6, 1, 1, 'prueba', 'asdasdasd', '2026-05-04 11:26:30', 'abierto', 'general'),
+(7, 1, 1, 'Fiesta Halloween', 'Sería buena idea que la comunidad celebre la fiesta de Halloween, y a Pepe lo vestimos de esqueleto repartiendo caramelos', '2026-05-06 01:51:46', 'abierto', 'propuestas');
 (8, 1, 3, 'Normas del presidente de dla comunidad', 'Acatar las normas de antonio recio presidente de la comunidad viva el rey y viva españa', '2026-05-06 18:52:12', 'abierto', 'convivencia');
 
 -- --------------------------------------------------------
@@ -379,6 +380,22 @@ CREATE TABLE `mancomunidad` (
   `id_mancomunidad` int(11) UNSIGNED NOT NULL,
   `id_direccion` int(11) UNSIGNED NOT NULL,
   `nombre` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `matriculas`
+--
+
+CREATE TABLE `matriculas` (
+  `id_matricula` int(10) UNSIGNED NOT NULL,
+  `id_vivienda` int(10) UNSIGNED NOT NULL,
+  `matricula` varchar(20) NOT NULL,
+  `uso_matricula` enum('habitual','invitado') NOT NULL,
+  `marca_vehículo` varchar(20) NOT NULL,
+  `nombre_invitado` varchar(40) DEFAULT NULL,
+  `fecha_entrada` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -678,6 +695,13 @@ ALTER TABLE `mancomunidad`
   ADD KEY `id_direccion` (`id_direccion`);
 
 --
+-- Indices de la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  ADD PRIMARY KEY (`id_matricula`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+
+--
 -- Indices de la tabla `reservas`
 --
 ALTER TABLE `reservas`
@@ -814,6 +838,12 @@ ALTER TABLE `mancomunidad`
   MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  MODIFY `id_matricula` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `reservas`
 --
 ALTER TABLE `reservas`
@@ -922,6 +952,19 @@ ALTER TABLE `incidencias_uniones`
 --
 ALTER TABLE `mancomunidad`
   ADD CONSTRAINT `fk_mancomunidad_direccion` FOREIGN KEY (`id_direccion`) REFERENCES `direccion` (`id_direccion`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  ADD CONSTRAINT `fk_matriculas_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD CONSTRAINT `fk_reservas_espacios` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `reunion`
