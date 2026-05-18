@@ -50,16 +50,27 @@ class ReunionModel extends BaseModel
     }
 
     // 🟢 CREAR UNA NUEVA REUNIÓN Y SUS ASISTENCIAS 🟢
-    public function crearReunion($id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $ordenDelDiaJson)
+    public function crearReunion($id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $ordenDelDiaJson, $pdf_ruta = null)
     {
         try {
             $this->db->beginTransaction();
-
-            $sql = "INSERT INTO reunion (id_comunidad, titulo, descripcion, fecha, hora, lugar, orden_del_dia, estado) 
-                    VALUES (:id_comunidad, :titulo, :descripcion, :fecha, :hora, :lugar, :orden_del_dia, 'convocada')";
+            
+            // Añadimos la columna pdf_orden_dia
+            $sql = "INSERT INTO reunion (id_comunidad, titulo, descripcion, fecha, hora, lugar, orden_del_dia, pdf_orden_dia, estado)
+                    VALUES (:id_comunidad, :titulo, :descripcion, :fecha, :hora, :lugar, :orden_del_dia, :pdf_orden_dia, 'convocada')";
+            
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id_comunidad' => $id_comunidad, 'titulo' => $titulo, 'descripcion' => $descripcion, 'fecha' => $fecha, 'hora' => $hora, 'lugar' => $lugar, 'orden_del_dia' => $ordenDelDiaJson]);
-
+            $stmt->execute([
+                'id_comunidad' => $id_comunidad, 
+                'titulo' => $titulo, 
+                'descripcion' => $descripcion, 
+                'fecha' => $fecha, 
+                'hora' => $hora, 
+                'lugar' => $lugar, 
+                'orden_del_dia' => $ordenDelDiaJson,
+                'pdf_orden_dia' => $pdf_ruta // Inyectamos la ruta del PDF
+            ]);
+            
             $id_reunion = $this->db->lastInsertId();
 
             $sqlViv = "SELECT id_vivienda FROM vivienda WHERE id_comunidad = :id_comunidad";
@@ -77,7 +88,8 @@ class ReunionModel extends BaseModel
             return $id_reunion; // Devolvemos el ID de la reunión creada
         } catch (PDOException $e) {
             $this->db->rollBack();
-            return false;
+            // En lugar de devolver false, devolvemos el texto del error de SQL
+            return $e->getMessage(); 
         }
     }
 

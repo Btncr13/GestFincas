@@ -107,6 +107,11 @@
                                         <textarea class="form-control custom-input" id="form-orden" rows="5" placeholder="1. Lectura y aprobación del acta anterior&#10;2. Aprobación de cuentas&#10;3. Ruegos y preguntas"></textarea>
                                     </div>
 
+                                    <div class="mb-4">
+                                        <label class="form-label" style="font-size: 14px; font-weight: 500; color: var(--bs-dark);">Documento Adjunto (PDF Opcional)</label>
+                                        <input type="file" class="form-control custom-input" id="form-pdf" accept=".pdf">
+                                    </div>
+
                                     <button type="submit" id="form-btn-submit" class="btn w-100 d-flex align-items-center justify-content-center gap-2" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;">
                                         <i class="bi bi-calendar-check"></i> Convocar Reunión
                                     </button>
@@ -454,7 +459,11 @@
         </div>
         
         <div class="d-flex gap-2 mt-3 pt-2">
-            <a href="index.php?route=reunion/downloadOrdenDelDiaAction&id=${r.id}" target="_blank" class="btn btn-sm text-white" style="background-color: var(--bs-primary); font-size:12px; flex-grow:1;"><i class="bi bi-file-earmark-pdf"></i> Descargar Orden del Día (PDF)</a>
+            ${r.pdf_orden_dia ? 
+            `<a href="${r.pdf_orden_dia}" target="_blank" class="btn btn-sm text-white" style="background-color: var(--bs-primary); font-size:12px; flex-grow:1;">
+                <i class="bi bi-file-earmark-pdf"></i> Descargar Documento (PDF)
+            </a>` 
+            : ''}
         </div>
 
         <!-- ASISTENCIAS -->
@@ -501,35 +510,22 @@
                         const rowBg = i%2!==0 ? 'var(--bs-light)' : 'var(--bs-secondary)';
                         const fresp = a.fechaRespuesta ? a.fechaRespuesta.split('-').slice(1).reverse().join('/') : '-';
 
-                        return ` <
-                div class = "d-flex align-items-center p-2 border-top"
-            style = "background-color:${rowBg};" >
-                <
-                div class = "flex-grow-1 px-2 d-flex align-items-center gap-2" >
-                <
-                div class = "rounded-circle d-flex justify-content-center align-items-center flex-shrink-0"
-            style = "width:28px; height:28px; background-color:${bg}; color:${txtC};" > < i class = "bi ${icon}" > < /i></div >
-                <
-                div class = "lh-1" >
-                <
-                div style = "font-size:14px; font-weight:500; color:var(--bs-dark);" > $ {
-                    a.piso
-                } < /div> <
-                /div> <
-                /div> <
-                div class = "text-center px-2"
-            style = "width:80px;" >
-                <
-                span style = "background-color:${bg}; color:${bcolor}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:500;" > $ {
-                    strEst
-                } < /span> <
-                /div> <
-                div class = "text-end px-2"
-            style = "width:90px; font-size:12px; color:var(--color-texto);" > $ {
-                    fresp
-                } < /div> <
-                /div>
-            `;
+                        return `
+                            <div class="d-flex align-items-center p-2 border-top" style="background-color:${rowBg};">
+                                <div class="flex-grow-1 px-2 d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width:28px; height:28px; background-color:${bg}; color:${txtC};">
+                                        <i class="bi ${icon}"></i>
+                                    </div>
+                                    <div class="lh-1">
+                                        <div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${a.piso}</div>
+                                    </div>
+                                </div>
+                                <div class="text-center px-2" style="width:80px;">
+                                    <span style="background-color:${bg}; color:${bcolor}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:500;">${strEst}</span>
+                                </div>
+                                <div class="text-end px-2" style="width:90px; font-size:12px; color:var(--color-texto);">${fresp}</div>
+                            </div>
+                        `;
                     }).join('')}
                 </div>
 
@@ -566,6 +562,21 @@
             formData.append('hora', hora);
             formData.append('lugar', lugar);
             formData.append('orden_del_dia', JSON.stringify(orden));
+
+            // CAPTURAR EL PDF (AHORA SÍ, EL ARCHIVO FÍSICO)
+            const pdfInput = document.getElementById('form-pdf');
+            if (pdfInput && pdfInput.files.length > 0) {
+                
+                // Usamos .item(0) o  para extraer el archivo real de la lista
+                const archivoReal = pdfInput.files.item(0);
+                
+                // Chivato para la consola
+                console.log("Archivo capturado listo para enviar:", archivoReal);
+                
+                // Lo inyectamos en el FormData
+                formData.append('pdf_orden_dia', archivoReal);
+            }
+
             if (id_reunion) formData.append('id_reunion', id_reunion);
 
             const endPoint = id_reunion ? 'index.php?route=reunion/editarReunionAction' : 'index.php?route=reunion/crearReunionAction';

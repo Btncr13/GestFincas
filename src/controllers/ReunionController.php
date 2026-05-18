@@ -74,7 +74,7 @@ class ReunionController
     public function crearReunionAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
-
+        
         $id_comunidad = $_SESSION['vivienda']['id_comunidad'] ?? null;
         if (!$id_comunidad || $_SESSION['vivienda']['rol'] !== 'presidente') {
             $this->jsonResponse(false, 'No autorizado');
@@ -87,12 +87,50 @@ class ReunionController
         $lugar = $_POST['lugar'] ?? '';
         $orden_del_dia = $_POST['orden_del_dia'] ?? '[]';
 
-        $id_reunion = $this->reunionModel->crearReunion($id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $orden_del_dia);
-        if ($id_reunion) {
-            $this->generateAndSavePdf($id_reunion, $titulo, $descripcion, $fecha, $hora, $lugar, json_decode($orden_del_dia, true));
-            $this->jsonResponse(true, 'Reunión convocada correctamente y PDF generado.');
+        // --- LÓGICA PARA SUBIR EL PDF ---
+        $pdf_ruta = null; // Por defecto es null
+
+        // Verificamos si JavaScript nos ha mandado un archivo físico
+        if (isset($_FILES['pdf_orden_dia'])) {
+            
+            // Si llegó y no hubo errores de subida (Código 0 = UPLOAD_ERR_OK)
+            if ($_FILES['pdf_orden_dia']['error'] === UPLOAD_ERR_OK) {
+                
+                $uploadDir = dirname(__DIR__, 2) . '/public/uploads/reuniones/';
+                
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $fileExtension = strtolower(pathinfo($_FILES['pdf_orden_dia']['name'], PATHINFO_EXTENSION));
+                
+                if ($fileExtension === 'pdf') {
+                    $newFileName = uniqid('reunion_', true) . '.pdf';
+                    
+                    if (move_uploaded_file($_FILES['pdf_orden_dia']['tmp_name'], $uploadDir . $newFileName)) {
+                        $pdf_ruta = 'public/uploads/reuniones/' . $newFileName;
+                    } else {
+                        $this->jsonResponse(false, 'Error al mover el PDF a su carpeta definitiva.');
+                    }
+                } else {
+                    $this->jsonResponse(false, 'Formato no soportado. Por favor, sube un archivo .pdf');
+                }
+            } else {
+                // Si PHP descarta el archivo (por peso o configuración), nos dirá el código exacto
+                $this->jsonResponse(false, 'Error interno de PHP al subir: Código ' . $_FILES['pdf_orden_dia']['error']);
+            }
+        }
+
+       // --- LÓGICA DE BASE DE DATOS ---
+        $success = $this->reunionModel->crearReunion($id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $orden_del_dia, $pdf_ruta);
+        
+        // --- RESPUESTA JSON FINAL QUE JS ESPERA ---
+        // Si es 'true' o es un número (el ID de la nueva reunión), es un éxito absoluto
+        if ($success === true || is_numeric($success)) {
+            $this->jsonResponse(true, 'Reunión convocada correctamente.');
         } else {
-            $this->jsonResponse(false, 'Error al convocar la reunión.');
+            // Si es un texto, es el mensaje de error del catch de PDO
+            $this->jsonResponse(false, 'Error SQL: ' . $success);
         }
     }
 
