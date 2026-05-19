@@ -460,8 +460,8 @@
         
         <div class="d-flex gap-2 mt-3 pt-2">
             ${r.pdf_orden_dia ? 
-            `<a href="${r.pdf_orden_dia}" target="_blank" class="btn btn-sm text-white" style="background-color: var(--bs-primary); font-size:12px; flex-grow:1;">
-                <i class="bi bi-file-earmark-pdf"></i> Descargar Documento (PDF)
+            `<a href="${r.pdf_orden_dia}" target="_blank" class="btn d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;">
+                <i class="bi bi-file-earmark-pdf fs-6"></i> Descargar Documento (PDF)
             </a>` 
             : ''}
         </div>

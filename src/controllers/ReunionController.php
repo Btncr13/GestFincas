@@ -122,15 +122,19 @@ class ReunionController
         }
 
        // --- LÓGICA DE BASE DE DATOS ---
-        $success = $this->reunionModel->crearReunion($id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $orden_del_dia, $pdf_ruta);
+        $id_reunion_creada = $this->reunionModel->crearReunion($id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $orden_del_dia, $pdf_ruta);
         
         // --- RESPUESTA JSON FINAL QUE JS ESPERA ---
         // Si es 'true' o es un número (el ID de la nueva reunión), es un éxito absoluto
-        if ($success === true || is_numeric($success)) {
+        if (is_numeric($id_reunion_creada)) {
+            // Si no se subió un PDF manual, generamos el automático
+            if ($pdf_ruta === null) {
+                $this->generateAndSavePdf($id_reunion_creada, $titulo, $descripcion, $fecha, $hora, $lugar, json_decode($orden_del_dia, true));
+            }
             $this->jsonResponse(true, 'Reunión convocada correctamente.');
         } else {
             // Si es un texto, es el mensaje de error del catch de PDO
-            $this->jsonResponse(false, 'Error SQL: ' . $success);
+            $this->jsonResponse(false, 'Error SQL: ' . $id_reunion_creada);
         }
     }
 
@@ -152,12 +156,106 @@ class ReunionController
         $lugar = $_POST['lugar'] ?? '';
         $orden_del_dia = $_POST['orden_del_dia'] ?? '[]';
 
-        $success = $this->reunionModel->actualizarReunion($id_reunion, $id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $orden_del_dia);
+        $pdf_ruta = null;
+
+        // --- LÓGICA PARA GESTIONAR EL PDF EN LA EDICIÓN ---
+        if (isset($_FILES['pdf_orden_dia']) && $_FILES['pdf_orden_dia']['error'] === UPLOAD_ERR_OK) {
+            
+            // 1. Necesitamos saber si ya existía un PDF previo para borrarlo físicamente
+            $reunionActual = $this->reunionModel->getReunionById($id_reunion, $id_comunidad);
+            
+            if ($reunionActual && !empty($reunionActual['pdf_orden_dia'])) {
+                // Convertimos ruta pública guardada en DB a ruta absoluta de servidor para unlink
+                $oldFilePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $reunionActual['pdf_orden_dia']);
+                
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+            }
+
+            // 2. Subimos el nuevo archivo
+            $uploadDir = dirname(__DIR__, 2) . '/public/uploads/reuniones/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $fileExtension = strtolower(pathinfo($_FILES['pdf_orden_dia']['name'], PATHINFO_EXTENSION));
+            if ($fileExtension === 'pdf') {
+                $newFileName = uniqid('reunion_', true) . '.pdf';
+                if (move_uploaded_file($_FILES['pdf_orden_dia']['tmp_name'], $uploadDir . $newFileName)) {
+                    $pdf_ruta = 'public/uploads/reuniones/' . $newFileName;
+                } else {
+                    $this->jsonResponse(false, 'Error al mover el nuevo PDF a su ubicación.');
+                }
+            } else {
+                $this->jsonResponse(false, 'Formato no soportado. Sube un PDF.');
+            }
+        }
+
+        $success = $this->reunionModel->actualizarReunion($id_reunion, $id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $orden_del_dia, $pdf_ruta);
+
         if ($success) {
-            $this->generateAndSavePdf($id_reunion, $titulo, $descripcion, $fecha, $hora, $lugar, json_decode($orden_del_dia, true));
-            $this->jsonResponse(true, 'Reunión actualizada correctamente y PDF regenerado.');
+            // Solo regeneramos el PDF automático si NO se ha subido uno manual en esta edición
+            if (!$pdf_ruta) {
+                $this->generateAndSavePdf($id_reunion, $titulo, $descripcion, $fecha, $hora, $lugar, json_decode($orden_del_dia, true));
+            }
+            $this->jsonResponse(true, 'Reunión actualizada correctamente.');
         } else {
             $this->jsonResponse(false, 'Error al actualizar la reunión.');
+        }
+    }
+
+    // 🟢 API ENDPOINT: LIMPIAR PDFS OBSOLETOS 🟢
+    public function cleanupOldPdfsAction() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonResponse(false, 'Método no permitido.');
+        }
+
+        $id_comunidad = $_SESSION['vivienda']['id_comunidad'] ?? null;
+        if (!$id_comunidad || $_SESSION['vivienda']['rol'] !== 'presidente') {
+            $this->jsonResponse(false, 'No autorizado.');
+        }
+
+        $uploadDir = dirname(__DIR__, 2) . '/public/uploads/reuniones/';
+        if (!is_dir($uploadDir)) {
+            $this->jsonResponse(true, 'La carpeta de subidas no existe, no hay PDFs que limpiar.');
+        }
+
+        // 1. Obtener todas las rutas de PDF activas en la base de datos
+        $activePdfPaths = $this->reunionModel->getAllPdfPaths();
+
+        // Convertir las rutas de la DB a un formato comparable con las rutas del sistema de archivos
+        // Las rutas en DB ya están en formato "public/uploads/reuniones/file.pdf"
+        $dbRelativePaths = [];
+        foreach ($activePdfPaths as $path) {
+            $dbRelativePaths[] = $path;
+        }
+
+        // 2. Obtener todos los archivos PDF en la carpeta de subidas
+        // glob() devuelve rutas absolutas
+        $fileSystemPdfs = glob($uploadDir . '*.pdf');
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($fileSystemPdfs as $filePath) {
+            // Convertir la ruta absoluta del sistema de archivos a una ruta relativa para la comparación
+            $relativePath = str_replace(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR, '', $filePath);
+            $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath); // Normalizar barras para comparación
+
+            if (!in_array($relativePath, $dbRelativePaths)) {
+                // Este archivo existe en disco pero no en la base de datos, así que lo eliminamos
+                if (unlink($filePath)) {
+                    $deletedCount++;
+                } else {
+                    $errors[] = "Error al eliminar el archivo: " . basename($filePath);
+                }
+            }
+        }
+
+        if (empty($errors)) {
+            $this->jsonResponse(true, "Limpieza completada. Se eliminaron $deletedCount archivos PDF obsoletos.");
+        } else {
+            $this->jsonResponse(false, "Limpieza completada con errores. Se eliminaron $deletedCount archivos. Errores: " . implode(', ', $errors));
         }
     }
 
@@ -172,6 +270,19 @@ class ReunionController
         }
 
         $id_reunion = $_POST['id_reunion'] ?? '';
+
+        // 1. Antes de borrar la reunión, buscamos si tiene un PDF asociado para eliminarlo del disco
+        $reunion = $this->reunionModel->getReunionById($id_reunion, $id_comunidad);
+        if ($reunion && !empty($reunion['pdf_orden_dia'])) {
+            // Convertimos la ruta relativa de la BD a una ruta absoluta del servidor
+            $filePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $reunion['pdf_orden_dia']);
+            
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // 2. Procedemos a eliminar la reunión de la base de datos
         $success = $this->reunionModel->eliminarReunion($id_reunion, $id_comunidad);
         $this->jsonResponse($success, $success ? null : 'Error al eliminar la reunión');
     }

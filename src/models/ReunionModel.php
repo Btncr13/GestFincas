@@ -112,15 +112,34 @@ class ReunionModel extends BaseModel
         }
     }
 
+    public function getAllPdfPaths()
+    {
+        try {
+            $sql = "SELECT pdf_orden_dia FROM reunion WHERE pdf_orden_dia IS NOT NULL AND pdf_orden_dia != ''";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } catch (PDOException $e) {
+            error_log("Error en getAllPdfPaths: " . $e->getMessage());
+            return [];
+        }
+    }
+    public function getReunionById($id_reunion, $id_comunidad)
+    {
+        $sql = "SELECT * FROM reunion WHERE id_reunion = :id AND id_comunidad = :com";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id' => $id_reunion, 'com' => $id_comunidad]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     // 🟢 ACTUALIZAR DATOS DE LA REUNIÓN 🟢
-    public function actualizarReunion($id_reunion, $id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $ordenDelDiaJson)
+    public function actualizarReunion($id_reunion, $id_comunidad, $titulo, $descripcion, $fecha, $hora, $lugar, $ordenDelDiaJson, $pdf_path = null)
     {
         try {
             $sql = "UPDATE reunion 
-                    SET titulo = :titulo, descripcion = :descripcion, fecha = :fecha, hora = :hora, lugar = :lugar, orden_del_dia = :orden_del_dia 
-                    WHERE id_reunion = :id_reunion AND id_comunidad = :id_comunidad";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
+                    SET titulo = :titulo, descripcion = :descripcion, fecha = :fecha, hora = :hora, lugar = :lugar, orden_del_dia = :orden_del_dia";
+            
+            $params = [
                 'titulo' => $titulo,
                 'descripcion' => $descripcion,
                 'fecha' => $fecha,
@@ -129,7 +148,17 @@ class ReunionModel extends BaseModel
                 'orden_del_dia' => $ordenDelDiaJson,
                 'id_reunion' => $id_reunion,
                 'id_comunidad' => $id_comunidad
-            ]);
+            ];
+
+            if ($pdf_path !== null) {
+                $sql .= ", pdf_orden_dia = :pdf_path";
+                $params['pdf_path'] = $pdf_path;
+            }
+
+            $sql .= " WHERE id_reunion = :id_reunion AND id_comunidad = :id_comunidad";
+            
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($params);
         } catch (PDOException $e) {
             return false;
         }
