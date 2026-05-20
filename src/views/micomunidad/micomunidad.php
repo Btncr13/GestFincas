@@ -25,18 +25,32 @@
                 </div>
 
                 <!-- 2. BOTONES DE ACCIÓN (Lógica del compañero) -->
-                <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
-                    <button class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearVivienda">
-                        <i class="bi bi-plus-lg"></i> Crear Vivienda
-                    </button>
-                    <button class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold shadow-sm text-white d-flex align-items-center gap-2" onclick="prepararModificacion()">
-                        <i class="bi bi-pencil-square"></i>
-                        <span>Modificar</span>
-                    </button>
-                    <!-- Llama a la función JS del compañero -->
-                    <button class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="prepararEliminacion()">
-                        <i class="bi bi-trash"></i> Eliminar
-                    </button>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                    <!-- Buscador Dinámico -->
+                    <div class="flex-grow-1" style="min-width: 280px; max-width: 450px;">
+                        <div class="input-group shadow-sm" style="border-radius: var(--radio-md); overflow: hidden; border: 1px solid var(--color-borde);">
+                            <span class="input-group-text border-0" style="background-color: var(--color-fondo-formularios); color: var(--color-texto);">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="buscadorVecinos" class="form-control border-0" 
+                                   placeholder="Buscar por vivienda, nombre, DNI..." 
+                                   style="background-color: var(--color-fondo-formularios); font-size: 14px; color: var(--bs-dark); height: 44px;">
+                        </div>
+                    </div>
+
+                    <!-- Grupo de Botones -->
+                    <div class="d-flex flex-wrap gap-2 ms-auto">
+                        <button class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearVivienda">
+                            <i class="bi bi-plus-lg"></i> Crear Vivienda
+                        </button>
+                        <button class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold shadow-sm text-white d-flex align-items-center gap-2" onclick="prepararModificacion()">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Modificar</span>
+                        </button>
+                        <button class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="prepararEliminacion()">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 3. TABLA DE VECINOS (Adaptada al Modo Oscuro) -->
@@ -60,7 +74,7 @@
                                         <th class="px-4 py-3 border-0 text-end small fw-bold text-uppercase">Estado</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tablaCuerpoVecinos">
                                     <?php if (empty($vecinos)): ?>
                                     <tr>
                                         <td colspan="6" class="text-center py-5 text-muted">
@@ -69,7 +83,7 @@
                                     </tr>
                                     <?php else: ?>
                                         <?php foreach ($vecinos as $vecino): ?>
-                                        <tr style="border-bottom: 1px solid var(--color-borde);">
+                                        <tr class="fila-vecino" style="border-bottom: 1px solid var(--color-borde);">
                                             <td class="px-4 py-3">
                                                 <span class="badge bg-info text-primary fw-bold px-2 py-1 vivienda-badge"
                                                       style="cursor: pointer; border: 2px solid transparent;"
@@ -125,6 +139,22 @@
                     alert('<?= addslashes($_SESSION['error_vivienda']) ?>');
                     <?php unset($_SESSION['error_vivienda']); ?>
                 <?php endif; ?>
+            });
+
+            // Lógica de filtrado en tiempo real
+            document.getElementById('buscadorVecinos').addEventListener('keyup', function() {
+                const busqueda = this.value.toLowerCase();
+                const filas = document.querySelectorAll('.fila-vecino');
+
+                filas.forEach(fila => {
+                    // Buscamos en todo el contenido de la fila (Vivienda, Nombre, DNI, Email)
+                    const contenidoFila = fila.textContent.toLowerCase();
+                    if (contenidoFila.includes(busqueda)) {
+                        fila.style.display = '';
+                    } else {
+                        fila.style.display = 'none';
+                    }
+                });
             });
             </script>
 
