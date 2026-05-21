@@ -1,4 +1,9 @@
 <?php
+// Blindaje de variables para evitar avisos (Undefined variable) en el editor (IDE)
+$rol = $rol ?? $_SESSION['modo_vista'] ?? $_SESSION['vivienda']['rol'] ?? 'vecino';
+$nombreComunidad = $nombreComunidad ?? $_SESSION['vivienda']['nombre_comunidad'] ?? 'Comunidad';
+$nombreVivienda = $nombreVivienda ?? $_SESSION['vivienda']['nombre_vivienda'] ?? 'Vivienda';
+
 // Si es presidente, la etiqueta será verde (success). Si no, gris.
 $badgeClass = ($rol === 'presidente') ? 'bg-success' : 'bg-secondary';
 ?>

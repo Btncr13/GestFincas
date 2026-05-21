@@ -156,7 +156,13 @@ class AuthController
     // 🟢 CERRAR SESIÓN 🟢
     public function logout()
     {
-        session_destroy();
+        unset($_SESSION['vivienda']);
+        unset($_SESSION['modo_vista']);
+        
+        // Si no hay ninguna otra sesión activa (como la del superadmin), destruimos la sesión por completo
+        if (!isset($_SESSION['superadmin'])) {
+            session_destroy();
+        }
         header("Location: index.php?route=auth/login");
         exit;
     }
