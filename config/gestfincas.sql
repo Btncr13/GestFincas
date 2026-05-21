@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-05-2026 a las 12:33:43
+-- Tiempo de generación: 21-05-2026 a las 15:12:20
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -44,6 +44,22 @@ INSERT INTO `asistencia_reunion` (`id_asistencia`, `id_reunion`, `id_vivienda`, 
 (30, 5, 4, 'confirmada', '2026-04-16'),
 (38, 7, 2, 'confirmada', '2026-04-17'),
 (39, 7, 4, 'rechazada', '2026-04-17');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `avisos_plataforma`
+--
+
+CREATE TABLE `avisos_plataforma` (
+  `id_aviso` int(11) UNSIGNED NOT NULL,
+  `titulo` varchar(150) NOT NULL,
+  `mensaje` text NOT NULL,
+  `fecha_inicio` datetime NOT NULL,
+  `fecha_fin` datetime NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -126,7 +142,9 @@ CREATE TABLE `comunidad` (
 --
 
 INSERT INTO `comunidad` (`id_comunidad`, `id_mancomunidad`, `id_direccion`, `nombre`, `fecha_creacion`) VALUES
-(1, NULL, 1, 'Las Flores', '2026-04-09 17:30:25');
+(1, NULL, 1, 'Las Flores', '2026-04-09 17:30:25'),
+(2, NULL, 2, 'Los Cerezos', '2026-05-21 15:03:23'),
+(3, NULL, 3, 'Los Pinos', '2026-05-21 15:03:56');
 
 -- --------------------------------------------------------
 
@@ -185,7 +203,9 @@ CREATE TABLE `direccion` (
 --
 
 INSERT INTO `direccion` (`id_direccion`, `tipo`, `calle`, `numero`, `edificio`, `planta`, `puerta`, `ciudad`, `provincia`, `codigo_postal`, `pais`) VALUES
-(1, 'comunidad', 'Las Flores', 2, NULL, NULL, NULL, 'Berchules', 'Granada', 14700, 'España');
+(1, 'comunidad', 'Las Flores', 2, NULL, NULL, NULL, 'Berchules', 'Granada', 14700, 'España'),
+(2, 'comunidad', 'Calle Zaragoza', 5, NULL, NULL, NULL, 'Sin especificar', 'Sin especificar', 0, 'Sin especificar'),
+(3, 'comunidad', 'Calle Ruiseñor', 12, NULL, NULL, NULL, 'Sin especificar', 'Sin especificar', 0, 'Sin especificar');
 
 -- --------------------------------------------------------
 
@@ -301,7 +321,6 @@ INSERT INTO `foro_tema` (`id_tema`, `id_comunidad`, `id_usuario`, `titulo`, `des
 (5, 1, 3, 'Vendo Boli Bic y regalo entradas para la Final de la Champions', 'Vendo boli Bic de color azul y regalo 2 entradas para la final de la Champions.\r\nPrecio: 1500 € (no negociable)', '2026-05-04 10:54:48', 'abierto', 'mercadillo'),
 (6, 1, 1, 'prueba', 'asdasdasd', '2026-05-04 11:26:30', 'abierto', 'general'),
 (7, 1, 1, 'Fiesta Halloween', 'Sería buena idea que la comunidad celebre la fiesta de Halloween, y a Pepe lo vestimos de esqueleto repartiendo caramelos', '2026-05-06 01:51:46', 'abierto', 'propuestas');
-(8, 1, 3, 'Normas del presidente de dla comunidad', 'Acatar las normas de antonio recio presidente de la comunidad viva el rey y viva españa', '2026-05-06 18:52:12', 'abierto', 'convivencia');
 
 -- --------------------------------------------------------
 
@@ -461,6 +480,26 @@ INSERT INTO `reunion` (`id_reunion`, `id_comunidad`, `titulo`, `descripcion`, `f
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `superadmin`
+--
+
+CREATE TABLE `superadmin` (
+  `id_superadmin` int(11) UNSIGNED NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `superadmin`
+--
+
+INSERT INTO `superadmin` (`id_superadmin`, `nombre`, `email`, `password`) VALUES
+(1, 'Super Admin', 'admin@gestfincas.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuario`
 --
 
@@ -486,7 +525,9 @@ CREATE TABLE `usuario` (
 INSERT INTO `usuario` (`id_usuario`, `id_vivienda`, `nombre`, `apellidos`, `dni`, `email`, `password`, `fecha_registro`, `es_propietario`, `rol`, `token_recuperacion`, `expiracion_token`) VALUES
 (1, 2, 'Maria', 'Pelaez', '42034567R', 'mariapelaez@gmail.com', '$2y$10$XyV7m6OAZ8IdECKxvEYEt.7Waw1b4VNY4fNWGfHb6/p4rwdzWDjmS', '2026-04-09 17:37:13', 1, 'vecino', NULL, NULL),
 (3, 4, 'pepe', 'perez', '28394873E', 'pepe@gmail.com', '$2y$10$qCYoCjYbtUazNP7W1pifwOFfHDJPT6A7bgGLqilyQ3STqWHwl1og.', '2026-04-15 02:18:47', 1, 'presidente', NULL, NULL),
-(13, 15, 'Moisés', 'Moreno Robles', '23456789E', 'moisesmobles@gmail.com', '$2y$10$iT9DF1JRbEXIraF.2TEN1e14pNi3Srkj8B7Y51t.uhV7PfLoUVpSu', '2026-05-12 23:40:51', 1, 'vecino', NULL, NULL);
+(13, 15, 'Moisés', 'Moreno Robles', '23456789E', 'moisesmobles@gmail.com', '$2y$10$iT9DF1JRbEXIraF.2TEN1e14pNi3Srkj8B7Y51t.uhV7PfLoUVpSu', '2026-05-12 23:40:51', 1, 'vecino', NULL, NULL),
+(14, 16, 'pepe', 'pepito', '123123123', 'pepe@presi.com', '$2y$10$h0LLXEvgrwHTtZpBaa64bu2q3PE7MJ4RZpBJA6TKlWw.fV4qJfC9y', '2026-05-21 15:03:23', 1, 'presidente', NULL, NULL),
+(15, 17, 'alex', 'sisi', '123123123', 'alex@presi.com', '$2y$10$y7KbblG2IuhnWdcfaq10LOn3sG0jBwkSCUlxXkJspoqym3EEchF0y', '2026-05-21 15:03:56', 1, 'presidente', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -507,7 +548,9 @@ CREATE TABLE `vivienda` (
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 (2, 1, 'Planta 2-1C'),
 (4, 1, 'Planta 1 1ºC'),
-(15, 1, 'Planta 2-2C');
+(15, 1, 'Planta 2-2C'),
+(16, 2, 'Planta 5-B'),
+(17, 3, 'Planta 5-C');
 
 -- --------------------------------------------------------
 
@@ -588,49 +631,16 @@ INSERT INTO `voto` (`id_voto`, `id_votacion`, `id_usuario`, `id_opcion`, `fecha_
 --
 
 --
--- Indices de la tabla `asistencia_reunion`
+-- Indices de la tabla `avisos_plataforma`
 --
-ALTER TABLE `asistencia_reunion`
-  ADD PRIMARY KEY (`id_asistencia`),
-  ADD UNIQUE KEY `uq_reunion_vivienda` (`id_reunion`,`id_vivienda`),
-  ADD KEY `fk_asistencia_vivienda` (`id_vivienda`);
-
---
--- Indices de la tabla `codigo_validacion`
---
-ALTER TABLE `codigo_validacion`
-  ADD PRIMARY KEY (`id_codigo`),
-  ADD KEY `id_vivienda` (`id_vivienda`);
-
---
--- Indices de la tabla `comunicados`
---
-ALTER TABLE `comunicados`
-  ADD PRIMARY KEY (`id_comunicado`),
-  ADD KEY `id_comunidad` (`id_comunidad`);
-
---
--- Indices de la tabla `comunicado_lectura`
---
-ALTER TABLE `comunicado_lectura`
-  ADD PRIMARY KEY (`id_comunicado`,`id_usuario`),
-  ADD KEY `id_comunicado` (`id_comunicado`),
-  ADD KEY `id_usuario` (`id_usuario`);
+ALTER TABLE `avisos_plataforma`
+  ADD PRIMARY KEY (`id_aviso`);
 
 --
 -- Indices de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
-  ADD PRIMARY KEY (`id_comunidad`),
-  ADD KEY `id_mancomunidad` (`id_mancomunidad`),
-  ADD KEY `id_direccion` (`id_direccion`);
-
---
--- Indices de la tabla `cuota`
---
-ALTER TABLE `cuota`
-  ADD PRIMARY KEY (`id_cuota`),
-  ADD KEY `fk_cuota_vivienda` (`id_vivienda`);
+  ADD PRIMARY KEY (`id_comunidad`);
 
 --
 -- Indices de la tabla `direccion`
@@ -639,350 +649,63 @@ ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
 
 --
--- Indices de la tabla `espacios_comunidad`
+-- Indices de la tabla `superadmin`
 --
-ALTER TABLE `espacios_comunidad`
-  ADD PRIMARY KEY (`id_espacios_comunidad`),
-  ADD KEY `id_comunidad` (`id_comunidad`);
-
---
--- Indices de la tabla `espacios_normas`
---
-ALTER TABLE `espacios_normas`
-  ADD PRIMARY KEY (`id_espacios_normas`),
-  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
-
---
--- Indices de la tabla `foro_mensaje`
---
-ALTER TABLE `foro_mensaje`
-  ADD PRIMARY KEY (`id_mensaje`),
-  ADD KEY `id_tema` (`id_tema`);
-
---
--- Indices de la tabla `foro_tema`
---
-ALTER TABLE `foro_tema`
-  ADD PRIMARY KEY (`id_tema`);
-
---
--- Indices de la tabla `gasto`
---
-ALTER TABLE `gasto`
-  ADD PRIMARY KEY (`id_gasto`),
-  ADD KEY `fk_gasto_comunidad` (`id_comunidad`);
-
---
--- Indices de la tabla `incidencias`
---
-ALTER TABLE `incidencias`
-  ADD PRIMARY KEY (`id_incidencias`),
-  ADD KEY `id_vivienda` (`id_vivienda`);
-ALTER TABLE `incidencias` ADD FULLTEXT KEY `texto_normalizado` (`texto_normalizado`);
-
---
--- Indices de la tabla `incidencias_uniones`
---
-ALTER TABLE `incidencias_uniones`
-  ADD KEY `incidencias_uniones_ibfk_1` (`id_incidencias`),
-  ADD KEY `incidencias_uniones_ibfk_2` (`id_vivienda`);
-
---
--- Indices de la tabla `mancomunidad`
---
-ALTER TABLE `mancomunidad`
-  ADD PRIMARY KEY (`id_mancomunidad`),
-  ADD KEY `id_direccion` (`id_direccion`);
-
---
--- Indices de la tabla `matriculas`
---
-ALTER TABLE `matriculas`
-  ADD PRIMARY KEY (`id_matricula`),
-  ADD KEY `id_vivienda` (`id_vivienda`);
-
---
--- Indices de la tabla `reservas`
---
-ALTER TABLE `reservas`
-  ADD PRIMARY KEY (`id_reservas`),
-  ADD KEY `id_usuario` (`id_usuario`),
-  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
-
---
--- Indices de la tabla `reunion`
---
-ALTER TABLE `reunion`
-  ADD PRIMARY KEY (`id_reunion`),
-  ADD KEY `fk_reunion_comunidad` (`id_comunidad`);
+ALTER TABLE `superadmin`
+  ADD PRIMARY KEY (`id_superadmin`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indices de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  ADD PRIMARY KEY (`id_usuario`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `id_vivienda` (`id_vivienda`);
+  ADD PRIMARY KEY (`id_usuario`);
 
 --
 -- Indices de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  ADD PRIMARY KEY (`id_vivienda`),
-  ADD KEY `id_comunidad` (`id_comunidad`);
-
---
--- Indices de la tabla `votacion`
---
-ALTER TABLE `votacion`
-  ADD PRIMARY KEY (`id_votacion`),
-  ADD KEY `id_comunidad` (`id_comunidad`);
-
---
--- Indices de la tabla `votacion_opcion`
---
-ALTER TABLE `votacion_opcion`
-  ADD PRIMARY KEY (`id_opcion`),
-  ADD KEY `id_votacion` (`id_votacion`);
-
---
--- Indices de la tabla `voto`
---
-ALTER TABLE `voto`
-  ADD PRIMARY KEY (`id_voto`),
-  ADD UNIQUE KEY `unique_voto_usuario` (`id_votacion`,`id_usuario`),
-  ADD KEY `id_votacion` (`id_votacion`),
-  ADD KEY `id_usuario` (`id_usuario`),
-  ADD KEY `id_opcion` (`id_opcion`);
+  ADD PRIMARY KEY (`id_vivienda`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT de la tabla `asistencia_reunion`
+-- AUTO_INCREMENT de la tabla `avisos_plataforma`
 --
-ALTER TABLE `asistencia_reunion`
-  MODIFY `id_asistencia` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
-
---
--- AUTO_INCREMENT de la tabla `codigo_validacion`
---
-ALTER TABLE `codigo_validacion`
-  MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
---
--- AUTO_INCREMENT de la tabla `comunicados`
---
-ALTER TABLE `comunicados`
-  MODIFY `id_comunicado` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `avisos_plataforma`
+  MODIFY `id_aviso` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
-  MODIFY `id_comunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT de la tabla `cuota`
---
-ALTER TABLE `cuota`
-  MODIFY `id_cuota` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id_comunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `direccion`
 --
 ALTER TABLE `direccion`
-  MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `espacios_comunidad`
+-- AUTO_INCREMENT de la tabla `superadmin`
 --
-ALTER TABLE `espacios_comunidad`
-  MODIFY `id_espacios_comunidad` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT de la tabla `espacios_normas`
---
-ALTER TABLE `espacios_normas`
-  MODIFY `id_espacios_normas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT de la tabla `foro_mensaje`
---
-ALTER TABLE `foro_mensaje`
-  MODIFY `id_mensaje` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
-
---
--- AUTO_INCREMENT de la tabla `foro_tema`
---
-ALTER TABLE `foro_tema`
-  MODIFY `id_tema` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT de la tabla `gasto`
---
-ALTER TABLE `gasto`
-  MODIFY `id_gasto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
-
---
--- AUTO_INCREMENT de la tabla `incidencias`
---
-ALTER TABLE `incidencias`
-  MODIFY `id_incidencias` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
-
---
--- AUTO_INCREMENT de la tabla `mancomunidad`
---
-ALTER TABLE `mancomunidad`
-  MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `matriculas`
---
-ALTER TABLE `matriculas`
-  MODIFY `id_matricula` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `reservas`
---
-ALTER TABLE `reservas`
-  MODIFY `id_reservas` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT de la tabla `reunion`
---
-ALTER TABLE `reunion`
-  MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+ALTER TABLE `superadmin`
+  MODIFY `id_superadmin` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-
---
--- AUTO_INCREMENT de la tabla `votacion`
---
-ALTER TABLE `votacion`
-  MODIFY `id_votacion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT de la tabla `votacion_opcion`
---
-ALTER TABLE `votacion_opcion`
-  MODIFY `id_opcion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT de la tabla `voto`
---
-ALTER TABLE `voto`
-  MODIFY `id_voto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `asistencia_reunion`
---
-ALTER TABLE `asistencia_reunion`
-  ADD CONSTRAINT `fk_asistencia_reunion` FOREIGN KEY (`id_reunion`) REFERENCES `reunion` (`id_reunion`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_asistencia_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `codigo_validacion`
---
-ALTER TABLE `codigo_validacion`
-  ADD CONSTRAINT `fk_codigo_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `comunicados`
---
-ALTER TABLE `comunicados`
-  ADD CONSTRAINT `fk_comunicados_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `comunicado_lectura`
---
-ALTER TABLE `comunicado_lectura`
-  ADD CONSTRAINT `fk_lectura_comunicado` FOREIGN KEY (`id_comunicado`) REFERENCES `comunicados` (`id_comunicado`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_lectura_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `comunidad`
---
-ALTER TABLE `comunidad`
-  ADD CONSTRAINT `fk_comunidad_direccion` FOREIGN KEY (`id_direccion`) REFERENCES `direccion` (`id_direccion`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_comunidad_mancomunidad` FOREIGN KEY (`id_mancomunidad`) REFERENCES `mancomunidad` (`id_mancomunidad`) ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `cuota`
---
-ALTER TABLE `cuota`
-  ADD CONSTRAINT `fk_cuota_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `gasto`
---
-ALTER TABLE `gasto`
-  ADD CONSTRAINT `fk_gasto_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `incidencias`
---
-ALTER TABLE `incidencias`
-  ADD CONSTRAINT `fk_incidencias_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `incidencias_uniones`
---
-ALTER TABLE `incidencias_uniones`
-  ADD CONSTRAINT `incidencias_uniones_ibfk_1` FOREIGN KEY (`id_incidencias`) REFERENCES `incidencias` (`id_incidencias`) ON DELETE CASCADE,
-  ADD CONSTRAINT `incidencias_uniones_ibfk_2` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `mancomunidad`
---
-ALTER TABLE `mancomunidad`
-  ADD CONSTRAINT `fk_mancomunidad_direccion` FOREIGN KEY (`id_direccion`) REFERENCES `direccion` (`id_direccion`) ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `matriculas`
---
-ALTER TABLE `matriculas`
-  ADD CONSTRAINT `fk_matriculas_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `reservas`
---
-ALTER TABLE `reservas`
-  ADD CONSTRAINT `fk_reservas_espacios` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `reunion`
---
-ALTER TABLE `reunion`
-  ADD CONSTRAINT `fk_reunion_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `usuario`
---
-ALTER TABLE `usuario`
-  ADD CONSTRAINT `fk_usuario_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `vivienda`
---
-ALTER TABLE `vivienda`
-  ADD CONSTRAINT `fk_vivienda_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
+  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

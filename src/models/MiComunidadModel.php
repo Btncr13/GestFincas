@@ -36,7 +36,7 @@ class MiComunidadModel extends BaseModel
             $id_vivienda = $this->db->lastInsertId();
 
             // 2. Insertar el código de validación asociado
-            $sqlC = "INSERT INTO codigo_validacion (id_vivienda, codigo, usado) VALUES (:id_v, :cod, 0)";
+            $sqlC = "INSERT INTO codigo_validacion (id_vivienda, codigo, usado, fecha_creacion) VALUES (:id_v, :cod, 0, NOW())";
             $stmtC = $this->db->prepare($sqlC);
             $stmtC->execute(['id_v' => $id_vivienda, 'cod' => $codigo]);
 
