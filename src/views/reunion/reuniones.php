@@ -27,7 +27,7 @@
                 <div id="vista-lista">
                     <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
                         <div>
-                            <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">Reuniones</h1>
+                            <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Reuniones</h2>
                             <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Juntas y reuniones de la comunidad</p>
                         </div>
                         <?php if ($rol === 'presidente'): ?>
@@ -68,7 +68,7 @@
                             <i class="bi bi-arrow-left"></i> Volver
                         </button>
 
-                        <h1 id="form-titulo-vista" class="mb-1" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">Convocar Nueva Reunión</h1>
+                        <h2 id="form-titulo-vista" class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Convocar Nueva Reunión</h2>
                         <p id="form-desc-vista" class="mb-4" style="color: var(--color-texto); font-size: 14px;">Completa los datos para convocar una junta o reunión</p>
 
                         <div class="card shadow-sm border-0" style="border-radius: var(--radio-lg);">
