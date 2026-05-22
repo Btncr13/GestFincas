@@ -141,20 +141,80 @@
                 <?php endif; ?>
             });
 
-            // Lógica de filtrado en tiempo real
-            document.getElementById('buscadorVecinos').addEventListener('keyup', function() {
-                const busqueda = this.value.toLowerCase();
-                const filas = document.querySelectorAll('.fila-vecino');
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. Filtrado de tabla
+                const buscador = document.getElementById('buscadorVecinos');
+                if (buscador) {
+                    buscador.addEventListener('keyup', function() {
+                        const busqueda = this.value.toLowerCase();
+                        const filas = document.querySelectorAll('.fila-vecino');
 
-                filas.forEach(fila => {
-                    // Buscamos en todo el contenido de la fila (Vivienda, Nombre, DNI, Email)
-                    const contenidoFila = fila.textContent.toLowerCase();
-                    if (contenidoFila.includes(busqueda)) {
-                        fila.style.display = '';
-                    } else {
-                        fila.style.display = 'none';
+                        filas.forEach(fila => {
+                            // Buscamos en todo el contenido de la fila (Vivienda, Nombre, DNI, Email)
+                            const contenidoFila = fila.textContent.toLowerCase();
+                            if (contenidoFila.includes(busqueda)) {
+                                fila.style.display = '';
+                            } else {
+                                fila.style.display = 'none';
+                            }
+                        });
+                    });
+                }
+
+                // 2. Validación en tiempo real de los Modales (Crear y Modificar)
+                const setupValidation = (inputId, buttonId, feedbackId) => {
+                    const input = document.getElementById(inputId);
+                    const btn = document.getElementById(buttonId);
+                    const feed = document.getElementById(feedbackId);
+                    const regex = /^Planta \d+-[0-9A-Z]$/; // Un solo carácter tras el guion (Número o Letra)
+
+                    if (input && btn) {
+                        const validate = () => {
+                            const isValid = regex.test(input.value.trim());
+                            input.classList.toggle('is-invalid', !isValid && input.value !== '');
+                            input.classList.toggle('is-valid', isValid);
+                            if (feed) feed.style.display = (isValid || input.value === '') ? 'none' : 'block';
+                            btn.disabled = !isValid;
+                        };
+
+                        input.addEventListener('input', validate);
+                        
+                        // Asegurar validación al abrir el modal (especialmente para Modificar)
+                        const modal = input.closest('.modal');
+                        if (modal) {
+                            modal.addEventListener('shown.bs.modal', validate);
+                        }
                     }
-                });
+                };
+
+                // Configurar validación para ambos formularios
+                setupValidation('vivienda', 'btnConfirmarCrearVivienda', 'viviendaFeedback');
+                setupValidation('nombre_vivienda_modificar', 'btnConfirmarModificarVivienda', 'viviendaModificarFeedback');
+
+                // 3. Limpiar formularios al cerrar o cancelar los modales
+                const handleModalReset = (modalId, buttonId, feedbackId) => {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.addEventListener('hidden.bs.modal', function () {
+                            const form = this.querySelector('form');
+                            if (form) {
+                                form.reset(); // Limpia los inputs
+                                // Quita las clases de éxito/error de Bootstrap
+                                this.querySelectorAll('.is-valid, .is-invalid').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+                                // Oculta el aviso de formato incorrecto
+                                const feed = document.getElementById(feedbackId);
+                                if (feed) feed.style.display = 'none';
+                                // Bloquea el botón de nuevo
+                                const btn = document.getElementById(buttonId);
+                                if (btn) btn.disabled = true;
+                            }
+                        });
+                    }
+                };
+
+                handleModalReset('modalCrearVivienda', 'btnConfirmarCrearVivienda', 'viviendaFeedback');
+                handleModalReset('modalModificarVivienda', 'btnConfirmarModificarVivienda', 'viviendaModificarFeedback');
+
             });
             </script>
 
