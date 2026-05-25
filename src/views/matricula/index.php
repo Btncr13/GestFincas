@@ -18,8 +18,8 @@ include 'src/views/components/topbar.php'; ?>
                 <div class="d-flex align-items-center gap-3">
 
                     <div>
-                        <h2 class="mb-0 fw-bold text-dark" style="font-family: var(--fuente-titulos);">Parking</h2>
-                        <p class="mb-0 text-muted small">Control de vehículos de la comunidad</p>
+                        <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Parking</h2>
+                        <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Control de vehículos de la comunidad</p>
                     </div>
                 </div>
                 <?php if ($rol !== 'presidente'): ?>

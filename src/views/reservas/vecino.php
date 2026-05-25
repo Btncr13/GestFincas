@@ -22,8 +22,8 @@ $titulo_pagina = "Reservas"; ?>
 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                 <div>
-                    <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 28px; font-weight: 700; color: var(--bs-dark);">Reservas de espacios</h1>
-                    <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Tablón para la gestión de reservas</p>
+                    <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Gestión Espacios / Reservas</h2>
+                    <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestión de reservas y espacios de la comunidad</p> 
                 </div>
                 <button type="button" class="btn btn-brand fw-semibold shadow-sm"
                     data-bs-toggle="modal" data-bs-target="#modalReserva">
