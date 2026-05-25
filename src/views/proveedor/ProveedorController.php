@@ -57,7 +57,7 @@ class ProveedorController
                 'nombre' => trim($_POST['nombre'] ?? ''),
                 'categoria' => $_POST['categoria'] ?? 'Otros',
                 'telefono' => trim($_POST['telefono'] ?? ''),
-                'email' => trim($_POST['email'] ?? ''),
+                'email' => strtolower(trim($_POST['email'] ?? '')),
                 'horario' => trim($_POST['horario'] ?? ''),
                 'descripcion' => trim($_POST['descripcion'] ?? '')
             ];
@@ -81,7 +81,7 @@ class ProveedorController
                 'nombre' => trim($_POST['nombre'] ?? ''),
                 'categoria' => $_POST['categoria'] ?? 'Otros',
                 'telefono' => trim($_POST['telefono'] ?? ''),
-                'email' => trim($_POST['email'] ?? ''),
+                'email' => strtolower(trim($_POST['email'] ?? '')),
                 'horario' => trim($_POST['horario'] ?? ''),
                 'descripcion' => trim($_POST['descripcion'] ?? '')
             ];

@@ -1,13 +1,11 @@
-<?php require_once __DIR__ . '/../components/head.php'; ?>
+ <?php require_once 'src/views/components/topbar.php'; ?>
 
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <?php require_once __DIR__ . '/../components/sidebar.php'; ?>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <?php require_once __DIR__ . '/../components/topbar.php'; ?>
-
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div class="container-fluid p-0">
+    <div class="row flex-nowrap m-0">
+        <?php require_once 'src/views/components/sidebar.php'; ?>
+        <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
+            <div class="container-fluid p-0">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                     <h1 class="h2">Directorio de Proveedores</h1>
                     <?php if ($rol === 'presidente') : ?>
                         <div class="btn-toolbar mb-2 mb-md-0">
@@ -85,11 +83,10 @@
                     <?php endif; ?>
                 </div>
                 <div id="noResultados" class="alert alert-warning text-center" style="display: none;">No se encontraron proveedores que coincidan con la búsqueda.</div>
-
+            </div>
             </main>
-        </div>
     </div>
-
+</div>
     <?php if ($rol === 'presidente') : ?>
         <!-- Modal Crear Proveedor -->
         <div class="modal fade" id="modalCrearProveedor" tabindex="-1" aria-labelledby="modalCrearProveedorLabel" aria-hidden="true">
@@ -99,7 +96,7 @@
                         <h5 class="modal-title" id="modalCrearProveedorLabel">Añadir Nuevo Proveedor</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="index.php?route=proveedores/store" method="POST">
+                    <form action="index.php?route=proveedor/store" method="POST">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="nombre" class="form-label">Nombre o Empresa</label>
@@ -120,11 +117,11 @@
                             </div>
                             <div class="mb-3">
                                 <label for="telefono" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono" name="telefono">
+                                <input type="tel" class="form-control" id="telefono" name="telefono" pattern="[0-9]{9}" title="El teléfono debe contener 9 dígitos." maxlength="9">
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email">
+                                <input type="email" class="form-control" id="email" name="email" title="Introduce un formato de correo válido (ej: usuario@dominio.com)">
                             </div>
                             <div class="mb-3">
                                 <label for="horario" class="form-label">Horario</label>
@@ -152,7 +149,7 @@
                         <h5 class="modal-title" id="modalEditarProveedorLabel">Editar Proveedor</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="index.php?route=proveedores/update" method="POST">
+                    <form action="index.php?route=proveedor/update" method="POST">
                         <input type="hidden" id="edit_id_proveedor" name="id_proveedor">
                         <div class="modal-body">
                             <div class="mb-3">
@@ -174,11 +171,11 @@
                             </div>
                             <div class="mb-3">
                                 <label for="edit_telefono" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="edit_telefono" name="telefono">
+                                <input type="tel" class="form-control" id="edit_telefono" name="telefono" pattern="[0-9]{9}" title="El teléfono debe contener 9 dígitos." maxlength="9">
                             </div>
                             <div class="mb-3">
                                 <label for="edit_email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="edit_email" name="email">
+                                <input type="email" class="form-control" id="edit_email" name="email" title="Introduce un formato de correo válido (ej: usuario@dominio.com)">
                             </div>
                             <div class="mb-3">
                                 <label for="edit_horario" class="form-label">Horario</label>
@@ -210,7 +207,7 @@
                         <p>¿Estás seguro de que quieres eliminar al proveedor <strong id="nombreProveedorEliminar"></strong>? Esta acción no se puede deshacer.</p>
                     </div>
                     <div class="modal-footer">
-                        <form action="index.php?route=proveedores/destroy" method="POST">
+                        <form action="index.php?route=proveedor/destroy" method="POST">
                             <input type="hidden" id="id_proveedor_eliminar" name="id_proveedor_eliminar">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -221,8 +218,6 @@
         </div>
 
     <?php endif; ?>
-
-    <?php require_once __DIR__ . '/../components/footer.php'; ?>
 
     <script>
         <?php if ($rol === 'presidente') : ?>
@@ -285,7 +280,3 @@
             });
         });
     </script>
-
-</body>
-
-</html>
