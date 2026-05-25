@@ -26,6 +26,31 @@ function runRouter($config)
     $route = $_GET['route'] ?? 'auth/login';
     $parts = explode('/', trim($route, '/'));
 
+    // --- MANTENIMIENTO GLOBAL OBLIGATORIO ---
+    // Excluimos las rutas del superadmin para no quedarnos bloqueados nosotros mismos
+    $isSuperadmin = (strtolower($parts[0]) === 'superadmin');
+
+    if (!$isSuperadmin) {
+        try {
+            $stmt = $pdo->query("SELECT titulo, mensaje, fecha_fin FROM avisos_plataforma WHERE activo = 1 AND NOW() BETWEEN fecha_inicio AND fecha_fin ORDER BY id_aviso DESC LIMIT 1");
+            $mantenimiento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($mantenimiento) {
+                global $isAjax;
+                if ($isAjax) {
+                    // Si una acción interna en segundo plano intenta ejecutarse, la bloqueamos devolviendo un JSON
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Sistema en mantenimiento.']);
+                    return;
+                }
+                // Cargamos la vista exclusiva de bloqueo y detenemos todo
+                require_once "src/views/mantenimiento.php";
+                return;
+            }
+        } catch (PDOException $e) {}
+    }
+    // ----------------------------------------
+
     // Normalizamos el nombre del controlador (Ej: miComunidad -> MiComunidadController)
     $controllerName = ucfirst($parts[0]) . "Controller";
     
