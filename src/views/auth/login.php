@@ -1,14 +1,14 @@
 <main class="d-flex justify-content-center align-items-center flex-grow-1 bg-light min-vh-100">
-    <div class="card shadow-sm login-card-custom position-relative">
+    <div class="card shadow-sm login-card-custom border-0 position-relative">
         
-        <button class="btn btn-link position-absolute top-0 end-0 m-3 text-muted shadow-none" id="themeToggleBtn" style="z-index: 10;">
+        <button class="btn btn-link position-absolute top-0 end-0 m-3 text-muted shadow-none" id="themeToggleBtn">
             <i class="fa-solid fa-moon fs-5" id="themeIcon"></i>
         </button>
 
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <img src="public/assets/img/Logo.png" alt="Logo" class="rounded-circle shadow-sm mb-3 logo-adaptable" style="width: 72px; height: 72px; object-fit: cover;">                
-                <h1 class="fw-bold mb-1" style="font-size: 1.25rem;">GestFincas</h1>
+                <img src="public/assets/img/Logo.png" alt="Logo" class="rounded-circle shadow-sm mb-3 logo-adaptable">                
+                <h2 class="fw-bold mb-1">GestFincas</h2>
                 <p class="text-secondary small mb-0">Sistema de gestión de comunidades</p>
             </div>
 
@@ -39,10 +39,10 @@
                     <div class="alert alert-danger py-2 text-center alert-custom" role="alert"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
-                <button type="submit" class="btn btn-primary w-100 mt-3 mb-4" style="background-color: var(--bs-primary); border: none;">Iniciar Sesión</button>
+                <button type="submit" class="btn btn-primary w-100 mt-3 mb-4">Iniciar Sesión</button>
             </form>
             <div class="text-end mb-4">
-                <span class="text-primary small fw-bold" style="cursor: pointer; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#modalRecuperarPassword">
+                <span class="text-primary small fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalRecuperarPassword" role="button">
                     ¿Has olvidado tu contraseña?
                 </span>
             </div>
@@ -54,20 +54,18 @@
     </div>
 </main>
 
-<!-- MODAL RECUPERAR CONTRASEÑA -->
 <div class="modal fade" id="modalRecuperarPassword" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-bottom py-3" style="background-color: var(--bs-light);">
-                <h5 class="modal-title fw-bold text-dark" style="font-family: var(--fuente-titulos);">
+            <div class="modal-header border-bottom py-3">
+                <h5 class="modal-title fw-bold text-dark">
                     <i class="fa-solid fa-unlock-keyhole me-2 text-primary"></i>Recuperar Contraseña
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4" style="background-color: var(--bs-light);">
+            <div class="modal-body p-4">
                 <p class="text-muted small mb-4">Introduce tu correo electrónico. Te enviaremos un enlace seguro para que puedas crear una nueva contraseña.</p>
                 
-                <!-- Alertas del modal -->
                 <div id="recuperarError" class="alert alert-danger d-none py-2 text-center small"></div>
                 <div id="recuperarExito" class="alert alert-success d-none py-2 text-center small"></div>
 
@@ -78,7 +76,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer border-0 py-3" style="background-color: var(--color-fondo-formularios);">
+            <div class="modal-footer border-0 py-3">
                 <button type="button" class="btn btn-secondary fw-semibold" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" id="btnEnviarRecuperacion" class="btn btn-brand fw-semibold shadow-sm">
                     Enviar instrucciones
