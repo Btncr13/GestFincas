@@ -11,7 +11,7 @@
                 <!-- TÍTULO Y BOTONES DE ACCIÓN -->
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 gap-3">
                     <div>
-                        <h2 class="mb-1 fw-bold" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Finanzas</h2>
+                        <h2 class="mb-1 fw-bold font-title text-dark">Finanzas</h2>
                         <p class="text-muted small mb-2">Control financiero de la comunidad y gestión de cuotas</p>
                         <?php $colorFondo = $saldoTotal >= 0 ? 'success' : 'danger'; ?>
                         <span class="badge bg-<?= $colorFondo ?> bg-opacity-10 text-<?= $colorFondo ?> border border-<?= $colorFondo ?> border-opacity-25 px-3 py-2 shadow-sm" style="font-size: 0.95rem;">
@@ -46,23 +46,23 @@
                 <?php endif; ?>
 
                 <!-- ÚLTIMOS GASTOS REGISTRADOS -->
-                <div class="card border-0 border-start border-4 border-primary shadow-sm mb-4 module-card" style="background-color: var(--bs-light); border-radius: var(--radio-md);">
+                <div class="card border-0 border-start border-4 border-primary shadow-sm mb-4 module-card bg-light rounded-3">
                     <div class="card-header bg-transparent border-0 pt-4 pb-0">
-                        <h6 class="fw-bold mb-0" style="color: var(--bs-primary); font-family: var(--fuente-titulos);">
+                        <h6 class="fw-bold mb-0 text-primary font-title">
                             <i class="fa-solid fa-file-invoice-dollar me-2"></i>Últimos Gastos Registrados
                         </h6>
                     </div>
                     <div class="card-body p-4">
                         <div class="d-flex flex-column gap-3">
                             <?php foreach ($ultimosGastos as $gasto): ?>
-                                <div class="d-flex justify-content-between align-items-center p-3 border rounded-3 bg-opacity-10" style="background-color: var(--bs-secondary); border-color: var(--color-borde) !important;">
+                                <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-opacity-10 bg-secondary border-custom">
                                     <div class="d-flex align-items-start gap-3">
                                         <!-- FIX 1: Cambiado bg-white por background-color: var(--bs-light) -->
-                                        <div class="rounded shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: var(--bs-light);">
+                                        <div class="rounded shadow-sm d-flex align-items-center justify-content-center flex-shrink-0 bg-light" style="width: 40px; height: 40px;">
                                             <i class="fa-regular fa-file-lines text-muted fs-5"></i>
                                         </div>
                                         <div>
-                                            <h6 class="mb-1 fw-bold" style="color: var(--bs-dark);"><?= htmlspecialchars($gasto['concepto']) ?></h6>
+                                            <h6 class="mb-1 fw-bold text-dark"><?= htmlspecialchars($gasto['concepto']) ?></h6>
                                             <small class="text-muted"><?= htmlspecialchars($gasto['categoria']) ?> &bull; <?= date('d/m/Y', strtotime($gasto['fecha'])) ?></small>
                                         </div>
                                     </div>
@@ -78,15 +78,15 @@
 
                 <!-- TABS (Mensual, Anual, Histórico) -->
                 <?php $tabActiva = $tabActiva ?? 'mensual'; ?>
-                <ul class="nav nav-pills d-flex mb-4 p-1 shadow-sm" id="finanzasTab" role="tablist" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+                <ul class="nav nav-pills d-flex mb-4 p-1 shadow-sm bg-fondo rounded-4" id="finanzasTab" role="tablist">
                     <li class="nav-item flex-fill text-center" role="presentation">
-                        <button class="nav-link <?= $tabActiva === 'mensual' ? 'active text-dark shadow-sm' : 'text-muted' ?> w-100 fw-semibold rounded-2" data-bs-toggle="pill" data-bs-target="#mensual" type="button" style="transition: all 0.2s; background-color: <?= $tabActiva === 'mensual' ? 'var(--bs-light)' : 'transparent' ?>;">Mensual</button>
+                        <button class="nav-link <?= $tabActiva === 'mensual' ? 'active text-dark shadow-sm bg-light' : 'text-muted bg-transparent' ?> w-100 fw-semibold rounded-2" data-bs-toggle="pill" data-bs-target="#mensual" type="button" style="transition: all 0.2s;">Mensual</button>
                     </li>
                     <li class="nav-item flex-fill text-center" role="presentation">
-                        <button class="nav-link <?= $tabActiva === 'anual' ? 'active text-dark shadow-sm' : 'text-muted' ?> w-100 fw-semibold rounded-2" data-bs-toggle="pill" data-bs-target="#anual" type="button" style="transition: all 0.2s; background-color: <?= $tabActiva === 'anual' ? 'var(--bs-light)' : 'transparent' ?>;">Anual</button>
+                        <button class="nav-link <?= $tabActiva === 'anual' ? 'active text-dark shadow-sm bg-light' : 'text-muted bg-transparent' ?> w-100 fw-semibold rounded-2" data-bs-toggle="pill" data-bs-target="#anual" type="button" style="transition: all 0.2s;">Anual</button>
                     </li>
                     <li class="nav-item flex-fill text-center" role="presentation">
-                        <button class="nav-link <?= $tabActiva === 'historico' ? 'active text-dark shadow-sm' : 'text-muted' ?> w-100 fw-semibold rounded-2" data-bs-toggle="pill" data-bs-target="#historico" type="button" style="transition: all 0.2s; background-color: <?= $tabActiva === 'historico' ? 'var(--bs-light)' : 'transparent' ?>;">Histórico</button>
+                        <button class="nav-link <?= $tabActiva === 'historico' ? 'active text-dark shadow-sm bg-light' : 'text-muted bg-transparent' ?> w-100 fw-semibold rounded-2" data-bs-toggle="pill" data-bs-target="#historico" type="button" style="transition: all 0.2s;">Histórico</button>
                     </li>
                 </ul>
 
@@ -96,13 +96,13 @@
                         <div class="row g-4 mb-4">
                             <!-- Gráfica Donut -->
                             <div class="col-md-6">
-                                <div class="card shadow-sm border-0 h-100 module-card" style="background-color: var(--bs-light); border-radius: var(--radio-md);">
+                                <div class="card shadow-sm border-0 h-100 module-card bg-light rounded-3">
                                     <div class="card-body p-4">
                                         <?php
                                         $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                                         $mesAnio = $meses[date('n') - 1] . ' ' . date('Y');
                                         ?>
-                                        <h6 class="fw-bold mb-4 text-capitalize" style="color: var(--bs-dark); font-family: var(--fuente-titulos);"><?= $mesAnio ?> - Ingresos vs Gastos</h6>
+                                        <h6 class="fw-bold mb-4 text-capitalize font-title text-dark"><?= $mesAnio ?> - Ingresos vs Gastos</h6>
                                         <div style="position: relative; height: 250px; width: 100%;">
                                             <canvas id="chartMensual"></canvas>
                                         </div>
@@ -126,11 +126,11 @@
                             </div>
                             <!-- ESTADO DE CUOTAS DE VECINOS -->
                             <div class="col-md-6">
-                                <div class="card shadow-sm border-0 h-100 module-card" style="background-color: var(--bs-light); border-radius: var(--radio-md);">
+                                <div class="card shadow-sm border-0 h-100 module-card bg-light rounded-3">
                                     <div class="card-body p-4 d-flex flex-column">
                                         <div class="d-flex justify-content-between align-items-center mb-4">
                                             <!-- FIX: Usamos la clase text-dark nativa que tu CSS ya adapta al modo oscuro -->
-                                            <h6 class="fw-bold mb-0 text-dark" style="font-family: var(--fuente-titulos);">Estado de Cuotas</h6>
+                                            <h6 class="fw-bold mb-0 text-dark font-title">Estado de Cuotas</h6>
                                             <button class="btn btn-sm btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalDirectorioVecinos"><i class="fa-solid fa-users me-1"></i> Ver todos los vecinos</button>
                                         </div>
                                         <div class="table-responsive flex-grow-1">
@@ -186,26 +186,27 @@
 
                     <!-- PESTAÑA ANUAL -->
                     <div class="tab-pane fade <?= $tabActiva === 'anual' ? 'show active' : '' ?>" id="anual" role="tabpanel">
-                        <div class="card shadow-sm border-0 module-card" style="background-color: var(--bs-light); border-radius: var(--radio-md);">
+                        <div class="card shadow-sm border-0 module-card bg-light rounded-3">
                             <div class="card-body p-4">
-                                <h6 class="fw-bold mb-4 text-center" style="color: var(--bs-dark); font-family: var(--fuente-titulos);">Evolución del Ejercicio <?= date('Y') ?></h6>
+                                <h6 class="fw-bold mb-4 text-center font-title text-dark">Evolución del Ejercicio <?= date('Y') ?></h6>
                                 <div class="row g-3 mb-4 text-center">
                                     <div class="col-12 col-md-4">
-                                        <div class="p-3 rounded-3" style="background-color: var(--bs-secondary); border: 1px solid var(--color-borde);">
+                                        <div class="p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
                                             <small class="text-muted d-block mb-1">Total Ingresos Estimados</small>
                                             <span class="fs-4 fw-bold text-success">+ <?= number_format($resumenAnual['ingresos'], 2) ?> €</span>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <div class="p-3 rounded-3" style="background-color: var(--bs-secondary); border: 1px solid var(--color-borde);">
+                                        <div class="p-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25">
                                             <small class="text-muted d-block mb-1">Total Gastos Realizados</small>
                                             <span class="fs-4 fw-bold text-danger">- <?= number_format($resumenAnual['gastos'], 2) ?> €</span>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <div class="p-3 rounded-3" style="background-color: var(--bs-secondary); border: 1px solid var(--color-borde);">
+                                        <?php $colorBalanceTexto = $resumenAnual['balance'] >= 0 ? 'success' : 'danger'; ?>
+                                        <div class="p-3 rounded-3 bg-transparent border-custom">
                                             <small class="text-muted d-block mb-1">Balance Actual</small>
-                                            <span class="fs-4 fw-bold <?= $resumenAnual['balance'] >= 0 ? 'text-primary' : 'text-danger' ?>"><?= number_format($resumenAnual['balance'], 2) ?> €</span>
+                                            <span class="fs-4 fw-bold text-<?= $colorBalanceTexto ?>"><?= number_format($resumenAnual['balance'], 2) ?> €</span>
                                         </div>
                                     </div>
                                 </div>
@@ -222,18 +223,18 @@
                     <div class="tab-pane fade <?= $tabActiva === 'historico' ? 'show active' : '' ?>" id="historico" role="tabpanel">
 
                         <!-- FILTROS HISTÓRICO -->
-                        <div class="p-3 mb-4 rounded-3 shadow-sm module-card" style="background-color: var(--bs-light); border: 1px solid var(--color-borde);">
+                        <div class="p-3 mb-4 rounded-3 shadow-sm module-card bg-light border-custom">
                             <form method="GET" action="index.php" class="row g-2 align-items-end m-0">
                                 <input type="hidden" name="route" value="finanzas/index">
                                 <input type="hidden" name="tab" value="historico">
 
                                 <div class="col-12 col-md-4">
                                     <label class="form-label small text-muted mb-1 fw-semibold">Buscar concepto</label>
-                                    <input type="text" name="concepto" class="form-control form-control-sm" placeholder="Ej: Reparación..." value="<?= htmlspecialchars($filtrosHistorico['concepto']) ?>" style="background-color: var(--color-fondo-formularios); border-color: var(--color-borde);">
+                                    <input type="text" name="concepto" class="form-control form-control-sm bg-fondo border-custom" placeholder="Ej: Reparación..." value="<?= htmlspecialchars($filtrosHistorico['concepto']) ?>">
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <label class="form-label small text-muted mb-1 fw-semibold">Categoría / Tipo</label>
-                                    <select name="categoria" class="form-select form-select-sm" style="background-color: var(--color-fondo-formularios); border-color: var(--color-borde);">
+                                    <select name="categoria" class="form-select form-select-sm bg-fondo border-custom">
                                         <option value="">Todas</option>
                                         <optgroup label="Ingresos">
                                             <option value="mensual" <?= ($filtrosHistorico['categoria'] == 'mensual') ? 'selected' : '' ?>>Cuota Mensual</option>
@@ -251,7 +252,7 @@
                                 </div>
                                 <div class="col-6 col-md-2">
                                     <label class="form-label small text-muted mb-1 fw-semibold">Año</label>
-                                    <select name="anio" class="form-select form-select-sm" style="background-color: var(--color-fondo-formularios); border-color: var(--color-borde);">
+                                    <select name="anio" class="form-select form-select-sm bg-fondo border-custom">
                                         <option value="">Todos</option>
                                         <?php $anioActualF = date('Y');
                                         for ($i = $anioActualF; $i >= $anioActualF - 5; $i--): ?>
@@ -261,7 +262,7 @@
                                 </div>
                                 <div class="col-6 col-md-2">
                                     <label class="form-label small text-muted mb-1 fw-semibold">Mes</label>
-                                    <select name="mes" class="form-select form-select-sm" style="background-color: var(--color-fondo-formularios); border-color: var(--color-borde);">
+                                    <select name="mes" class="form-select form-select-sm bg-fondo border-custom">
                                         <option value="">Todos</option>
                                         <?php foreach (['1' => 'Enero', '2' => 'Febrero', '3' => 'Marzo', '4' => 'Abril', '5' => 'Mayo', '6' => 'Junio', '7' => 'Julio', '8' => 'Agosto', '9' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'] as $num => $nombreMes): ?>
                                             <option value="<?= $num ?>" <?= ($filtrosHistorico['mes'] == $num) ? 'selected' : '' ?>><?= $nombreMes ?></option>
@@ -270,11 +271,11 @@
                                 </div>
                                 <div class="col-6 col-md-4 mt-2">
                                     <label class="form-label small text-muted mb-1 fw-semibold">Desde fecha</label>
-                                    <input type="date" name="fecha_inicio" class="form-control form-control-sm" value="<?= $filtrosHistorico['fecha_inicio'] ?>" style="background-color: var(--color-fondo-formularios); border-color: var(--color-borde);">
+                                    <input type="date" name="fecha_inicio" class="form-control form-control-sm bg-fondo border-custom" value="<?= $filtrosHistorico['fecha_inicio'] ?>">
                                 </div>
                                 <div class="col-6 col-md-4 mt-2">
                                     <label class="form-label small text-muted mb-1 fw-semibold">Hasta fecha</label>
-                                    <input type="date" name="fecha_fin" class="form-control form-control-sm" value="<?= $filtrosHistorico['fecha_fin'] ?>" style="background-color: var(--color-fondo-formularios); border-color: var(--color-borde);">
+                                    <input type="date" name="fecha_fin" class="form-control form-control-sm bg-fondo border-custom" value="<?= $filtrosHistorico['fecha_fin'] ?>">
                                 </div>
                                 <div class="col-12 col-md-4 d-flex gap-2 mt-3 mt-md-0">
                                     <button type="submit" class="btn btn-sm btn-primary text-white flex-grow-1 shadow-sm"><i class="fa-solid fa-search me-1"></i> Buscar</button>
@@ -283,7 +284,7 @@
                             </form>
                         </div>
 
-                        <div class="card shadow-sm border-0 module-card" style="background-color: var(--bs-light); border-radius: var(--radio-md);">
+                        <div class="card shadow-sm border-0 module-card bg-light rounded-3">
                             <div class="card-body p-0">
                                 <div class="table-responsive">
                                     <table class="table table-borderless table-hover align-middle mb-0 text-sm-custom">
@@ -374,21 +375,21 @@
 <!-- MODAL REGISTRAR GASTO -->
 <div class="modal fade" id="modalGasto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+        <div class="modal-content bg-fondo rounded-4">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Registrar Nuevo Gasto</h5>
+                <h5 class="modal-title fw-bold font-title text-dark">Registrar Nuevo Gasto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="index.php?route=finanzas/nuevoGasto" method="POST">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-muted">Concepto</label>
-                        <input type="text" name="concepto" class="form-control" required placeholder="Ej: Reparación ascensor" style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                        <input type="text" name="concepto" class="form-control bg-light border-custom" required placeholder="Ej: Reparación ascensor">
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Categoría</label>
-                            <select name="categoria" class="form-select" required style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                            <select name="categoria" class="form-select bg-light border-custom" required>
                                 <option value="Mantenimiento y Reparaciones">Mantenimiento y Reparaciones</option>
                                 <option value="Suministros">Suministros (Luz, Agua, Gas)</option>
                                 <option value="Limpieza">Limpieza</option>
@@ -399,12 +400,12 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Importe (€)</label>
-                            <input type="number" name="importe" step="0.01" class="form-control" required placeholder="0.00" style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                            <input type="number" name="importe" step="0.01" class="form-control bg-light border-custom" required placeholder="0.00">
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-muted">Fecha del Gasto</label>
-                        <input type="date" name="fecha" class="form-control" required value="<?= date('Y-m-d') ?>" style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                        <input type="date" name="fecha" class="form-control bg-light border-custom" required value="<?= date('Y-m-d') ?>">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -419,9 +420,9 @@
 <!-- MODAL EMITIR CUOTA -->
 <div class="modal fade" id="modalCuota" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+        <div class="modal-content bg-fondo rounded-4">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Emitir Cuota o Derrama</h5>
+                <h5 class="modal-title fw-bold font-title text-dark">Emitir Cuota o Derrama</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="index.php?route=finanzas/nuevaCuota" method="POST">
@@ -432,23 +433,23 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Tipo de ingreso</label>
-                            <select name="tipo" class="form-select" required style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                            <select name="tipo" class="form-select bg-light border-custom" required>
                                 <option value="mensual">Cuota Mensual</option>
                                 <option value="derrama">Derrama Extraordinaria</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Importe <b>por vecino</b> (€)</label>
-                            <input type="number" name="importe" step="0.01" min="0.01" class="form-control" required placeholder="50.00" style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                            <input type="number" name="importe" step="0.01" min="0.01" class="form-control bg-light border-custom" required placeholder="50.00">
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-muted">Concepto</label>
-                        <input type="text" name="concepto" class="form-control" required placeholder="Ej: Cuota Abril 2026" style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                        <input type="text" name="concepto" class="form-control bg-light border-custom" required placeholder="Ej: Cuota Abril 2026">
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-muted">Fecha de Emisión</label>
-                        <input type="date" name="fecha_emision" class="form-control" required value="<?= date('Y-m-d') ?>" style="background-color: var(--bs-light); border-color: var(--color-borde);">
+                        <input type="date" name="fecha_emision" class="form-control bg-light border-custom" required value="<?= date('Y-m-d') ?>">
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -463,15 +464,15 @@
 <!-- MODAL DIRECTORIO DE VECINOS -->
 <div class="modal fade" id="modalDirectorioVecinos" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+        <div class="modal-content bg-fondo rounded-4">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Directorio de Vecinos</h5>
+                <h5 class="modal-title fw-bold font-title text-dark">Directorio de Vecinos</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="d-flex flex-column gap-2">
                     <?php foreach ($cuotasVecinos as $vecino): ?>
-                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 border shadow-sm" style="background-color: var(--bs-light) !important;">
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 border shadow-sm bg-light">
                             <div>
                                 <h6 class="fw-bold mb-0 text-dark"><?= htmlspecialchars($vecino['vivienda']) ?></h6>
                                 <small class="text-muted"><?= htmlspecialchars($vecino['vecino']) ?></small>
@@ -499,10 +500,10 @@
 <?php foreach ($cuotasVecinos as $vecino): ?>
     <div class="modal fade" id="modalHistorial-<?= $vecino['id_vivienda'] ?>" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+            <div class="modal-content bg-fondo rounded-4">
                 <div class="modal-header border-0 pb-0">
                     <div>
-                        <h5 class="modal-title fw-bold" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Historial de Pagos</h5>
+                        <h5 class="modal-title fw-bold font-title text-dark">Historial de Pagos</h5>
                         <small class="text-muted"><?= htmlspecialchars($vecino['vivienda']) ?> - <?= htmlspecialchars($vecino['vecino']) ?></small>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -518,19 +519,19 @@
                         <?php else: ?>
                             <div class="d-flex flex-column gap-3">
                                 <?php foreach ($vecino['historial'] as $recibo): ?>
-                                    <div class="p-3 rounded-3 border shadow-sm" style="background-color: var(--bs-light) !important;">
+                                    <div class="p-3 rounded-3 border shadow-sm bg-light">
                                         <div class="row g-2 align-items-end">
                                             <div class="col-12 col-md-5">
                                                 <label class="form-label small fw-semibold text-muted mb-1">Concepto</label>
-                                                <input type="text" name="cuotas[<?= $recibo['id_cuota'] ?>][concepto]" class="form-control form-control-sm" value="<?= htmlspecialchars($recibo['concepto']) ?>" required style="background-color: var(--bs-secondary); border-color: var(--color-borde);">
+                                                <input type="text" name="cuotas[<?= $recibo['id_cuota'] ?>][concepto]" class="form-control form-control-sm bg-secondary border-custom" value="<?= htmlspecialchars($recibo['concepto']) ?>" required>
                                             </div>
                                             <div class="col-6 col-md-3">
                                                 <label class="form-label small fw-semibold text-muted mb-1">Importe (€)</label>
-                                                <input type="number" step="0.01" min="0.01" name="cuotas[<?= $recibo['id_cuota'] ?>][importe]" class="form-control form-control-sm" value="<?= $recibo['importe'] ?>" required style="background-color: var(--bs-secondary); border-color: var(--color-borde);">
+                                                <input type="number" step="0.01" min="0.01" name="cuotas[<?= $recibo['id_cuota'] ?>][importe]" class="form-control form-control-sm bg-secondary border-custom" value="<?= $recibo['importe'] ?>" required>
                                             </div>
                                             <div class="col-6 col-md-3">
                                                 <label class="form-label small fw-semibold text-muted mb-1">Estado</label>
-                                                <select name="cuotas[<?= $recibo['id_cuota'] ?>][estado]" class="form-select form-select-sm <?= $recibo['estado'] == 'pagada' ? 'text-success fw-bold' : 'text-warning fw-bold' ?>" style="background-color: var(--bs-secondary); border-color: var(--color-borde);">
+                                                <select name="cuotas[<?= $recibo['id_cuota'] ?>][estado]" class="form-select form-select-sm bg-secondary border-custom <?= $recibo['estado'] == 'pagada' ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
                                                     <option value="pagada" <?= $recibo['estado'] == 'pagada' ? 'selected' : '' ?>>Pagada</option>
                                                     <option value="pendiente" <?= $recibo['estado'] == 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
                                                 </select>
@@ -568,13 +569,11 @@
         tabButtons.forEach(btn => {
             btn.addEventListener('shown.bs.tab', function(e) {
                 tabButtons.forEach(b => {
-                    b.classList.remove('text-dark', 'shadow-sm');
-                    b.classList.add('text-muted');
-                    b.style.backgroundColor = 'transparent';
+                    b.classList.remove('text-dark', 'shadow-sm', 'bg-light');
+                    b.classList.add('text-muted', 'bg-transparent');
                 });
-                e.target.classList.add('text-dark', 'shadow-sm');
-                e.target.classList.remove('text-muted');
-                e.target.style.backgroundColor = 'var(--bs-light)'; // Usa el color del tema en lugar de blanco puro
+                e.target.classList.add('text-dark', 'shadow-sm', 'bg-light');
+                e.target.classList.remove('text-muted', 'bg-transparent');
             });
         });
 
@@ -585,13 +584,31 @@
         const colorIngresos = '#5CB244';
         const colorGastos = '#A41E34';
 
+        // Variables para los datos del gráfico
+        const totalIngresos = <?= $resumen['ingresos'] ?? 0 ?>;
+        const totalGastos = <?= $resumen['gastos'] ?? 0 ?>;
+
+        // Configuración por defecto
+        let valoresGrafico = [totalIngresos, totalGastos];
+        let coloresGrafico = [colorIngresos, colorGastos];
+        let etiquetasGrafico = ['Ingresos', 'Gastos'];
+        let mostrarTooltips = true;
+
+        // Estado vacío: Sin ingresos ni gastos
+        if (totalIngresos === 0 && totalGastos === 0) {
+            valoresGrafico = [1];
+            coloresGrafico = [isDarkInitial ? '#313244' : '#ECECF0']; // Gris según el tema
+            etiquetasGrafico = ['Sin movimientos'];
+            mostrarTooltips = false;
+        }
+
         let chartMensual = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Ingresos', 'Gastos'],
+                labels: etiquetasGrafico,
                 datasets: [{
-                    data: [<?= $resumen['ingresos'] ?>, <?= $resumen['gastos'] ?>],
-                    backgroundColor: [colorIngresos, colorGastos],
+                    data: valoresGrafico,
+                    backgroundColor: coloresGrafico,
                     borderWidth: 4,
                     borderColor: isDarkInitial ? '#1E1E2E' : '#FFFFFF',
                     hoverOffset: 4
@@ -602,6 +619,9 @@
                 maintainAspectRatio: false,
                 cutout: '70%',
                 plugins: {
+                    tooltip: {
+                        enabled: mostrarTooltips
+                    },
                     legend: {
                         position: 'bottom',
                         labels: {
@@ -686,6 +706,10 @@
                     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                     // Cambiamos el borde interior de la gráfica al color de la tarjeta
                     chartMensual.data.datasets[0].borderColor = isDark ? '#1E1E2E' : '#FFFFFF';
+                    // Cambiamos el gris del estado vacío si cambia el tema
+                    if (totalIngresos === 0 && totalGastos === 0) {
+                        chartMensual.data.datasets[0].backgroundColor = [isDark ? '#313244' : '#ECECF0'];
+                    }
                     // Cambiamos el color de las letras de la leyenda
                     chartMensual.options.plugins.legend.labels.color = isDark ? '#CDD6F4' : '#221C35';
                     chartMensual.update();
