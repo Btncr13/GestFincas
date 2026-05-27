@@ -177,3 +177,119 @@
     margin-bottom: var(--espacio-md);
 }
 
+/* =========================================
+   ADAPTACIÓN DE LA PAGINACIÓN (BOOTSTRAP)
+   ========================================= */
+
+/* --- Modo Claro (Variables Globales) --- */
+.page-link {
+    background-color: var(--bs-light);
+    color: var(--color-texto);
+    border-color: var(--color-borde);
+}
+
+.page-link:hover {
+    background-color: var(--color--hover);
+    color: var(--bs-primary);
+    border-color: var(--color-borde);
+}
+
+.page-item.active .page-link {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #FFFFFF;
+}
+
+.page-item.disabled .page-link {
+    background-color: var(--bs-secondary);
+    color: var(--color-texto);
+    border-color: var(--color-borde);
+    opacity: 0.6;
+}
+
+/* --- Modo Oscuro (Dark Theme Overrides) --- */
+[data-theme="dark"] .page-link {
+    background-color: var(--bs-light) !important;
+    color: var(--color-texto) !important;
+    border-color: var(--color-borde) !important;
+}
+
+[data-theme="dark"] .page-link:hover {
+    background-color: var(--color--hover) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .page-item.active .page-link {
+    /* Usamos el mismo morado vibrante de los botones en modo oscuro */
+    background-color: #4c407a !important; 
+    border-color: #4c407a !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .page-item.disabled .page-link {
+    background-color: var(--bs-secondary) !important;
+    color: var(--color-texto) !important;
+    border-color: var(--color-borde) !important;
+    opacity: 0.5;
+}
+
+/* =========================================
+   MIGAS DE PAN (BREADCRUMBS) - MODO OSCURO
+   ========================================= */
+[data-theme="dark"] .breadcrumb-item a {
+    color: #b5a8d5 !important; /* Morado claro para el enlace (Panel) */
+}
+[data-theme="dark"] .breadcrumb-item.active {
+    color: var(--bs-dark) !important; /* Texto claro para la página actual */
+}
+[data-theme="dark"] .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--color-texto) !important; /* Color de la barrita separadora "/" */
+}
+
+/* =========================================
+   AJUSTES PARA INPUTS DE FECHA/HORA Y SELECTS
+   ========================================= */
+
+/* --- 1. Ajustes para Modo Claro --- */
+/* Aplicar nuestro fondo personalizado a los desplegables en Modo Claro */
+.form-select, .form-select.custom-input {
+    background-color: var(--color-fondo-formularios);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto);
+}
+/* Cambiar el azul por defecto del navegador en calendarios y relojes */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    accent-color: var(--bs-primary); /* Nuestro morado oscuro corporativo */
+}
+
+/* --- 2. Ajustes para Modo Oscuro --- */
+/* Cambiar el azul por nuestro morado claro y hacer legible la flecha del select */
+[data-theme="dark"] .form-select {
+    background-color: var(--color-fondo-formularios) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-borde) !important;
+    
+    /* Inyectamos una flecha SVG nueva con el color de nuestro texto oscuro (#CDD6F4) */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23CDD6F4' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="time"],
+[data-theme="dark"] input[type="datetime-local"] {
+    accent-color: #b5a8d5 !important; /* Morado claro para que contraste perfecto */
+}
+
+/* =========================================
+   MENÚS DESPLEGABLES (DROPDOWNS) - MODO OSCURO
+   ========================================= */
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--bs-light) !important; /* El fondo oscuro de nuestras tarjetas */
+    border: 1px solid var(--color-borde) !important; /* Un borde sutil para que no flote en el aire */
+    box-shadow: var(--sombra-media) !important;
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--bs-dark) !important; /* Nuestro color de texto claro (#CDD6F4) */
+}

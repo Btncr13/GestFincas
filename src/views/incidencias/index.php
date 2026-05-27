@@ -18,7 +18,7 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
 
                 <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
                     <div>
-                        <h1 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">Tablón de Incidencias</h1>
+                        <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Tablón de Incidencias</h2>
                         <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestiona las averías de la comunidad</p>
                     </div>
                     <?php if (!$esPresidente): ?>
