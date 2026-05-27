@@ -14,8 +14,9 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Vivienda</label>
-                        <input type="text" name="vivienda" class="form-control custom-input" placeholder="Ej: Planta 2-1B" required pattern="^Planta \d+-[A-Z0-9]+$" title="Formato: Planta X-PisoLetra">
-                        <div class="form-text mt-1" style="font-size: 0.75rem;">Siga el formato: Planta [Número]-[Piso]</div>
+                        <input type="text" id="vivienda" name="vivienda" class="form-control custom-input" placeholder="Ej: Planta 2-1 o Planta 2-B" required pattern="^Planta \d+-[0-9A-Z]$" title="Formato: Planta [Número]-[Número o LETRA MAYÚSCULA]">
+                        <div id="viviendaFeedback" class="invalid-feedback">El formato debe ser 'Planta [Número]-[Número o LETRA MAYÚSCULA]' (ej: Planta 2-1 o Planta 2-B).</div>
+                        <div class="form-text mt-1" style="font-size: 0.75rem;">Siga el formato: Planta [Número]-[Número o LETRA MAYÚSCULA]</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Email del vecino</label>

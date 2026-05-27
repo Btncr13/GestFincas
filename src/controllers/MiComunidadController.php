@@ -84,8 +84,8 @@ class MiComunidadController
         $email_vecino = trim($_POST['email_vecino'] ?? ''); // Capturamos el email del modal [4]
 
         // Validación de formato
-        if (!preg_match('/^Planta \d+-[A-Z0-9]+$/i', $nombre_vivienda)) {
-            $_SESSION['error_vivienda'] = "El formato de vivienda debe ser 'Planta X-PisoLetra' (ej: Planta 2-1B)";
+        if (!preg_match('/^Planta \d+-[0-9A-Z]$/', $nombre_vivienda)) {
+            $_SESSION['error_vivienda'] = "El formato debe ser 'Planta [Número]-[Número o LETRA]' (ej: Planta 2-1 o Planta 2-B)";
             header("Location: index.php?route=micomunidad/index");
             exit;
         }
@@ -157,8 +157,8 @@ class MiComunidadController
         $nombre_vivienda = trim($_POST['nombre_vivienda'] ?? '');
 
         // 3. Validación estricta del formato "Planta X-PisoY"
-        if (!preg_match('/^Planta \d+-[A-Z0-9]+$/i', $nombre_vivienda)) {
-            $_SESSION['error_vivienda'] = "El formato de la vivienda debe ser 'Planta X-PisoLetra' (ej: Planta 2-1B)";
+        if (!preg_match('/^Planta \d+-[0-9A-Z]$/', $nombre_vivienda)) {
+            $_SESSION['error_vivienda'] = "El formato debe ser 'Planta [Número]-[Número o LETRA]' (ej: Planta 2-1 o Planta 2-B)";
             header("Location: index.php?route=micomunidad/index");
             exit;
         }
