@@ -40,6 +40,14 @@ CREATE TABLE `asistencia_reunion` (
 --
 
 INSERT INTO `asistencia_reunion` (`id_asistencia`, `id_reunion`, `id_vivienda`, `confirmacion`, `fecha_respuesta`) VALUES
+(29, 5, 2, 'confirmada', '2026-05-13'),
+(30, 5, 4, 'confirmada', '2026-04-16'),
+(38, 7, 2, 'confirmada', '2026-04-17'),
+(39, 7, 4, 'rechazada', '2026-04-17'),
+(43, 8, 2, 'confirmada', '2026-05-09'),
+(44, 8, 4, 'rechazada', '2026-05-09'),
+(45, 9, 2, 'pendiente', NULL),
+(46, 9, 4, 'confirmada', '2026-05-09');
 (29, 5, 2, 'rechazada', '2026-04-15'),
 (30, 5, 4, 'confirmada', '2026-04-26'),
 (43, 9, 2, 'pendiente', NULL),
@@ -98,6 +106,14 @@ CREATE TABLE `comunicados` (
   `fecha_publicacion` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `comunicados`
+--
+
+INSERT INTO `comunicados` (`id_comunicado`, `id_comunidad`, `titulo`, `cuerpo`, `tipo`, `fecha_publicacion`) VALUES
+(5, 1, 'Se ha encontrado una rata en el cuarto de contadores', 'La rata se llama Fermín Trujillo no le deis pan que nos pega el hantavirus', 'urgente', '2026-05-13 08:34:22'),
+(6, 1, 'Corte de Agua programado', 'Mañana cortarán el agua de la calle de 10 a 14 preparen los cubos con agua!', 'normal', '2026-05-13 08:47:29');
+
 -- --------------------------------------------------------
 
 --
@@ -108,6 +124,14 @@ CREATE TABLE `comunicado_lectura` (
   `id_comunicado` int(11) UNSIGNED NOT NULL,
   `id_usuario` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `comunicado_lectura`
+--
+
+INSERT INTO `comunicado_lectura` (`id_comunicado`, `id_usuario`) VALUES
+(5, 3),
+(6, 3);
 
 -- --------------------------------------------------------
 
@@ -215,6 +239,7 @@ CREATE TABLE `espacios_comunidad` (
 
 INSERT INTO `espacios_comunidad` (`id_espacios_comunidad`, `id_comunidad`, `nombre_espacio`, `aforo`, `max_personas`, `hora_apertura`, `hora_cierre`, `duracion_uso`, `bloqueado`, `motivo`, `fecha_actualizacion`) VALUES
 (3, 1, 'Piscina', 30, 15, '09:00:00', '23:00:00', 30, 0, NULL, NULL),
+(4, 1, 'Gimnasio', 8, 3, '08:00:00', '14:00:00', 120, 0, NULL, NULL);
 (4, 2, 'Sala multiuso', 50, 50, '10:00:00', '20:00:00', 120, 0, NULL, NULL);
 
 -- --------------------------------------------------------
@@ -235,6 +260,8 @@ CREATE TABLE `espacios_normas` (
 
 INSERT INTO `espacios_normas` (`id_espacios_normas`, `id_espacios_comunidad`, `descripcion`) VALUES
 (5, 3, 'Seguir las ordenes de la administración Recio que bueno soy y que culito tengo '),
+(6, 4, '-Traer toalla'),
+(7, 4, '-Limpiar el sudor de las máquinas una vez utilizadas');
 (6, 4, 'Recoger la sala antes de cerrar');
 
 -- --------------------------------------------------------
@@ -344,7 +371,7 @@ CREATE TABLE `incidencias` (
 --
 
 INSERT INTO `incidencias` (`id_incidencias`, `id_vivienda`, `titulo`, `texto_normalizado`, `descripcion`, `fecha_creacion`, `fecha_actualizacion`, `estado`, `numero_afectados`, `foto_incidencia`) VALUES
-(6, 4, 'Bombilla fundida', 'luz roto luz portal parpadea', 'La bombilla del portal parpadea', '2026-04-27 16:50:37', '2026-04-29 13:23:47', 'resuelta', 1, 'public/uploads/incidencias/inc_69ef77bd0254a1.10175354.jpg');
+(20, 4, 'Pintar paredes', 'pintar paredes fachada manchada calima limpiarla y pintarla', 'La fachada está manchada de calima hay que limpiarla y pintarla', '2026-05-13 08:49:45', '2026-05-20 11:09:42', 'resuelta', 1, 'public/uploads/incidencias/inc_6a041f09eedc12.04082282.jpg');
 
 -- --------------------------------------------------------
 
@@ -373,20 +400,28 @@ CREATE TABLE `mancomunidad` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `matriculas`
+-- Estructura de tabla para la tabla `proveedores`
 --
 
-CREATE TABLE `matriculas` (
-  `id_matricula` int(10) UNSIGNED NOT NULL,
-  `id_vivienda` int(10) UNSIGNED NOT NULL,
-  `matricula` varchar(20) NOT NULL,
-  `uso_matricula` enum('habitual','invitado') NOT NULL,
-  `marca_vehículo` varchar(20) NOT NULL,
-  `nombre_invitado` varchar(40) DEFAULT NULL,
-  `fecha_entrada` datetime NOT NULL
+CREATE TABLE `proveedores` (
+  `id_proveedor` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `categoria` varchar(100) NOT NULL DEFAULT 'Otros',
+  `telefono` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `horario` varchar(100) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Volcado de datos para la tabla `proveedores`
+--
+
+INSERT INTO `proveedores` (`id_proveedor`, `id_comunidad`, `nombre`, `categoria`, `telefono`, `email`, `horario`, `descripcion`) VALUES
+(3, 1, 'MarioBros', 'Fontanería', '929556274', 'MarioyLuigi@gmail.com', 'L-J de 8.00 a 14.00 y de 16.00 a 18.00', 'Arreglamos, tuberías, baños, fregaderos y salvamos princesas en nuestro tiempo libre YaJuuu'),
+(4, 1, 'AlamBrito', 'Electricidad', '678492373', 'alam@brito.com', 'L-V de 10 a 18', 'Arreglamos cableados, enchufes y termomixes'),
+(5, 1, 'ManiManitas', 'Conserjería', '678940324', 'Mani@manitas.com', 'L-J de 8.00 a 16.00 y V-S de 8.00 a 15.00', 'No arreglo nada, solo saco la basura y limpio el portal.  De vez en cuando me puedes pedir que te cuelgue un cuadro no me llames para tonterías');
 -- Volcado de datos para la tabla `matriculas`
 --
 
@@ -421,6 +456,13 @@ INSERT INTO `reservas` (`id_reservas`, `id_usuario`, `id_espacios_comunidad`, `a
 (2, 1, 3, 13, '2026-04-21', '18:00:00', '18:30:00', 'inactivo'),
 (3, 3, 3, 2, '2026-04-21', '18:30:00', '19:00:00', 'inactivo'),
 (4, 3, 3, 15, '2026-04-23', '18:00:00', '18:30:00', 'inactivo'),
+(6, 1, 3, 14, '2026-04-23', '17:30:00', '18:00:00', 'inactivo'),
+(8, 1, 3, 3, '2026-05-06', '09:30:00', '10:00:00', 'inactivo'),
+(11, 3, 3, 2, '2026-05-06', '09:30:00', '10:00:00', 'inactivo'),
+(12, 3, 3, 1, '2026-05-09', '17:00:00', '17:30:00', 'inactivo'),
+(13, 1, 3, 4, '2026-05-09', '18:00:00', '18:30:00', 'inactivo'),
+(14, 3, 3, 4, '2026-05-11', '10:30:00', '11:00:00', 'inactivo'),
+(15, 3, 4, 1, '2026-05-13', '10:00:00', '12:00:00', 'inactivo');
 (5, 1, 3, 15, '2026-04-22', '18:00:00', '18:30:00', 'inactivo');
 
 -- --------------------------------------------------------
@@ -447,8 +489,11 @@ CREATE TABLE `reunion` (
 -- Volcado de datos para la tabla `reunion`
 --
 
-INSERT INTO `reunion` (`id_reunion`, `id_comunidad`, `titulo`, `descripcion`, `fecha`, `hora`, `lugar`, `orden_del_dia`, `pdf_orden_dia`, `estado`, `fecha_creacion`) VALUES
-(5, 1, 'ANTONIO RECIO PRESIDENTE', 'JUNTA URGENTE', '2026-07-24', '01:26:00', 'Casa de Antonio Recio', '[\"Punto del dia \",\"SOY PRESIDENTE DE LA COMUNIDAD\"]', '', 'convocada', '2026-04-15 02:22:07'),
+INSERT INTO `reunion` (`id_reunion`, `id_comunidad`, `titulo`, `descripcion`, `fecha`, `hora`, `lugar`, `orden_del_dia`, `estado`, `fecha_creacion`) VALUES
+(5, 1, 'ANTONIO RECIO PRESIDENTE', 'JUNTA URGENTE', '2026-07-24', '01:26:00', 'Casa de Antonio Recio', '[\"Punto del dia \",\"SOY PRESIDENTE DE LA COMUNIDAD\"]', 'convocada', '2026-04-15 02:22:07'),
+(7, 1, 'asdddf', 'dfgdfghj', '2026-04-23', '12:12:00', 'asd', '[\"awsed\"]', 'convocada', '2026-04-17 09:12:22'),
+(8, 1, 'Prueba notificaciones', 'ndlofihaeopodijf', '2026-05-10', '14:13:00', 'Sala común', '[\"1 invito a migas con longaniza\",\"2 pruebo las notificaciones \",\"3 quienes traigan postre para compartir tiene entrada gratis a la piscina\"]', 'convocada', '2026-05-09 13:13:50'),
+(9, 1, 'Prueba notificaciones', 'dafahadfg', '2026-05-09', '18:08:00', 'Sala común', '[\"dargvba\",\"dfgaer\"]', 'convocada', '2026-05-09 17:07:35'),
 (9, 1, 'Prueba de pdf', 'Vamos a comprobar que el pdf funciona.', '2026-05-30', '14:00:00', 'En mi casa', '[\"1. Vamos a crear un pdf.\",\"2. Vamos a comprobar que la mecánica funciona.\",\"3. Vamos a editar la reunión y subir otro pdf.\",\"4. Vamos a comprobar que funciona.\"]', 'public/uploads/reuniones/9.pdf', 'convocada', '2026-05-19 12:52:39');
 
 -- --------------------------------------------------------
@@ -485,10 +530,10 @@ CREATE TABLE `usuario` (
   `dni` varchar(9) NOT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `fecha_registro` datetime NOT NULL DEFAULT current_timestamp(),
-  `es_propietario` tinyint(1) NOT NULL DEFAULT 1,
+  `fecha_registro` datetime NOT NULL,
+  `es_propietario` tinyint(4) NOT NULL DEFAULT 1,
   `rol` enum('vecino','presidente') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
@@ -521,6 +566,7 @@ CREATE TABLE `vivienda` (
 --
 
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
+(2, 1, 'Planta 2-1C'),
 (4, 1, 'Planta 1-C'),
 (2, 1, 'Planta 2-B'),
 (13, 1, 'Planta 3-D'),
@@ -643,6 +689,18 @@ ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
 
 --
+-- Indices de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  ADD PRIMARY KEY (`id_espacios_comunidad`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  ADD PRIMARY KEY (`id_espacios_normas`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
 -- Indices de la tabla `superadmin`
 --
 ALTER TABLE `superadmin`
@@ -667,11 +725,11 @@ ALTER TABLE `mancomunidad`
   ADD KEY `id_direccion` (`id_direccion`);
 
 --
--- Indices de la tabla `matriculas`
+-- Indices de la tabla `proveedores`
 --
-ALTER TABLE `matriculas`
-  ADD PRIMARY KEY (`id_matricula`),
-  ADD KEY `id_vivienda` (`id_vivienda`);
+ALTER TABLE `proveedores`
+  ADD PRIMARY KEY (`id_proveedor`),
+  ADD KEY `fk_proveedor_comunidad` (`id_comunidad`);
 
 --
 -- Indices de la tabla `reservas`
@@ -743,6 +801,13 @@ ALTER TABLE `asistencia_reunion`
 -- AUTO_INCREMENT de la tabla `codigo_validacion`
 --
 ALTER TABLE `codigo_validacion`
+  MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `comunicados`
+--
+ALTER TABLE `comunicados`
+  MODIFY `id_comunicado` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
   MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
@@ -796,14 +861,23 @@ ALTER TABLE `gasto`
   MODIFY `id_gasto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT de la tabla `incidencias`
+--
+ALTER TABLE `incidencias`
+  MODIFY `id_incidencias` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
 -- AUTO_INCREMENT de la tabla `mancomunidad`
 --
 ALTER TABLE `mancomunidad`
   MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `matriculas`
+-- AUTO_INCREMENT de la tabla `proveedores`
 --
+ALTER TABLE `proveedores`
+  MODIFY `id_proveedor` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  
 ALTER TABLE `matriculas`
   MODIFY `id_matricula` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
@@ -829,7 +903,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `votacion`
@@ -904,17 +978,10 @@ ALTER TABLE `mancomunidad`
   ADD CONSTRAINT `fk_mancomunidad_direccion` FOREIGN KEY (`id_direccion`) REFERENCES `direccion` (`id_direccion`) ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `matriculas`
+-- Filtros para la tabla `proveedores`
 --
-ALTER TABLE `matriculas`
-  ADD CONSTRAINT `fk_matriculas_vivienda` FOREIGN KEY (`id_vivienda`) REFERENCES `vivienda` (`id_vivienda`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `reservas`
---
-ALTER TABLE `reservas`
-  ADD CONSTRAINT `fk_reservas_espacios` FOREIGN KEY (`id_espacios_comunidad`) REFERENCES `espacios_comunidad` (`id_espacios_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_reservas_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `proveedores`
+  ADD CONSTRAINT `fk_proveedor_comunidad` FOREIGN KEY (`id_comunidad`) REFERENCES `comunidad` (`id_comunidad`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `reunion`
