@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 21-05-2026 a las 15:12:20
+-- Servidor: 127.0.0.1:3306
+-- Tiempo de generación: 27-05-2026 a las 10:13:51
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -42,8 +42,8 @@ CREATE TABLE `asistencia_reunion` (
 INSERT INTO `asistencia_reunion` (`id_asistencia`, `id_reunion`, `id_vivienda`, `confirmacion`, `fecha_respuesta`) VALUES
 (29, 5, 2, 'rechazada', '2026-04-15'),
 (30, 5, 4, 'confirmada', '2026-04-26'),
-(38, 7, 2, 'confirmada', '2026-04-17'),
-(39, 7, 4, 'rechazada', '2026-04-17');
+(43, 9, 2, 'pendiente', NULL),
+(44, 9, 4, 'pendiente', NULL);
 
 -- --------------------------------------------------------
 
@@ -80,7 +80,8 @@ CREATE TABLE `codigo_validacion` (
 --
 
 INSERT INTO `codigo_validacion` (`id_codigo`, `id_vivienda`, `codigo`, `usado`, `fecha_creacion`) VALUES
-(1, 2, 'LF0012', 1, '2026-04-09 17:35:15');
+(1, 2, 'LF0012', 1, '2026-04-09 17:35:15'),
+(8, 13, 'PIHCW2YN', 1, '2026-05-22 12:25:23');
 
 -- --------------------------------------------------------
 
@@ -437,7 +438,7 @@ CREATE TABLE `reunion` (
   `hora` time NOT NULL,
   `lugar` varchar(100) NOT NULL,
   `orden_del_dia` text NOT NULL CHECK (json_valid(`orden_del_dia`)),
-  `pdf_orden_dia` varchar(255) DEFAULT NULL, -- Ya está en NULL, confirmamos
+  `pdf_orden_dia` varchar(255) DEFAULT NULL,
   `estado` enum('convocada','en_curso','finalizada') NOT NULL DEFAULT 'convocada',
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -448,7 +449,7 @@ CREATE TABLE `reunion` (
 
 INSERT INTO `reunion` (`id_reunion`, `id_comunidad`, `titulo`, `descripcion`, `fecha`, `hora`, `lugar`, `orden_del_dia`, `pdf_orden_dia`, `estado`, `fecha_creacion`) VALUES
 (5, 1, 'ANTONIO RECIO PRESIDENTE', 'JUNTA URGENTE', '2026-07-24', '01:26:00', 'Casa de Antonio Recio', '[\"Punto del dia \",\"SOY PRESIDENTE DE LA COMUNIDAD\"]', '', 'convocada', '2026-04-15 02:22:07'),
-(7, 1, 'asdddf', 'dfgdfghj', '2026-04-23', '12:12:00', 'asd', '[\"awsed\"]', '', 'convocada', '2026-04-17 09:12:22');
+(9, 1, 'Prueba de pdf', 'Vamos a comprobar que el pdf funciona.', '2026-05-30', '14:00:00', 'En mi casa', '[\"1. Vamos a crear un pdf.\",\"2. Vamos a comprobar que la mecánica funciona.\",\"3. Vamos a editar la reunión y subir otro pdf.\",\"4. Vamos a comprobar que funciona.\"]', 'public/uploads/reuniones/9.pdf', 'convocada', '2026-05-19 12:52:39');
 
 -- --------------------------------------------------------
 
@@ -500,7 +501,8 @@ INSERT INTO `usuario` (`id_usuario`, `id_vivienda`, `nombre`, `apellidos`, `dni`
 (14, 16, 'pepe', 'pepito', '123123123', 'pepe@presi.com', '$2y$10$h0LLXEvgrwHTtZpBaa64bu2q3PE7MJ4RZpBJA6TKlWw.fV4qJfC9y', '2026-05-21 15:03:23', 1, 'presidente', NULL, NULL),
 (15, 17, 'alex', 'sisi', '123123123', 'alex@presi.com', '$2y$10$y7KbblG2IuhnWdcfaq10LOn3sG0jBwkSCUlxXkJspoqym3EEchF0y', '2026-05-21 15:03:56', 1, 'presidente', NULL, NULL),
 (4, 5, 'Aurora ', 'Pérez', '34567900T', 'chilenita@gmail.com', '$2y$10$34PNWR0CmaZFuTzEMUKTJuA6ALJ1aQ3gVPblzuQ3Gv1ZUVihIUlHq', '2026-05-14 23:34:50', 1, 'presidente'),
-(5, 6, 'Natalia ', 'Gamero', '22222290P', 'nati@gmail.com', '$2y$10$lHGk5Ub97vjgfrBDWZVSYuiY72g4yC2UXqsYcmYX9xdGv2X5FOi9G', '2026-05-14 23:34:50', 1, 'vecino');
+(5, 6, 'Natalia ', 'Gamero', '22222290P', 'nati@gmail.com', '$2y$10$lHGk5Ub97vjgfrBDWZVSYuiY72g4yC2UXqsYcmYX9xdGv2X5FOi9G', '2026-05-14 23:34:50', 1, 'vecino'),
+(7, 13, 'Tomás', 'Ruiz', '35607789R', 'adios@gmail.com', '$2y$10$j32yeALlTVozfkJY6Qexh.W/Yga9NOy3PhxIavkzybgQOj74XGEey', '2026-05-22 12:26:47', 1, 'vecino');
 
 -- --------------------------------------------------------
 
@@ -519,13 +521,11 @@ CREATE TABLE `vivienda` (
 --
 
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
-(4, 1, 'Planta 1 1ºC'),
-(15, 1, 'Planta 2-2C'),
-(16, 2, 'Planta 5-B'),
-(17, 3, 'Planta 5-C');
-(2, 1, 'Planta 2-1B'),
-(6, 2, 'Planta 2-1B'),
-(5, 2, 'Planta 4-1D');
+(4, 1, 'Planta 1-C'),
+(2, 1, 'Planta 2-B'),
+(13, 1, 'Planta 3-D'),
+(6, 2, 'Planta 2-1'),
+(5, 2, 'Planta 4-1');
 
 -- --------------------------------------------------------
 
@@ -737,13 +737,13 @@ ALTER TABLE `avisos_plataforma`
   MODIFY `id_aviso` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
   
 ALTER TABLE `asistencia_reunion`
-  MODIFY `id_asistencia` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id_asistencia` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- AUTO_INCREMENT de la tabla `codigo_validacion`
 --
 ALTER TABLE `codigo_validacion`
-  MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `comunidad`
@@ -817,19 +817,19 @@ ALTER TABLE `reservas`
 -- AUTO_INCREMENT de la tabla `reunion`
 --
 ALTER TABLE `reunion`
-  MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `votacion`
