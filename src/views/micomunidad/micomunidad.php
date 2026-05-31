@@ -38,17 +38,15 @@
                         </div>
                     </div>
 
-                    <!-- Grupo de Botones -->
                     <div class="d-flex flex-wrap gap-2 ms-auto">
                         <button class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearVivienda">
-                            <i class="bi bi-plus-lg"></i> Crear Vivienda
+                            <i class="fa-solid fa-plus"></i> Crear Vivienda
                         </button>
-                        <button class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold shadow-sm text-white d-flex align-items-center gap-2" onclick="prepararModificacion()">
-                            <i class="bi bi-pencil-square"></i>
-                            <span>Modificar</span>
+                        <button class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white d-flex align-items-center gap-2" onclick="prepararModificacion()">
+                            <i class="fa-solid fa-pen-to-square"></i> Modificar
                         </button>
                         <button class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="prepararEliminacion()">
-                            <i class="bi bi-trash"></i> Eliminar
+                            <i class="fa-solid fa-trash"></i> Eliminar
                         </button>
                     </div>
                 </div>
