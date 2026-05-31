@@ -56,7 +56,7 @@ class ComunicacionesModel extends BaseModel
                     JOIN comunidad com ON c.id_comunidad = com.id_comunidad
                     JOIN vivienda v ON com.id_comunidad = v.id_comunidad
                     JOIN usuario u ON v.id_vivienda = u.id_vivienda
-                    WHERE u.id_usuario = :id_usuario AND c.tipo IN ('importante', 'urgente') 
+                    WHERE u.id_usuario = :id_usuario AND c.tipo IN ('normal', 'importante', 'urgente') 
                     AND c.id_comunicado NOT IN (SELECT id_comunicado FROM comunicado_lectura WHERE id_usuario = :id_usuario_lectura)";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id_usuario' => $id_usuario, 'id_usuario_lectura' => $id_usuario]);
