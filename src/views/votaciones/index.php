@@ -64,7 +64,7 @@ if ($rol === 'presidente') {
                         </div>
 
                         <?php if ($rol === 'presidente'): ?>
-                            <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrearVotacion">
+                            <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#nuevaVotacionModal">
                                 <i class="fa-solid fa-plus me-2"></i> Nueva Votación
                             </button>
                         <?php endif; ?>

@@ -27,7 +27,7 @@ include 'src/views/components/topbar.php';
                         <h2 class="fw-bold mb-1 font-title">Foro Vecinal</h2>
                         <p class="text-muted small mb-0">Debate y propón ideas con tus vecinos</p>
                     </div>
-                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrearTema">
+                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoTema">
                         <i class="fa-solid fa-plus me-2"></i> Crear Nuevo Tema
                     </button>
                 </div>

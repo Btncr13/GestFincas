@@ -22,7 +22,7 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
                         <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestiona las averías de la comunidad</p>
                     </div>
                     <?php if (!$esPresidente): ?>
-                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrearIncidencia">
+                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalIncidencia">
                         <i class="fa-solid fa-plus me-2"></i> Crear Incidencia
                     </button>
                     <?php endif; ?>

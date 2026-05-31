@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-primary" id="modalCrearEspacioLabel" style="font-family: var(--fuente-titulos);">Nueva Instalación</h5>
+                <h5 class="modal-title fw-bold text-primary" style="font-family: var(--fuente-titulos);">Nueva Instalación</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
