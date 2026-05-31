@@ -61,7 +61,7 @@ if ($rol === 'presidente') {
                         <h2 class="mb-0" style="font-family: var(--fuente-titulos);">Votaciones</h2>
                         
                         <?php if ($rol === 'presidente'): ?>
-                            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#nuevaVotacionModal">
+                            <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCrearVotacion">
                                 <i class="fa-solid fa-plus me-2"></i> Nueva Votación
                             </button>
                         <?php endif; ?>
