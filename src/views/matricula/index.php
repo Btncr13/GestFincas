@@ -23,7 +23,7 @@ include 'src/views/components/topbar.php'; ?>
                     </div>
                 </div>
                 <?php if ($rol !== 'presidente'): ?>
-                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRegistrarVehiculo">
+                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalMatricula">
                         <i class="fa-solid fa-plus me-2"></i> Registrar Vehículo
                     </button>
                 <?php endif; ?>
