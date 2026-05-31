@@ -64,3 +64,10 @@ a:hover {
 .badge-pulse {
     animation: pulse-danger 2s infinite;
 }
+
+/* Añade esto a tu archivo CSS para arreglar el logo */
+.logo-adaptable {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+}

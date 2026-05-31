@@ -39,7 +39,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=<?= $dashboardUrl ?>"
                     style="background-color: <?= $isDashboard ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= $isDashboard ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-table-cells-large me-2"></i> Dashboard
+                    <i class="fa-solid fa-table-cells-large me-2 fa-fw"></i> Dashboard
                 </a>
             </li>
 
@@ -49,7 +49,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                         href="index.php?route=micomunidad/index"
                         style="background-color: <?= ($ruta_actual == 'micomunidad/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'micomunidad/index') ? 'white' : 'var(--color-texto)' ?>;">
-                        <i class="fa-solid fa-users me-2"></i> Mi Comunidad
+                        <i class="fa-solid fa-users me-2 fa-fw"></i> Mi Comunidad
                     </a>
                 </li>
             <?php endif; ?>
@@ -59,7 +59,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=comunicaciones/index"
                     style="background-color: <?= ($ruta_actual == 'comunicaciones/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'comunicaciones/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-bullhorn me-2"></i> Comunicaciones
+                    <i class="fa-solid fa-bullhorn me-2 fa-fw"></i> Comunicaciones
                 </a>
             </li>
 
@@ -68,7 +68,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=foro/index"
                     style="background-color: <?= ($ruta_actual == 'foro/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'foro/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-comments me-2"></i> Foro Vecinal
+                    <i class="fa-solid fa-comments me-2 fa-fw"></i> Foro Vecinal
                 </a>
             </li>
 
@@ -77,7 +77,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=votacion/index"
                     style="background-color: <?= ($ruta_actual == 'votacion/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'votacion/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-check-to-slot me-2"></i> Votaciones
+                    <i class="fa-solid fa-check-to-slot me-2 fa-fw"></i> Votaciones
                 </a>
             </li>
 
@@ -86,7 +86,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=reserva/index"
                     style="background-color: <?= ($ruta_actual == 'reserva/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'reserva/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-calendar-check me-2"></i> Reservas
+                    <i class="fa-solid fa-calendar-check me-2 fa-fw"></i> Reservas
                 </a>
             </li>
 
@@ -95,7 +95,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=reunion/reuniones"
                     style="background-color: <?= ($ruta_actual == 'reunion/reuniones') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'reunion/reuniones') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-people-group me-2"></i> Reuniones
+                    <i class="fa-solid fa-people-group me-2 fa-fw"></i> Reuniones
                 </a>
             </li>
 
@@ -104,7 +104,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=incidencias/index"
                     style="background-color: <?= ($ruta_actual == 'incidencias/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'incidencias/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-screwdriver-wrench me-2"></i> Incidencias
+                    <i class="fa-solid fa-screwdriver-wrench me-2 fa-fw"></i> Incidencias
                 </a>
             </li>
             <li class="nav-item">
@@ -112,7 +112,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                     href="index.php?route=matricula/index"
                     style="background-color: <?= ($ruta_actual == 'matricula/index') ? 'var(--bs-primary)' : 'transparent' ?>; 
                           color: <?= ($ruta_actual == 'matricula/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-car me-2"></i> Parking
+                    <i class="fa-solid fa-car me-2 fa-fw"></i> Parking
                 </a>
             </li>
             <li class="nav-item">
@@ -120,7 +120,7 @@ $isDashboard = in_array($ruta_actual, ['auth/panelpresi', 'auth/panelvecino']);
                 href="index.php?route=finanzas/index"
                 style="background-color: <?= ($ruta_actual == 'finanzas/index') ? 'var(--bs-primary)' : 'transparent' ?>;
                         color: <?= ($ruta_actual == 'finanzas/index') ? 'white' : 'var(--color-texto)' ?>;">
-                    <i class="fa-solid fa-wallet me-2"></i> Finanzas
+                    <i class="fa-solid fa-wallet me-2 fa-fw"></i> Finanzas
                 </a>
             </li>
             <li class="nav-item">

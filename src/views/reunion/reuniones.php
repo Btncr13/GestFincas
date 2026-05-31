@@ -31,8 +31,8 @@
                             <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Juntas y reuniones de la comunidad</p>
                         </div>
                         <?php if ($rol === 'presidente'): ?>
-                            <button class="btn d-flex align-items-center gap-2" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;" onclick="app.abrirFormularioCrear()">
-                                <i class="bi bi-plus fs-6"></i> Convocar Reunión
+                            <button class="btn btn-primary fw-semibold shadow-sm" onclick="app.abrirFormularioCrear()">
+                                <i class="fa-solid fa-plus me-2"></i> Convocar Reunión
                             </button>
                         <?php endif; ?>
                     </div>

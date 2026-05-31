@@ -57,11 +57,14 @@ if ($rol === 'presidente') {
             <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
                 
                 <div class="container-fluid p-0">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="mb-0" style="font-family: var(--fuente-titulos);">Votaciones</h2>
-                        
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                        <div>
+                            <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Votaciones</h2>
+                            <p class="mb-3" style="color: var(--color-texto); font-size: 14px;">Gestión de votaciones y consultas vecinales</p>
+                        </div>
+
                         <?php if ($rol === 'presidente'): ?>
-                            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#nuevaVotacionModal">
+                            <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#nuevaVotacionModal">
                                 <i class="fa-solid fa-plus me-2"></i> Nueva Votación
                             </button>
                         <?php endif; ?>
