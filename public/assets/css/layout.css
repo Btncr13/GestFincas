@@ -293,3 +293,8 @@ input[type="datetime-local"] {
 [data-theme="dark"] .dropdown-item {
     color: var(--bs-dark) !important; /* Nuestro color de texto claro (#CDD6F4) */
 }
+
+/* Mantener el color rojo en acciones destructivas del dropdown en Modo Oscuro */
+[data-theme="dark"] .dropdown-item.text-danger {
+    color: #ff7383 !important; /* Rojo pastel/claro para contraste perfecto en oscuro */
+}

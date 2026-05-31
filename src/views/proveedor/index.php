@@ -38,7 +38,7 @@
                                                         <h5 class="card-title fw-bold text-primary"><?= htmlspecialchars($p['nombre']) ?></h5>
                                                         <?php if ($rol === 'presidente') : ?>
                                                             <div class="dropdown">
-                                                                <button class="btn btn-light btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                                     <i class="fa-solid fa-ellipsis-vertical"></i>
                                                                 </button>
                                                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -57,13 +57,13 @@
                                                         <?php if (!empty($p['telefono'])) : ?>
                                                             <li class="mb-2 d-flex align-items-center">
                                                                 <i class="fa-solid fa-phone fa-fw me-2 text-muted"></i>
-                                                                <a href="tel:<?= htmlspecialchars($p['telefono']) ?>" class="text-decoration-none"><?= htmlspecialchars($p['telefono']) ?></a>
+                                                                <a href="tel:<?= htmlspecialchars($p['telefono']) ?>" class="text-decoration-none text-reset"><?= htmlspecialchars($p['telefono']) ?></a>
                                                             </li>
                                                         <?php endif; ?>
                                                         <?php if (!empty($p['email'])) : ?>
                                                             <li class="mb-2 d-flex align-items-center">
                                                                 <i class="fa-solid fa-envelope fa-fw me-2 text-muted"></i>
-                                                                <a href="mailto:<?= htmlspecialchars($p['email']) ?>" class="text-decoration-none"><?= htmlspecialchars($p['email']) ?></a>
+                                                                <a href="mailto:<?= htmlspecialchars($p['email']) ?>" class="text-decoration-none text-reset"><?= htmlspecialchars($p['email']) ?></a>
                                                             </li>
                                                         <?php endif; ?>
                                                         <?php if (!empty($p['horario'])) : ?>
