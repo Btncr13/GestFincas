@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-06-2026 a las 15:40:48
+-- Tiempo de generación: 01-06-2026 a las 18:07:50
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -35,16 +35,6 @@ CREATE TABLE `asistencia_reunion` (
   `fecha_respuesta` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `asistencia_reunion`
---
-
-INSERT INTO `asistencia_reunion` (`id_asistencia`, `id_reunion`, `id_vivienda`, `confirmacion`, `fecha_respuesta`) VALUES
-(29, 5, 2, 'rechazada', '2026-04-15'),
-(30, 5, 4, 'confirmada', '2026-04-16'),
-(38, 7, 2, 'confirmada', '2026-04-17'),
-(39, 7, 4, 'rechazada', '2026-04-17');
-
 -- --------------------------------------------------------
 
 --
@@ -61,14 +51,6 @@ CREATE TABLE `avisos_plataforma` (
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `avisos_plataforma`
---
-
-INSERT INTO `avisos_plataforma` (`id_aviso`, `titulo`, `mensaje`, `fecha_inicio`, `fecha_fin`, `activo`, `fecha_creacion`) VALUES
-(3, 'Pintura de la fachada', 'asdf', '2026-05-21 09:04:00', '2026-05-22 09:06:00', 1, '2026-05-22 09:05:11'),
-(5, 'Mantenimiento', 'asd', '2026-05-21 09:19:00', '2026-05-23 09:19:00', 1, '2026-05-22 09:19:45');
-
 -- --------------------------------------------------------
 
 --
@@ -82,14 +64,6 @@ CREATE TABLE `codigo_validacion` (
   `usado` tinyint(4) NOT NULL DEFAULT 0,
   `fecha_creacion` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `codigo_validacion`
---
-
-INSERT INTO `codigo_validacion` (`id_codigo`, `id_vivienda`, `codigo`, `usado`, `fecha_creacion`) VALUES
-(1, 2, 'LF0012', 1, '2026-04-09 17:35:15'),
-(12, 15, 'KZWLN3K5', 1, '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -106,13 +80,6 @@ CREATE TABLE `comunicados` (
   `fecha_publicacion` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Volcado de datos para la tabla `comunicados`
---
-
-INSERT INTO `comunicados` (`id_comunicado`, `id_comunidad`, `titulo`, `cuerpo`, `tipo`, `fecha_publicacion`) VALUES
-(2, 1, 'Corte de agua 9.00-21.00', 'xcv', 'normal', '2026-05-07 20:21:54');
-
 -- --------------------------------------------------------
 
 --
@@ -120,16 +87,10 @@ INSERT INTO `comunicados` (`id_comunicado`, `id_comunidad`, `titulo`, `cuerpo`, 
 --
 
 CREATE TABLE `comunicado_lectura` (
+  `id_comunicado_lectura` int(11) NOT NULL,
   `id_comunicado` int(11) UNSIGNED NOT NULL,
   `id_usuario` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `comunicado_lectura`
---
-
-INSERT INTO `comunicado_lectura` (`id_comunicado`, `id_usuario`) VALUES
-(2, 3);
 
 -- --------------------------------------------------------
 
@@ -272,8 +233,8 @@ INSERT INTO `espacios_normas` (`id_espacios_normas`, `id_espacios_comunidad`, `d
 --
 
 CREATE TABLE `foro_mensaje` (
-  `id_mensaje` int(11) NOT NULL,
-  `id_tema` int(11) NOT NULL,
+  `id_mensaje` int(11) UNSIGNED NOT NULL,
+  `id_tema` int(11) UNSIGNED NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `mensaje` text NOT NULL,
   `fecha_creacion` datetime DEFAULT current_timestamp()
@@ -310,9 +271,9 @@ INSERT INTO `foro_mensaje` (`id_mensaje`, `id_tema`, `id_usuario`, `mensaje`, `f
 --
 
 CREATE TABLE `foro_tema` (
-  `id_tema` int(11) NOT NULL,
-  `id_comunidad` int(11) NOT NULL,
-  `id_usuario` int(11) NOT NULL,
+  `id_tema` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `id_usuario` int(11) UNSIGNED NOT NULL,
   `titulo` varchar(255) NOT NULL,
   `descripcion` text NOT NULL,
   `fecha_creacion` datetime DEFAULT current_timestamp(),
@@ -384,7 +345,7 @@ CREATE TABLE `incidencias` (
 --
 
 INSERT INTO `incidencias` (`id_incidencias`, `id_vivienda`, `titulo`, `texto_normalizado`, `descripcion`, `fecha_creacion`, `fecha_actualizacion`, `estado`, `numero_afectados`, `foto_incidencia`) VALUES
-(6, 4, 'Bombilla fundida', 'luz roto luz portal parpadea', 'La bombilla del portal parpadea', '2026-04-27 16:50:37', '2026-04-29 13:23:47', 'resuelta', 1, 'public/uploads/incidencias/inc_69ef77bd0254a1.10175354.jpg');
+(1, 21, 'Ratas portal', 'ratas portal ratas portal', 'hay ratas en el portal', '2026-06-01 17:34:28', '2026-06-01 17:34:28', 'pendiente', 1, 'public/uploads/incidencias/inc_6a1da684b21155.72522696.webp');
 
 -- --------------------------------------------------------
 
@@ -393,6 +354,7 @@ INSERT INTO `incidencias` (`id_incidencias`, `id_vivienda`, `titulo`, `texto_nor
 --
 
 CREATE TABLE `incidencias_uniones` (
+  `id_incidencias_uniones` int(10) UNSIGNED NOT NULL,
   `id_incidencias` int(10) UNSIGNED NOT NULL,
   `id_vivienda` int(10) UNSIGNED NOT NULL,
   `fecha_union` timestamp NOT NULL DEFAULT current_timestamp()
@@ -425,6 +387,42 @@ CREATE TABLE `matriculas` (
   `nombre_invitado` varchar(40) DEFAULT NULL,
   `fecha_entrada` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `matriculas`
+--
+
+INSERT INTO `matriculas` (`id_matricula`, `id_vivienda`, `matricula`, `uso_matricula`, `marca_vehículo`, `nombre_invitado`, `fecha_entrada`) VALUES
+(1, 21, '2244ABC', 'habitual', 'Seat Ibiza', NULL, '2026-06-01 16:22:19'),
+(2, 21, '4455COM', 'habitual', 'Lamborgini', NULL, '2026-06-01 16:23:01'),
+(3, 21, '9988SER', 'invitado', 'Porsche', 'Catalina war', '2026-06-02 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `proveedores`
+--
+
+CREATE TABLE `proveedores` (
+  `id_proveedor` int(11) UNSIGNED NOT NULL,
+  `id_comunidad` int(11) UNSIGNED NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `categoria` varchar(100) NOT NULL DEFAULT 'Otros',
+  `telefono` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `horario` varchar(100) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `proveedores`
+--
+
+INSERT INTO `proveedores` (`id_proveedor`, `id_comunidad`, `nombre`, `categoria`, `telefono`, `email`, `horario`, `descripcion`) VALUES
+(3, 1, 'MarioBros', 'Fontaner铆a', '929556274', 'MarioyLuigi@gmail.com', 'L-J de 8.00 a 14.00 y de 16.00 a 18.00', 'Arreglamos, tuber铆as, ba帽os, fregaderos y salvamos princesas en nuestro tiempo libre YaJuuu'),
+(4, 1, 'AlamBrito', 'Electricidad', '678492373', 'alam@brito.com', 'L-V de 10 a 18', 'Arreglamos cableados, enchufes y termomixes'),
+(5, 1, 'ManiManitas', 'Conserjer铆a', '678940324', 'Mani@manitas.com', 'L-J de 8.00 a 16.00 y V-S de 8.00 a 15.00', 'No arreglo nada, solo saco la basura y limpio el portal.  De vez en cuando me puedes pedir que te cuelgue un cuadro no me llames para tonter铆as'),
+(0, 1, 'Coque SL', 'Jardiner铆a', '123932123', 'coquecalatraba@gmail.com', 'L-V de 10 a 18', 'Coque conserje, jardinero, todo');
 
 -- --------------------------------------------------------
 
@@ -536,7 +534,8 @@ INSERT INTO `usuario` (`id_usuario`, `id_vivienda`, `nombre`, `apellidos`, `dni`
 (3, 4, 'pepe', 'perez', '28394873E', 'pepe@gmail.com', '$2y$10$qCYoCjYbtUazNP7W1pifwOFfHDJPT6A7bgGLqilyQ3STqWHwl1og.', '2026-04-15 02:18:47', 1, 'presidente', NULL, NULL),
 (13, 15, 'Moisés', 'Moreno Robles', '23456789E', 'moisesmobles@gmail.com', '$2y$10$iT9DF1JRbEXIraF.2TEN1e14pNi3Srkj8B7Y51t.uhV7PfLoUVpSu', '2026-05-12 23:40:51', 1, 'vecino', NULL, NULL),
 (14, 16, 'pepe', 'pepito', '123123123', 'pepe@presi.com', '$2y$10$h0LLXEvgrwHTtZpBaa64bu2q3PE7MJ4RZpBJA6TKlWw.fV4qJfC9y', '2026-05-21 15:03:23', 1, 'presidente', NULL, NULL),
-(15, 17, 'alex', 'sisi', '123123123', 'alex@presi.com', '$2y$10$y7KbblG2IuhnWdcfaq10LOn3sG0jBwkSCUlxXkJspoqym3EEchF0y', '2026-05-21 15:03:56', 1, 'presidente', NULL, NULL);
+(15, 17, 'alex', 'sisi', '123123123', 'alex@presi.com', '$2y$10$y7KbblG2IuhnWdcfaq10LOn3sG0jBwkSCUlxXkJspoqym3EEchF0y', '2026-05-21 15:03:56', 1, 'presidente', NULL, NULL),
+(17, 21, 'José Joaquín', 'Despliegue Caos', '00000001C', 'jj@gmail.com', '$2y$10$cSxABB5eRCyHdiWIWm2iQuKcDtw4tfS0HgWex5VELX34SXH/9L3PO', '2026-06-01 16:10:24', 1, 'vecino', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -559,7 +558,8 @@ INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
 (4, 1, 'Planta 1-C'),
 (15, 1, 'Planta 2-C'),
 (16, 2, 'Planta 5-B'),
-(17, 3, 'Planta 5-C');
+(17, 3, 'Planta 5-C'),
+(21, 1, 'Planta 7-A');
 
 -- --------------------------------------------------------
 
@@ -640,22 +640,143 @@ INSERT INTO `voto` (`id_voto`, `id_votacion`, `id_usuario`, `id_opcion`, `fecha_
 --
 
 --
+-- Indices de la tabla `asistencia_reunion`
+--
+ALTER TABLE `asistencia_reunion`
+  ADD PRIMARY KEY (`id_asistencia`),
+  ADD KEY `id_reunion` (`id_reunion`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+
+--
 -- Indices de la tabla `avisos_plataforma`
 --
 ALTER TABLE `avisos_plataforma`
   ADD PRIMARY KEY (`id_aviso`);
 
 --
+-- Indices de la tabla `codigo_validacion`
+--
+ALTER TABLE `codigo_validacion`
+  ADD PRIMARY KEY (`id_codigo`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+
+--
+-- Indices de la tabla `comunicados`
+--
+ALTER TABLE `comunicados`
+  ADD PRIMARY KEY (`id_comunicado`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `comunicado_lectura`
+--
+ALTER TABLE `comunicado_lectura`
+  ADD PRIMARY KEY (`id_comunicado_lectura`),
+  ADD KEY `id_comunicado` (`id_comunicado`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
 -- Indices de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
-  ADD PRIMARY KEY (`id_comunidad`);
+  ADD PRIMARY KEY (`id_comunidad`),
+  ADD KEY `id_mancomunidad` (`id_mancomunidad`),
+  ADD KEY `id_direccion` (`id_direccion`);
+
+--
+-- Indices de la tabla `cuota`
+--
+ALTER TABLE `cuota`
+  ADD PRIMARY KEY (`id_cuota`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
 
 --
 -- Indices de la tabla `direccion`
 --
 ALTER TABLE `direccion`
   ADD PRIMARY KEY (`id_direccion`);
+
+--
+-- Indices de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  ADD PRIMARY KEY (`id_espacios_comunidad`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  ADD PRIMARY KEY (`id_espacios_normas`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
+
+--
+-- Indices de la tabla `foro_mensaje`
+--
+ALTER TABLE `foro_mensaje`
+  ADD PRIMARY KEY (`id_mensaje`),
+  ADD KEY `id_tema` (`id_tema`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `foro_tema`
+--
+ALTER TABLE `foro_tema`
+  ADD PRIMARY KEY (`id_tema`),
+  ADD KEY `id_comunidad` (`id_comunidad`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `gasto`
+--
+ALTER TABLE `gasto`
+  ADD PRIMARY KEY (`id_gasto`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `incidencias`
+--
+ALTER TABLE `incidencias`
+  ADD PRIMARY KEY (`id_incidencias`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+ALTER TABLE `incidencias` ADD FULLTEXT KEY `texto_normalizado` (`texto_normalizado`);
+
+--
+-- Indices de la tabla `incidencias_uniones`
+--
+ALTER TABLE `incidencias_uniones`
+  ADD PRIMARY KEY (`id_incidencias_uniones`),
+  ADD KEY `id_incidencias` (`id_incidencias`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+
+--
+-- Indices de la tabla `mancomunidad`
+--
+ALTER TABLE `mancomunidad`
+  ADD PRIMARY KEY (`id_mancomunidad`),
+  ADD KEY `id_direccion` (`id_direccion`);
+
+--
+-- Indices de la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  ADD PRIMARY KEY (`id_matricula`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
+
+--
+-- Indices de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  ADD PRIMARY KEY (`id_reservas`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_espacios_comunidad` (`id_espacios_comunidad`);
+
+--
+-- Indices de la tabla `reunion`
+--
+ALTER TABLE `reunion`
+  ADD PRIMARY KEY (`id_reunion`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
 
 --
 -- Indices de la tabla `superadmin`
@@ -668,17 +789,48 @@ ALTER TABLE `superadmin`
 -- Indices de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  ADD PRIMARY KEY (`id_usuario`);
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD KEY `id_vivienda` (`id_vivienda`);
 
 --
 -- Indices de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  ADD PRIMARY KEY (`id_vivienda`);
+  ADD PRIMARY KEY (`id_vivienda`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `votacion`
+--
+ALTER TABLE `votacion`
+  ADD PRIMARY KEY (`id_votacion`),
+  ADD KEY `id_comunidad` (`id_comunidad`);
+
+--
+-- Indices de la tabla `votacion_opcion`
+--
+ALTER TABLE `votacion_opcion`
+  ADD PRIMARY KEY (`id_opcion`),
+  ADD KEY `id_votacion` (`id_votacion`);
+
+--
+-- Indices de la tabla `voto`
+--
+ALTER TABLE `voto`
+  ADD PRIMARY KEY (`id_voto`),
+  ADD KEY `id_votacion` (`id_votacion`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_opcion` (`id_opcion`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
+
+--
+-- AUTO_INCREMENT de la tabla `asistencia_reunion`
+--
+ALTER TABLE `asistencia_reunion`
+  MODIFY `id_asistencia` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT de la tabla `avisos_plataforma`
@@ -687,16 +839,106 @@ ALTER TABLE `avisos_plataforma`
   MODIFY `id_aviso` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT de la tabla `codigo_validacion`
+--
+ALTER TABLE `codigo_validacion`
+  MODIFY `id_codigo` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `comunicados`
+--
+ALTER TABLE `comunicados`
+  MODIFY `id_comunicado` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `comunicado_lectura`
+--
+ALTER TABLE `comunicado_lectura`
+  MODIFY `id_comunicado_lectura` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de la tabla `comunidad`
 --
 ALTER TABLE `comunidad`
   MODIFY `id_comunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT de la tabla `cuota`
+--
+ALTER TABLE `cuota`
+  MODIFY `id_cuota` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
 -- AUTO_INCREMENT de la tabla `direccion`
 --
 ALTER TABLE `direccion`
   MODIFY `id_direccion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `espacios_comunidad`
+--
+ALTER TABLE `espacios_comunidad`
+  MODIFY `id_espacios_comunidad` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `espacios_normas`
+--
+ALTER TABLE `espacios_normas`
+  MODIFY `id_espacios_normas` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT de la tabla `foro_mensaje`
+--
+ALTER TABLE `foro_mensaje`
+  MODIFY `id_mensaje` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+
+--
+-- AUTO_INCREMENT de la tabla `foro_tema`
+--
+ALTER TABLE `foro_tema`
+  MODIFY `id_tema` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `gasto`
+--
+ALTER TABLE `gasto`
+  MODIFY `id_gasto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT de la tabla `incidencias`
+--
+ALTER TABLE `incidencias`
+  MODIFY `id_incidencias` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `incidencias_uniones`
+--
+ALTER TABLE `incidencias_uniones`
+  MODIFY `id_incidencias_uniones` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `mancomunidad`
+--
+ALTER TABLE `mancomunidad`
+  MODIFY `id_mancomunidad` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `matriculas`
+--
+ALTER TABLE `matriculas`
+  MODIFY `id_matricula` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `reservas`
+--
+ALTER TABLE `reservas`
+  MODIFY `id_reservas` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT de la tabla `reunion`
+--
+ALTER TABLE `reunion`
+  MODIFY `id_reunion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `superadmin`
@@ -708,13 +950,31 @@ ALTER TABLE `superadmin`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_usuario` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `vivienda`
 --
 ALTER TABLE `vivienda`
-  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id_vivienda` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT de la tabla `votacion`
+--
+ALTER TABLE `votacion`
+  MODIFY `id_votacion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `votacion_opcion`
+--
+ALTER TABLE `votacion_opcion`
+  MODIFY `id_opcion` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT de la tabla `voto`
+--
+ALTER TABLE `voto`
+  MODIFY `id_voto` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
