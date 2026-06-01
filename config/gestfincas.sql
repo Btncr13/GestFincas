@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-05-2026 a las 09:32:58
+-- Tiempo de generación: 01-06-2026 a las 15:40:48
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -555,9 +555,9 @@ CREATE TABLE `vivienda` (
 --
 
 INSERT INTO `vivienda` (`id_vivienda`, `id_comunidad`, `nombre`) VALUES
-(2, 1, 'Planta 2-1C'),
-(4, 1, 'Planta 1 1ºC'),
-(15, 1, 'Planta 2-2C'),
+(2, 1, 'Planta 2-C'),
+(4, 1, 'Planta 1-C'),
+(15, 1, 'Planta 2-C'),
 (16, 2, 'Planta 5-B'),
 (17, 3, 'Planta 5-C');
 
