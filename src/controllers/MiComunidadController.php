@@ -1,4 +1,5 @@
 <?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -18,12 +19,12 @@ class MiComunidadController
     public function __construct($pdo)
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        
+
         if (!isset($_SESSION['vivienda'])) {
             header("Location: index.php?route=auth/login");
             exit;
         }
-        
+
         $this->usuarioModel = new UsuarioModel($pdo);
         $this->miComunidadModel = new MiComunidadModel($pdo); // <-- 2. Comprueba que haces el "new"
     }
@@ -62,7 +63,7 @@ class MiComunidadController
 
         $_SESSION['modo_vista'] = 'presidente';
         extract($this->getViewData());
-        
+
         // Obtenemos los usuarios con el método fusionado
         $vecinos = $this->miComunidadModel->getUsuariosPorComunidad($id_comunidad);
 
@@ -70,7 +71,7 @@ class MiComunidadController
         require "src/views/micomunidad/micomunidad.php";
     }
 
-     // 🟢 ACCIÓN: CREAR VIVIENDA Y ENVIAR EMAIL
+    // 🟢 ACCIÓN: CREAR VIVIENDA Y ENVIAR EMAIL
     public function crearViviendaAction()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SESSION['vivienda']['rol'] !== 'presidente') {
@@ -84,8 +85,8 @@ class MiComunidadController
         $email_vecino = trim($_POST['email_vecino'] ?? ''); // Capturamos el email del modal [4]
 
         // Validación de formato
-        if (!preg_match('/^Planta \d+-[0-9A-Z]$/', $nombre_vivienda)) {
-            $_SESSION['error_vivienda'] = "El formato debe ser 'Planta [Número]-[Número o LETRA]' (ej: Planta 2-1 o Planta 2-B)";
+        if (!preg_match('/^Planta\s+(Bajo|[1-9]|[12][0-9]|30)-([1-9]|10|[A-M])$/i', $nombre_vivienda)) {
+            $_SESSION['error_vivienda'] = "Formato: Planta [1-30 o Bajo]-[1-10 o A-M]. Ej: Planta 1-C";
             header("Location: index.php?route=micomunidad/index");
             exit;
         }
@@ -98,13 +99,13 @@ class MiComunidadController
 
                 try {
                     // Configuración del servidor SMTP (Ejemplo usando Mailtrap para pruebas locales o Gmail)
-                    $mail->isSMTP();                                            
+                    $mail->isSMTP();
                     $mail->Host       = 'smtp.gmail.com'; // Cambia esto por tu host SMTP (ej. sandbox.smtp.mailtrap.io) [3, 5]
-                    $mail->SMTPAuth   = true;                                   
+                    $mail->SMTPAuth   = true;
                     $mail->Username   = 'moisesmrobles@gmail.com'; // Tu usuario SMTP [5]
                     $mail->Password   = 'xonw eroz tnke xszg'; // Tu contraseña SMTP 
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         
-                    $mail->Port       = 587;                                    
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
 
                     // Remitente y Destinatario
                     $mail->setFrom('moisesmrobles@gmail.com', 'GestFincas Administración');
@@ -114,7 +115,7 @@ class MiComunidadController
                     $enlaceRegistro = "http://localhost/ComunidadVecinos/JR_M26_ComunidadVecinos/index.php?route=auth/register&codigo=" . urlencode($codigo);
 
                     // Contenido del Correo
-                $mail->isHTML(true); 
+                    $mail->isHTML(true);
                     $mail->Subject = mb_encode_mimeheader('Invitación a tu nueva comunidad - GestFincas', 'UTF-8');
                     $mail->Body    = "
                         <h2>¡Hola, nuevo vecino!</h2>
@@ -157,8 +158,8 @@ class MiComunidadController
         $nombre_vivienda = trim($_POST['nombre_vivienda'] ?? '');
 
         // 3. Validación estricta del formato "Planta X-PisoY"
-        if (!preg_match('/^Planta \d+-[0-9A-Z]$/', $nombre_vivienda)) {
-            $_SESSION['error_vivienda'] = "El formato debe ser 'Planta [Número]-[Número o LETRA]' (ej: Planta 2-1 o Planta 2-B)";
+        if (!preg_match('/^Planta\s+(Bajo|[1-9]|[12][0-9]|30)-([1-9]|10|[A-M])$/i', $nombre_vivienda)) {
+            $_SESSION['error_vivienda'] = "Formato: Planta [1-30 o Bajo]-[1-10 o A-M]. Ej: Planta 1-C";
             header("Location: index.php?route=micomunidad/index");
             exit;
         }
@@ -191,5 +192,4 @@ class MiComunidadController
         }
         exit;
     }
-}    
-?>
+}

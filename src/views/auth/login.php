@@ -1,13 +1,13 @@
 <main class="d-flex justify-content-center align-items-center flex-grow-1 bg-light min-vh-100">
     <div class="card shadow-sm login-card-custom border-0 position-relative">
-        
+
         <button class="btn btn-link position-absolute top-0 end-0 m-3 text-muted shadow-none" id="themeToggleBtn">
             <i class="fa-solid fa-moon fs-5" id="themeIcon"></i>
         </button>
 
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <img src="public/assets/img/Logo.png" alt="Logo" class="rounded-circle shadow-sm mb-3 logo-adaptable">                
+                <img src="public/assets/img/Logo.png" alt="Logo" class="rounded-circle shadow-sm mb-3 logo-adaptable">
                 <h2 class="fw-bold mb-1">GestFincas</h2>
                 <p class="text-secondary small mb-0">Sistema de gestión de comunidades</p>
             </div>
@@ -15,7 +15,14 @@
             <form id="loginForm" action="index.php?route=auth/loginAction" method="POST">
                 <div class="mb-3">
                     <label for="nombre_vivienda" class="form-label fw-medium text-dark text-sm-custom">Nombre de la Vivienda</label>
-                    <input type="text" id="nombre_vivienda" name="nombre_vivienda" placeholder="Ej: Piso 1A" class="form-control custom-input" required>
+                    <input type="text" id="nombre_vivienda" name="nombre_vivienda"
+                        placeholder="Ej: Planta 1-C"
+                        class="form-control custom-input"
+                        required
+                        pattern="Planta\s+(Bajo|bajo|[1-9]|[12][0-9]|30)-([1-9]|10|[A-Ma-m])">
+                    <div class="invalid-feedback" style="font-size: 0.75rem;">
+                        Ejemplo: Planta 1-C / Planta Bajo-D
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label fw-medium text-dark text-sm-custom">Correo Electrónico</label>
@@ -65,7 +72,7 @@
             </div>
             <div class="modal-body p-4">
                 <p class="text-muted small mb-4">Introduce tu correo electrónico. Te enviaremos un enlace seguro para que puedas crear una nueva contraseña.</p>
-                
+
                 <div id="recuperarError" class="alert alert-danger d-none py-2 text-center small"></div>
                 <div id="recuperarExito" class="alert alert-success d-none py-2 text-center small"></div>
 
@@ -97,6 +104,16 @@
             icon.classList.toggle('fa-eye-slash');
         });
 
+        // Validación en tiempo real para el nombre de la vivienda
+        const inputVivienda = document.getElementById('nombre_vivienda');
+        inputVivienda.addEventListener('input', function() {
+            if (this.value !== "" && !this.checkValidity()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
         // Lógica del Modo Oscuro
         const themeBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
@@ -119,16 +136,16 @@
 
     // Lógica para enviar el correo de recuperación mediante AJAX
     const btnEnviarRecuperacion = document.getElementById('btnEnviarRecuperacion');
-    if(btnEnviarRecuperacion) {
+    if (btnEnviarRecuperacion) {
         btnEnviarRecuperacion.addEventListener('click', async function() {
             const email = document.getElementById('email_recuperacion').value.trim();
             const errorAlert = document.getElementById('recuperarError');
             const exitoAlert = document.getElementById('recuperarExito');
-            
+
             errorAlert.classList.add('d-none');
             exitoAlert.classList.add('d-none');
 
-            if(!email) {
+            if (!email) {
                 errorAlert.textContent = 'Por favor, introduce tu correo electrónico.';
                 errorAlert.classList.remove('d-none');
                 return;
@@ -149,7 +166,7 @@
                 });
                 const data = await response.json();
 
-                if(data.success) {
+                if (data.success) {
                     document.getElementById('formRecuperarPassword').reset();
                     exitoAlert.textContent = data.message;
                     exitoAlert.classList.remove('d-none');
