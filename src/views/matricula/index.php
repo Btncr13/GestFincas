@@ -14,35 +14,32 @@ include 'src/views/components/topbar.php'; ?>
         <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5">
 
             <!-- CABECERA DE SECCIÓN: Estilo limpio y alineado con la marca -->
-            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-3">
-
-                    <div>
-                        <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Parking</h2>
-                        <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Control de vehículos de la comunidad</p>
-                    </div>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1 font-title">Parking</h2>
+                    <p class="text-muted small mb-0">Control de vehículos de la comunidad</p>
                 </div>
                 <?php if ($rol !== 'presidente'): ?>
-                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalMatricula">
-                        <i class="fa-solid fa-plus me-2"></i> Registrar Vehículo
+                    <button type="button" class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalMatricula">
+                        <i class="fa-solid fa-plus"></i> Registrar Vehículo
                     </button>
                 <?php endif; ?>
             </div>
 
             <?php if (isset($_SESSION['parking_success'])): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <?= $_SESSION['parking_success'];
-                    unset($_SESSION['parking_success']); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius: var(--radio-md);">
+                    <i class="fa-solid fa-check-circle me-2"></i> <?= $_SESSION['parking_success'] ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+                <?php unset($_SESSION['parking_success']); ?>
             <?php endif; ?>
 
             <?php if (isset($_SESSION['parking_error'])): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?= $_SESSION['parking_error'];
-                    unset($_SESSION['parking_error']); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius: var(--radio-md);">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i> <strong>Atención:</strong> <?= $_SESSION['parking_error'] ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+                <?php unset($_SESSION['parking_error']); ?>
             <?php endif; ?>
 
 

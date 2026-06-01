@@ -19,16 +19,16 @@ include 'src/views/components/topbar.php'; ?>
             <div class="container-fluid p-0">
 
                 <!-- 1. BANNER PRINCIPAL "MI COMUNIDAD" -->
-                <div class="card border-0 mb-4 overflow-hidden shadow-sm" style="min-height: 200px;">
-                    <img src="public/assets/img/banner.jpeg" alt="Residencial" class="card-img w-100 h-100 object-fit-cover position-absolute" style="filter: brightness(0.6);">
+                <div class="card border-0 mb-4 overflow-hidden shadow-sm banner-presi-card">
+                    <img src="public/assets/img/banner.jpeg" alt="Residencial" class="card-img w-100 h-100 object-fit-cover position-absolute banner-presi-img">
                     <div class="card-img-overlay d-flex flex-column justify-content-end p-4 text-white">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);">
+                            <div class="rounded d-flex align-items-center justify-content-center flex-shrink-0 glass-icon-48">
                                 <i class="bi bi-house-door-fill fs-4 text-white"></i>
                             </div>
                             <div>
-                                <h2 class="mb-1 fw-bold text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: var(--fuente-titulos);"><?= htmlspecialchars($nombreVivienda) ?></h2>
-                                <p class="mb-1 fw-semibold text-white" style="font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                                <h2 class="mb-1 fw-bold text-white text-shadow-main font-titulos"><?= htmlspecialchars($nombreVivienda) ?></h2>
+                                <p class="mb-1 fw-semibold text-white text-shadow-sub fs-5">
                                     <?= htmlspecialchars($nombreComunidad) ?>
                                 </p>
                                 <div class="d-flex align-items-center gap-1 text-white opacity-75 small">

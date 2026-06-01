@@ -419,9 +419,9 @@ CREATE TABLE `proveedores` (
 --
 
 INSERT INTO `proveedores` (`id_proveedor`, `id_comunidad`, `nombre`, `categoria`, `telefono`, `email`, `horario`, `descripcion`) VALUES
-(3, 1, 'MarioBros', 'Fontaner铆a', '929556274', 'MarioyLuigi@gmail.com', 'L-J de 8.00 a 14.00 y de 16.00 a 18.00', 'Arreglamos, tuber铆as, ba帽os, fregaderos y salvamos princesas en nuestro tiempo libre YaJuuu'),
+(3, 1, 'MarioBros', 'Fontanería', '929556274', 'MarioyLuigi@gmail.com', 'L-J de 8.00 a 14.00 y de 16.00 a 18.00', 'Arreglamos, tuber铆as, ba帽os, fregaderos y salvamos princesas en nuestro tiempo libre YaJuuu'),
 (4, 1, 'AlamBrito', 'Electricidad', '678492373', 'alam@brito.com', 'L-V de 10 a 18', 'Arreglamos cableados, enchufes y termomixes'),
-(5, 1, 'ManiManitas', 'Conserjer铆a', '678940324', 'Mani@manitas.com', 'L-J de 8.00 a 16.00 y V-S de 8.00 a 15.00', 'No arreglo nada, solo saco la basura y limpio el portal.  De vez en cuando me puedes pedir que te cuelgue un cuadro no me llames para tonter铆as'),
+(5, 1, 'ManiManitas', 'Conserjería', '678940324', 'Mani@manitas.com', 'L-J de 8.00 a 16.00 y V-S de 8.00 a 15.00', 'No arreglo nada, solo saco la basura y limpio el portal.  De vez en cuando me puedes pedir que te cuelgue un cuadro no me llames para tonter铆as'),
 (0, 1, 'Coque SL', 'Jardiner铆a', '123932123', 'coquecalatraba@gmail.com', 'L-V de 10 a 18', 'Coque conserje, jardinero, todo');
 
 -- --------------------------------------------------------

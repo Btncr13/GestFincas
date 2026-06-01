@@ -69,17 +69,17 @@ if (!function_exists('getAvatarForo')) {
                                         <input type="hidden" name="id_tema" value="<?= $tema['id_tema'] ?>">
                                         <?php if (($tema['estado'] ?? 'abierto') === 'abierto'): ?>
                                             <input type="hidden" name="estado" value="cerrado">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold shadow-sm"><i class="fa-solid fa-lock me-1"></i> Cerrar Tema</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold shadow-sm d-inline-flex align-items-center gap-2"><i class="fa-solid fa-lock"></i> Cerrar Tema</button>
                                         <?php else: ?>
                                             <input type="hidden" name="estado" value="abierto">
-                                            <button type="submit" class="btn btn-sm btn-outline-success fw-semibold shadow-sm"><i class="fa-solid fa-lock-open me-1"></i> Abrir Tema</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-success fw-semibold shadow-sm d-inline-flex align-items-center gap-2"><i class="fa-solid fa-lock-open"></i> Abrir Tema</button>
                                         <?php endif; ?>
                                     </form>
                                 <?php endif; ?>
                                 
                                 <?php $esAutorTema = ($tema['id_usuario'] == $id_usuario); ?>
                                 <?php if ($esAutorTema): ?>
-                                    <button type="button" class="btn btn-sm btn-outline-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditarTema" title="Editar Tema"><i class="fa-solid fa-pen"></i></button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditarTema" title="Editar Tema"><i class="fa-solid fa-pen"></i></button>
                                 <?php endif; ?>
                                 <?php if ($esAutorTema || $rol === 'presidente'): ?>
                                     <button type="button" class="btn btn-sm btn-outline-danger fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEliminarTema" title="Eliminar Tema"><i class="fa-solid fa-trash"></i></button>
@@ -197,7 +197,7 @@ if (!function_exists('getAvatarForo')) {
                                     <textarea name="mensaje" id="mensaje-respuesta" class="form-control custom-input text-dark" rows="4" required placeholder="Escribe tu respuesta aquí..."></textarea>
                                 </div>
                                 <div class="text-end">
-                                    <button type="submit" class="btn btn-primary px-4 shadow-sm"><i class="fa-solid fa-paper-plane me-1"></i> Enviar Respuesta</button>
+                                    <button type="submit" class="btn btn-primary fw-semibold shadow-sm d-inline-flex align-items-center gap-2"><i class="fa-solid fa-paper-plane"></i> Enviar Respuesta</button>
                                 </div>
                             </form>
                         </div>
@@ -235,8 +235,8 @@ if (!function_exists('getAvatarForo')) {
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Guardar Cambios</button>
+                    <button type="button" class="btn btn-outline-secondary fw-semibold shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold shadow-sm d-flex align-items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -257,8 +257,8 @@ if (!function_exists('getAvatarForo')) {
                     <p class="text-muted small mt-2 mb-0">Esta acción no se puede deshacer y se borrarán también todas las respuestas.</p>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger px-4 shadow-sm">Sí, eliminar</button>
+                    <button type="button" class="btn btn-outline-secondary fw-semibold shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-semibold shadow-sm d-flex align-items-center gap-2"><i class="fa-solid fa-trash"></i> Sí, eliminar</button>
                 </div>
             </form>
         </div>
@@ -281,8 +281,8 @@ if (!function_exists('getAvatarForo')) {
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Guardar Cambios</button>
+                    <button type="button" class="btn btn-outline-secondary fw-semibold shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold shadow-sm d-flex align-items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -303,8 +303,8 @@ if (!function_exists('getAvatarForo')) {
                     <p class="mb-0 fs-5 text-dark">¿Estás seguro de que deseas eliminar esta respuesta?</p>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger px-4 shadow-sm">Sí, eliminar</button>
+                    <button type="button" class="btn btn-outline-secondary fw-semibold shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-semibold shadow-sm d-flex align-items-center gap-2"><i class="fa-solid fa-trash"></i> Sí, eliminar</button>
                 </div>
             </form>
         </div>

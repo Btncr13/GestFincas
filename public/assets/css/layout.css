@@ -247,6 +247,21 @@
 }
 
 /* =========================================
+   ESTILOS PARA PESTAÑAS (TABS) PERSONALIZADAS
+   Usado en Reservas, Reuniones, Incidencias...
+   ========================================= */
+.nav-tabs-custom .btn {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.nav-tabs-custom .btn.active {
+    background-color: var(--bs-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    color: var(--bs-dark);
+}
+
+/* =========================================
    AJUSTES PARA INPUTS DE FECHA/HORA Y SELECTS
    ========================================= */
 

@@ -16,14 +16,14 @@ $miViviendaId = $_SESSION['vivienda']['id_vivienda'] ?? null;
             
             <div class="container-fluid p-0 position-relative" id="appIncidencias">
 
-                <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                     <div>
-                        <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Tablón de Incidencias</h2>
-                        <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestiona las averías de la comunidad</p>
+                        <h2 class="fw-bold mb-1 font-title">Tablón de Incidencias</h2>
+                        <p class="text-muted small mb-0">Gestiona las averías de la comunidad</p>
                     </div>
                     <?php if (!$esPresidente): ?>
-                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalIncidencia">
-                        <i class="fa-solid fa-plus me-2"></i> Crear Incidencia
+                    <button type="button" class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalIncidencia">
+                        <i class="fa-solid fa-plus"></i> Crear Incidencia
                     </button>
                     <?php endif; ?>
                 </div>

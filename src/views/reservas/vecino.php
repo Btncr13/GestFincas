@@ -16,20 +16,20 @@ $titulo_pagina = "Reservas"; ?>
 
         <?php include 'src/views/components/sidebar.php'; ?>
 
-        <main class="container py-4 py-md-5">
+        <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
+            <div class="container-fluid p-0">
 
-            <!-- Título + botón -->
-
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <div>
-                    <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Gestión Espacios / Reservas</h2>
-                    <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestión de reservas y espacios de la comunidad</p> 
+                <!-- Título + botón -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1 font-title">Gestión Espacios / Reservas</h2>
+                        <p class="text-muted small mb-0">Gestión de reservas y espacios de la comunidad</p> 
+                    </div>
+                    <button type="button" class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalReserva">
+                        <i class="fa-solid fa-plus"></i> Nueva Reserva
+                    </button>
                 </div>
-                <button type="button" class="btn btn-brand fw-semibold shadow-sm"
-                    data-bs-toggle="modal" data-bs-target="#modalReserva">
-                    <i class="fa-solid fa-plus me-2"></i> Nueva Reserva
-                </button>
-            </div>
 
             <!-- Normas -->
             <div class="alert alert-warning border-0 border-start border-4 border-warning shadow-sm mb-4"
@@ -224,7 +224,7 @@ $titulo_pagina = "Reservas"; ?>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center ms-md-auto">
-                                        <button type="button" class="btn btn-primary btn-sm fw-semibold shadow-sm px-4" 
+                                        <button type="button" class="btn btn-success text-white btn-sm fw-semibold shadow-sm px-4" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#modalReserva"
                                                 data-id-espacio="<?= $espacio['id_espacios_comunidad'] ?>">
@@ -242,6 +242,7 @@ $titulo_pagina = "Reservas"; ?>
                         </div>
                     <?php endif; ?>
                 </div>
+            </div>
             </div>
         </main>
 

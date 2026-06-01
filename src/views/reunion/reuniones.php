@@ -1,5 +1,41 @@
 <?php include 'src/views/components/topbar.php'; ?>
 
+<?php
+// =========================================================================
+// PREPARACIÓN DE DATOS EN PHP (Evita tener que procesar todo en JavaScript)
+// =========================================================================
+$ahora = time();
+$proximas = [];
+$pasadas = [];
+$reunionesData = $reunionesData ?? [];
+
+foreach ($reunionesData as $r) {
+    $fechaHoraStr = $r['fecha'] . ' ' . ($r['hora'] ?? '00:00:00');
+    $fechaHora = strtotime($fechaHoraStr);
+    if ($r['estado'] !== 'finalizada' && $fechaHora >= $ahora) {
+        $proximas[] = $r;
+    } else {
+        $pasadas[] = $r;
+    }
+}
+
+// Ordenar: Próximas de más cercana a más lejana, Pasadas de más reciente a más antigua
+usort($proximas, function($a, $b) { return strtotime($a['fecha']) - strtotime($b['fecha']); });
+usort($pasadas, function($a, $b) { return strtotime($b['fecha']) - strtotime($a['fecha']); });
+
+$totalProximas = count($proximas);
+$totalPasadas = count($pasadas);
+
+$confGlobal = 0;
+$pendGlobal = 0;
+if ($totalProximas > 0) {
+    foreach ($proximas[0]['asistencias'] as $a) {
+        if ($a['confirmacion'] === 'confirmada') $confGlobal++;
+        if ($a['confirmacion'] === 'pendiente') $pendGlobal++;
+    }
+}
+?>
+
 <div class="container-fluid p-0">
     <div class="row flex-nowrap m-0">
 
@@ -25,51 +61,334 @@
 
                 <!-- VISTA 1: LISTADO PRINCIPAL -->
                 <div id="vista-lista">
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-4 align-items-center">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                         <div>
-                            <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Reuniones</h2>
-                            <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Juntas y reuniones de la comunidad</p>
+                            <h2 class="fw-bold mb-1 font-title">Reuniones</h2>
+                            <p class="text-muted small mb-0">Juntas y reuniones de la comunidad</p>
                         </div>
                         <?php if ($rol === 'presidente'): ?>
-                            <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" onclick="app.abrirFormularioCrear()">
-                                <i class="fa-solid fa-plus me-2"></i> Convocar Reunión
+                            <button type="button" class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="app.abrirFormularioCrear()">
+                                <i class="fa-solid fa-plus"></i> Convocar Reunión
                             </button>
                         <?php endif; ?>
                     </div>
 
                     <!-- Resumen (Cards) -->
                     <div class="row row-cols-2 g-2 mb-4" id="cards-resumen">
+                        <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
+                            <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(92,178,68,0.1);"><i class="bi bi-check-circle" style="color: var(--bs-success); font-size:20px;"></i></div>
+                            <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;"><?= $confGlobal ?></div><small style="font-size:10px; color:var(--color-texto);">Confirmadas</small></div>
+                        </div></div></div>
+                        <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
+                            <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(164,30,52,0.1);"><i class="bi bi-question-circle" style="color: var(--bs-danger); font-size:20px;"></i></div>
+                            <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;"><?= $pendGlobal ?></div><small style="font-size:10px; color:var(--color-texto);">Pendientes</small></div>
+                        </div></div></div>
                     </div>
 
                     <!-- Tabs -->
-                    <div class="d-flex mb-3 p-1" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
-                        <button id="btn-tab-proximas" class="btn flex-fill text-center rounded-2 py-2" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="app.switchTab('proximas')">Próximas</button>
-                        <button id="btn-tab-pasadas" class="btn flex-fill text-center rounded-2 py-2 text-muted" style="font-size: 14px; font-weight: 500; transition: all 0.2s;" onclick="app.switchTab('pasadas')">Pasadas</button>
+                    <div class="d-flex mb-3 p-1 nav-tabs-custom" style="background-color: var(--color-fondo-formularios); border-radius: var(--radio-lg);">
+                        <button id="btn-tab-proximas" class="btn flex-fill text-center rounded-2 py-2 fw-semibold active" style="font-size: 14px; transition: all 0.2s;" onclick="app.switchTab('proximas')">Próximas (<?= $totalProximas ?>)</button>
+                        <button id="btn-tab-pasadas" class="btn flex-fill text-center rounded-2 py-2 fw-semibold text-muted" style="font-size: 14px; transition: all 0.2s;" onclick="app.switchTab('pasadas')">Pasadas (<?= $totalPasadas ?>)</button>
                     </div>
 
                     <!-- Contenedor Listas -->
-                    <div id="lista-proximas" class="d-flex flex-column gap-3"></div>
-                    <div id="lista-pasadas" class="d-flex flex-column gap-3 d-none"></div>
+                    <div id="lista-proximas" class="d-flex flex-column gap-3">
+                        <?php if (empty($proximas)): ?>
+                            <div class="text-center py-5 rounded-3 shadow-sm" style="background-color: var(--bs-light);">
+                                <i class="bi bi-calendar-check text-muted" style="font-size: 48px;"></i>
+                                <p class="mt-2 mb-1 text-muted" style="font-size:14px;">No hay reuniones próximas convocadas</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($proximas as $r): ?>
+                                <?php 
+                                    $total = count($r['asistencias']);
+                                    $confs = count(array_filter($r['asistencias'], fn($a) => $a['confirmacion'] === 'confirmada'));
+                                    $pct = $total > 0 ? round(($confs / $total) * 100) : 0;
+                                    $diasRestantes = ceil((strtotime($r['fecha']) - $ahora) / 86400);
+                                    $fechaHora = strtotime($r['fecha'] . ' ' . ($r['hora'] ?? '00:00'));
+                                    
+                                    // Renderizador de Etiqueta (Badge)
+                                    $badge = '<span class="badge" style="background-color: var(--bs-warning); font-size:12px;">Convocada</span>';
+                                    if ($r['estado'] === 'en_curso') $badge = '<span class="badge" style="background-color: var(--bs-success); font-size:12px;">En Curso</span>';
+                                ?>
+                                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-warning) !important;">
+                                    <div class="card-body p-3 p-md-4">
+                                        <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                                    <span style="font-size:14px; font-weight:600; color:var(--bs-dark);"><?= htmlspecialchars($r['titulo']) ?></span>
+                                                    <?= $badge ?>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
+                                                    <span><i class="bi bi-clock"></i> <?= date('d/m/Y', strtotime($r['fecha'])) ?> a las <?= $r['hora'] ?></span>
+                                                    <span><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($r['lugar']) ?></span>
+                                                </div>
+                                            </div>
+                                            <span style="font-size:12px; font-weight:600; color:var(--bs-primary); background-color: rgba(34,28,53,0.05); padding:2px 8px; border-radius:4px; height:fit-content;"><?= $diasRestantes ?> días</span>
+                                        </div>
+
+                                        <div class="d-flex gap-2 align-items-center mt-3 mb-2" style="font-size:12px;">
+                                            <i class="bi bi-people" style="color:var(--color-texto); font-size:16px;"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between mb-1"><span style="color:var(--color-texto);">Asistencia: <?= $confs ?>/<?= $total ?></span><span style="font-weight:600;"><?= $pct ?>%</span></div>
+                                                <div class="progress" style="height:6px; background-color:var(--color-fondo-formularios);"><div class="progress-bar bg-success" style="width: <?= $pct ?>%"></div></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-2">
+                                            <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="app.toggleAgenda('<?= $r['id'] ?>')">
+                                                <i class="bi bi-chevron-down" id="icon-agenda-<?= $r['id'] ?>"></i> Orden del día (<?= count($r['ordenDelDia']) ?> puntos)
+                                            </button>
+                                            <div id="agenda-<?= $r['id'] ?>" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
+                                                <ul class="list-unstyled mb-0">
+                                                    <?php foreach ($r['ordenDelDia'] as $i => $o): ?>
+                                                        <li><?= $i+1 ?>. <?= htmlspecialchars($o) ?></li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex gap-2 mt-3 pt-2">
+                                            <button class="btn btn-sm btn-outline-primary fw-semibold shadow-sm d-flex justify-content-center align-items-center gap-2" style="flex-grow:1; max-width: 200px;" onclick="app.renderDetalle('<?= $r['id'] ?>')"><i class="bi bi-eye"></i> Ver detalle</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div id="lista-pasadas" class="d-flex flex-column gap-3 d-none">
+                        <?php if (empty($pasadas)): ?>
+                            <div class="text-center py-5 rounded-3 shadow-sm" style="background-color: var(--bs-light);">
+                                <i class="bi bi-file-earmark-text text-muted" style="font-size: 48px;"></i>
+                                <p class="mt-2 text-muted" style="font-size:14px;">No hay reuniones pasadas registradas</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($pasadas as $r): ?>
+                                <?php 
+                                    $confs = count(array_filter($r['asistencias'], fn($a) => $a['confirmacion'] === 'confirmada'));
+                                    $badge = '<span class="badge border text-muted bg-transparent" style="font-size:12px;">Realizada</span>';
+                                ?>
+                                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid #d1d5db !important; cursor:pointer;" onclick="app.renderDetalle('<?= $r['id'] ?>')">
+                                    <div class="card-body p-3 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                                <span style="font-size:14px; font-weight:600; color:var(--bs-dark);"><?= htmlspecialchars($r['titulo']) ?></span>
+                                                <?= $badge ?>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
+                                                <span><i class="bi bi-clock"></i> <?= date('d/m/Y', strtotime($r['fecha'])) ?></span>
+                                                <span><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($r['lugar']) ?></span>
+                                                <span><i class="bi bi-people"></i> <?= $confs ?>/<?= count($r['asistencias']) ?> asistentes</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <!-- VISTA 2: DETALLE -->
                 <div id="vista-detalle" class="d-none">
-                    <button class="btn btn-link text-decoration-none p-0 mb-3 d-flex align-items-center gap-1" style="color: var(--color-texto); font-size: 14px; font-weight: 500;" onclick="app.showView('vista-lista')">
+                    <button class="btn btn-link text-muted text-decoration-none p-0 mb-3 d-flex align-items-center gap-1 fw-semibold" onclick="app.showView('vista-lista')">
                         <i class="bi bi-arrow-left"></i> Volver
                     </button>
                     <div id="detalle-content">
+                        <!-- Generamos todos los detalles ocultos en PHP nativo -->
+                        <?php foreach ($reunionesData as $r): ?>
+                            <?php
+                                $diasRestantes = ceil((strtotime($r['fecha']) - $ahora) / 86400);
+                                $total = count($r['asistencias']);
+                                $confs = count(array_filter($r['asistencias'], fn($a) => $a['confirmacion'] === 'confirmada'));
+                                $rechs = count(array_filter($r['asistencias'], fn($a) => $a['confirmacion'] === 'rechazada'));
+                                $pends = count(array_filter($r['asistencias'], fn($a) => $a['confirmacion'] === 'pendiente'));
+                                
+                                $ptConf = $total > 0 ? ($confs / $total) * 100 : 0;
+                                $ptRech = $total > 0 ? ($rechs / $total) * 100 : 0;
+                                $ptPend = $total > 0 ? ($pends / $total) * 100 : 0;
+                                
+                                $fechaHora = strtotime($r['fecha'] . ' ' . ($r['hora'] ?? '00:00'));
+                                $isPasada = ($r['estado'] === 'finalizada' || $fechaHora < $ahora);
+                                
+                                $badge = '<span class="badge border text-muted bg-transparent" style="font-size:12px;">Realizada</span>';
+                                if (!$isPasada) {
+                                    $badge = ($r['estado'] === 'en_curso') 
+                                        ? '<span class="badge" style="background-color: var(--bs-success); font-size:12px;">En Curso</span>' 
+                                        : '<span class="badge" style="background-color: var(--bs-warning); font-size:12px;">Convocada</span>';
+                                }
+
+                                // Buscar mi respuesta
+                                $miAsistencia = null;
+                                foreach ($r['asistencias'] as $a) {
+                                    if ($a['id_vivienda'] == $id_vivienda) {
+                                        $miAsistencia = $a;
+                                        break;
+                                    }
+                                }
+                            ?>
+                            <div id="detalle-reunion-<?= $r['id'] ?>" class="d-none detalle-reunion-container">
+                                <div class="mb-4">
+                                    <h1 class="mb-2" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);"><?= htmlspecialchars($r['titulo']) ?></h1>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <?= $badge ?>
+                                        <?php if (!$isPasada): ?>
+                                            <span style="font-size:12px; color:var(--color-texto);"><i class="bi bi-clock"></i> Faltan <?= $diasRestantes ?> días</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <?php if (!$isPasada): ?>
+                                    <?php
+                                        $txtEstado = '<span class="text-muted fw-bold">Pendiente de respuesta</span>';
+                                        if ($miAsistencia) {
+                                            if ($miAsistencia['confirmacion'] === 'confirmada') $txtEstado = '<span class="text-success fw-bold">Sí, asistiré</span>';
+                                            if ($miAsistencia['confirmacion'] === 'rechazada') $txtEstado = '<span class="text-danger fw-bold">No asistiré</span>';
+                                        }
+                                    ?>
+                                    <div class="card shadow-sm border-0 mb-4" style="background-color: var(--bs-light); border-left: 4px solid var(--bs-primary) !important;">
+                                        <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                                            <div>
+                                                <h4 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700;">Tu asistencia</h4>
+                                                <p class="mb-0 text-muted" style="font-size: 14px;">Estado actual: <?= $txtEstado ?></p>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-outline-danger fw-semibold shadow-sm" onclick="app.enviarAsistencia('<?= $r['id'] ?>', 'rechazada')">No asistiré</button>
+                                                <button class="btn btn-success text-white fw-semibold shadow-sm" onclick="app.enviarAsistencia('<?= $r['id'] ?>', 'confirmada')">Sí, asistiré</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- INFO -->
+                                <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
+                                    <div class="card-body p-4">
+                                        <h3 class="mb-3" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Información de la Reunión</h3>
+                                        <p style="font-size: 14px; color: var(--color-texto); margin-bottom: 1rem; white-space: pre-wrap;"><?= htmlspecialchars($r['descripcion']) ?></p>
+                                        
+                                        <div class="row row-cols-1 row-cols-sm-2 g-3">
+                                            <div class="col d-flex gap-2 align-items-center">
+                                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-calendar3" style="color:var(--bs-primary);font-size:14px;"></i></div>
+                                                <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Fecha</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);"><?= date('d/m/Y', strtotime($r['fecha'])) ?></div></div>
+                                            </div>
+                                            <div class="col d-flex gap-2 align-items-center">
+                                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-clock" style="color:var(--bs-primary);font-size:14px;"></i></div>
+                                                <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Hora</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);"><?= $r['hora'] ?>h</div></div>
+                                            </div>
+                                            <div class="col d-flex gap-2 align-items-center">
+                                                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-geo-alt" style="color:var(--bs-primary);font-size:14px;"></i></div>
+                                                <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Lugar</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);"><?= htmlspecialchars($r['lugar']) ?></div></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ORDEN DEL DIA -->
+                                <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
+                                    <div class="card-body p-4">
+                                        <h3 class="mb-3 d-flex align-items-center gap-2" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Orden del Día <span style="font-size:12px; font-weight:400; color:var(--color-texto);"><?= count($r['ordenDelDia']) ?> puntos</span></h3>
+                                        <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                            <?php foreach ($r['ordenDelDia'] as $i => $o): ?>
+                                                <li class="d-flex gap-2 align-items-start">
+                                                    <div class="rounded-circle text-white d-flex justify-content-center align-items-center flex-shrink-0" style="width:24px; height:24px; background-color:var(--bs-primary); font-size:12px; font-family:var(--fuente-titulos); font-weight:700;"><?= $i+1 ?></div>
+                                                    <div style="font-size:14px; color:var(--bs-dark); padding-top:2px;"><?= htmlspecialchars($o) ?></div>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 mt-3 pt-2">
+                                    <?php if (!empty($r['pdf_orden_dia'])): ?>
+                                    <a href="<?= htmlspecialchars($r['pdf_orden_dia']) ?>" target="_blank" class="btn d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;">
+                                        <i class="bi bi-file-earmark-pdf fs-6"></i> Descargar Documento (PDF)
+                                    </a>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- ASISTENCIAS -->
+                                <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between flex-wrap gap-2 mb-4">
+                                            <div>
+                                                <h3 class="mb-0" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Confirmación de Asistencia</h3>
+                                                <span style="font-size:12px; color:var(--color-texto);"><?= $total ?> viviendas convocadas</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Barra tricolor -->
+                                        <div class="mb-4">
+                                            <div class="d-flex justify-content-between mb-1" style="font-size:12px; color:var(--color-texto);">
+                                                <span><strong style="color:var(--bs-dark);"><?= round($ptConf) ?>%</strong> confirmado</span>
+                                                <span><?= $confs ?>/<?= $total ?> viviendas</span>
+                                            </div>
+                                            <div class="progress" style="height:12px; border-radius:10px; background-color:var(--color-fondo-formularios);">
+                                                <div class="progress-bar bg-success" style="width: <?= $ptConf ?>%"></div>
+                                                <div class="progress-bar bg-danger" style="width: <?= $ptRech ?>%"></div>
+                                                <div class="progress-bar bg-secondary" style="width: <?= $ptPend ?>%"></div>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:12px; color:var(--color-texto);">
+                                                <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-success" style="width:10px;height:10px;"></span> Confirmadas (<?= $confs ?>)</div>
+                                                <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-danger" style="width:10px;height:10px;"></span> No asisten (<?= $rechs ?>)</div>
+                                                <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-secondary" style="width:10px;height:10px;"></span> Pendientes (<?= $pends ?>)</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Tabla Listado -->
+                                        <div class="border rounded-2 overflow-hidden">
+                                            <div class="d-flex p-2" style="background-color: var(--color-fondo-formularios); font-size:12px; font-weight:600; color:var(--color-texto);">
+                                                <div class="flex-grow-1 px-2">Vivienda</div>
+                                                <div class="text-center px-2" style="width:80px;">Estado</div>
+                                                <div class="text-end px-2" style="width:90px;">Respuesta</div>
+                                            </div>
+                                            <?php foreach ($r['asistencias'] as $i => $a): ?>
+                                                <?php
+                                                if($a['confirmacion'] === 'confirmada') { $icon='bi-person-check'; $bg='rgba(92,178,68,0.1)'; $txtC='var(--bs-success)'; $strEst='Asiste'; $bcolor='var(--bs-success)';}
+                                                elseif($a['confirmacion'] === 'rechazada') { $icon='bi-person-x'; $bg='rgba(164,30,52,0.1)'; $txtC='var(--bs-danger)'; $strEst='No asiste'; $bcolor='var(--bs-danger)';}
+                                                else { $icon='bi-person-dash'; $bg='var(--color-fondo-formularios)'; $txtC='var(--color-texto)'; $strEst='Pendiente'; $bcolor='var(--color-texto)';}
+                                                
+                                                $rowBg = $i % 2 !== 0 ? 'var(--bs-light)' : 'var(--bs-secondary)';
+                                                $fresp = $a['fechaRespuesta'] ? date('d/m/Y', strtotime($a['fechaRespuesta'])) : '-';
+                                                ?>
+                                                <div class="d-flex align-items-center p-2 border-top" style="background-color:<?= $rowBg ?>;">
+                                                    <div class="flex-grow-1 px-2 d-flex align-items-center gap-2">
+                                                        <div class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width:28px; height:28px; background-color:<?= $bg ?>; color:<?= $txtC ?>;">
+                                                            <i class="bi <?= $icon ?>"></i>
+                                                        </div>
+                                                        <div class="lh-1">
+                                                            <div style="font-size:14px; font-weight:500; color:var(--bs-dark);"><?= htmlspecialchars($a['piso']) ?></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center px-2" style="width:80px;">
+                                                        <span style="background-color:<?= $bg ?>; color:<?= $bcolor ?>; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:500;"><?= $strEst ?></span>
+                                                    </div>
+                                                    <div class="text-end px-2" style="width:90px; font-size:12px; color:var(--color-texto);"><?= $fresp ?></div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        
+                                        <?php if ($rol === 'presidente'): ?>
+                                        <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                                            <button class="btn btn-outline-secondary shadow-sm flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-2" onclick="app.abrirFormularioEditar('<?= $r['id'] ?>')"><i class="bi bi-pencil"></i> Editar</button>
+                                            <button class="btn btn-outline-danger shadow-sm flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-2" onclick="app.eliminarReunion('<?= $r['id'] ?>')"><i class="bi bi-trash"></i> Eliminar</button>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
 
                 <!-- VISTA 3: FORMULARIO -->
                 <?php if ($rol === 'presidente'): ?>
                     <div id="vista-formulario" class="d-none">
-                        <button class="btn btn-link text-decoration-none p-0 mb-3 d-flex align-items-center gap-1" style="color: var(--color-texto); font-size: 14px; font-weight: 500;" onclick="app.showView('vista-lista')">
+                        <button class="btn btn-link text-muted text-decoration-none p-0 mb-3 d-flex align-items-center gap-1 fw-semibold" onclick="app.showView('vista-lista')">
                             <i class="bi bi-arrow-left"></i> Volver
                         </button>
 
-                        <h2 id="form-titulo-vista" class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Convocar Nueva Reunión</h2>
-                        <p id="form-desc-vista" class="mb-4" style="color: var(--color-texto); font-size: 14px;">Completa los datos para convocar una junta o reunión</p>
+                        <h2 id="form-titulo-vista" class="fw-bold mb-1 font-title">Convocar Nueva Reunión</h2>
+                        <p id="form-desc-vista" class="text-muted small mb-4">Completa los datos para convocar una junta o reunión</p>
 
                         <div class="card shadow-sm border-0" style="border-radius: var(--radio-lg);">
                             <div class="card-body p-4">
@@ -112,7 +431,7 @@
                                         <input type="file" class="form-control custom-input" id="form-pdf" accept=".pdf">
                                     </div>
 
-                                    <button type="submit" id="form-btn-submit" class="btn w-100 d-flex align-items-center justify-content-center gap-2" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;">
+                                    <button type="submit" id="form-btn-submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-sm" style="min-height: 44px; border-radius: var(--radio-lg);">
                                         <i class="bi bi-calendar-check"></i> Convocar Reunión
                                     </button>
                                 </form>
@@ -136,15 +455,12 @@
     // 🟢 LÓGICA PRINCIPAL (VANILLA JS) 🟢
     const app = {
         init: function() {
-            // Formateo de fechas para que el input type="date" tenga hoy de minimo
             const today = new Date().toISOString().split('T')[0];
 
             const dateInput = document.getElementById('form-fecha');
             if (dateInput) {
                 dateInput.setAttribute('min', today);
             }
-
-            this.renderAll();
         },
 
         showView: function(viewId) {
@@ -155,7 +471,6 @@
             if (formView) formView.classList.add('d-none');
 
             document.getElementById(viewId).classList.remove('d-none');
-            if (viewId === 'vista-lista') this.renderAll();
             window.scrollTo(0, 0);
         },
 
@@ -191,15 +506,13 @@
             const btnProx = document.getElementById('btn-tab-proximas');
             const btnPas = document.getElementById('btn-tab-pasadas');
 
-            // Estilos pestaña
-            btnProx.style.backgroundColor = isProx ? 'var(--bs-light)' : 'transparent';
-            btnProx.style.boxShadow = isProx ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
-            btnProx.className = isProx ? 'btn flex-fill text-center rounded-2 py-2 text-dark' : 'btn flex-fill text-center rounded-2 py-2 text-muted';
-
-            btnPas.style.backgroundColor = !isProx ? 'var(--bs-light)' : 'transparent';
-            btnPas.style.boxShadow = !isProx ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
-            btnPas.className = !isProx ? 'btn flex-fill text-center rounded-2 py-2 text-dark' : 'btn flex-fill text-center rounded-2 py-2 text-muted';
-
+            // Toggle de clases para los botones
+            btnProx.classList.toggle('active', isProx);
+            btnProx.classList.toggle('text-muted', !isProx);
+            
+            btnPas.classList.toggle('active', !isProx);
+            btnPas.classList.toggle('text-muted', isProx);
+            
             // Mostrar contenedores
             document.getElementById('lista-proximas').classList.toggle('d-none', !isProx);
             document.getElementById('lista-pasadas').classList.toggle('d-none', isProx);
@@ -215,148 +528,6 @@
             t.show();
         },
 
-        formatDateLong: function(d) {
-            const opt = {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short'
-            };
-            return new Date(d).toLocaleDateString('es-ES', opt);
-        },
-
-        getBadgeEstado: function(r) {
-            const ahora = new Date();
-            const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
-
-            if (r.estado === 'finalizada' || fechaHora < ahora) {
-                return `<span class="badge border text-muted bg-transparent" style="font-size:12px;">Realizada</span>`;
-            }
-            if (r.estado === 'en_curso') return `<span class="badge" style="background-color: var(--bs-success); font-size:12px;">En Curso</span>`;
-            return `<span class="badge" style="background-color: var(--bs-warning); font-size:12px;">Convocada</span>`;
-        },
-
-        renderAll: function() {
-            const ahora = new Date();
-            const proximas = reunionesDB.filter(r => {
-                const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
-                return r.estado !== 'finalizada' && fechaHora >= ahora;
-            }).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-            const pasadas = reunionesDB.filter(r => {
-                const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
-                return r.estado === 'finalizada' || fechaHora < ahora;
-            }).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-            // Actualizar nombres tabs
-            document.getElementById('btn-tab-proximas').innerText = `Próximas (${proximas.length})`;
-            document.getElementById('btn-tab-pasadas').innerText = `Pasadas (${pasadas.length})`;
-
-            // Render Resumen
-            let conf = 0,
-                pend = 0;
-            if (proximas.length > 0) {
-                conf = proximas[0].asistencias.filter(a => a.confirmacion === 'confirmada').length;
-                pend = proximas[0].asistencias.filter(a => a.confirmacion === 'pendiente').length;
-            }
-
-            document.getElementById('cards-resumen').innerHTML = `
-            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
-                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(92,178,68,0.1);"><i class="bi bi-check-circle" style="color: var(--bs-success); font-size:20px;"></i></div>
-                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${conf}</div><small style="font-size:10px; color:var(--color-texto);">Confirmadas</small></div>
-            </div></div></div>
-            <div class="col"><div class="card shadow-sm border-0 h-100"><div class="card-body p-2 d-flex align-items-center gap-2">
-                <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: rgba(164,30,52,0.1);"><i class="bi bi-question-circle" style="color: var(--bs-danger); font-size:20px;"></i></div>
-                <div class="lh-1"><div style="font-family: var(--fuente-titulos); font-weight:700; font-size:20px;">${pend}</div><small style="font-size:10px; color:var(--color-texto);">Pendientes</small></div>
-            </div></div></div>
-        `;
-
-            // Render Próximas
-            const proxHtml = proximas.length === 0 ?
-                `<div class="text-center py-5 rounded-3 shadow-sm style="background-color: var(--bs-light);">
-                <i class="bi bi-calendar-check text-muted" style="font-size: 48px;"></i>
-                <p class="mt-2 mb-1 text-muted" style="font-size:14px;">No hay reuniones próximas convocadas</p>
-                <small class="text-muted d-block" style="font-size: 11px;">Comunidad actual ID: ${<?= json_encode($id_comunidad ?? 'Nulo') ?>}</small>
-                <small class="text-muted d-block" style="font-size: 11px;">Comunidad actual ID: ${idComunidad ?? 'Nulo'}</small>
-            </div>` :
-                proximas.map(r => {
-                    const total = r.asistencias.length;
-                    const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
-                    const pct = total > 0 ? Math.round((confs / total) * 100) : 0;
-                    const diasRestantes = Math.ceil((new Date(r.fecha) - new Date()) / (1000 * 60 * 60 * 24));
-                    const pends = r.asistencias.filter(a => a.confirmacion === 'pendiente').length;
-
-                    let ordList = r.ordenDelDia.map((o, i) => `<li>${i+1}. ${o}</li>`).join('');
-
-                    return `
-                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid var(--bs-warning) !important;">
-                    <div class="card-body p-3 p-md-4">
-                        <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                                    <span style="font-size:14px; font-weight:600; color:var(--bs-dark);">${r.titulo}</span>
-                                    ${this.getBadgeEstado(r)}
-                                </div>
-                                <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
-                                    <span><i class="bi bi-clock"></i> ${this.formatDateLong(r.fecha)} a las ${r.hora}</span>
-                                    <span><i class="bi bi-geo-alt"></i> ${r.lugar}</span>
-                                </div>
-                            </div>
-                            <span style="font-size:12px; font-weight:600; color:var(--bs-primary); background-color: rgba(34,28,53,0.05); padding:2px 8px; border-radius:4px; height:fit-content;">${diasRestantes} días</span>
-                        </div>
-
-                        <div class="d-flex gap-2 align-items-center mt-3 mb-2" style="font-size:12px;">
-                            <i class="bi bi-people" style="color:var(--color-texto); font-size:16px;"></i>
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between mb-1"><span style="color:var(--color-texto);">Asistencia: ${confs}/${total}</span><span style="font-weight:600;">${pct}%</span></div>
-                                <div class="progress" style="height:6px; background-color:var(--color-fondo-formularios);"><div class="progress-bar bg-success" style="width: ${pct}%"></div></div>
-                            </div>
-                        </div>
-
-                        <div class="mt-2">
-                            <button class="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-1" style="font-size:12px; font-weight:500; color:var(--bs-primary);" onclick="app.toggleAgenda('${r.id}')">
-                                <i class="bi bi-chevron-down" id="icon-agenda-${r.id}"></i> Orden del día (${r.ordenDelDia.length} puntos)
-                            </button>
-                            <div id="agenda-${r.id}" class="d-none mt-2 ps-2" style="border-left: 2px solid rgba(34,28,53,0.2); font-size:12px; color:var(--color-texto);">
-                                <ul class="list-unstyled mb-0">${ordList}</ul>
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-2 mt-3 pt-2">
-                            <button class="btn btn-sm text-white" style="background-color: var(--bs-primary); font-size:12px; flex-grow:1; max-width: 200px;" onclick="app.renderDetalle('${r.id}')">Ver detalle</button>
-                        </div>
-                    </div>
-                </div>`;
-                }).join('');
-            document.getElementById('lista-proximas').innerHTML = proxHtml;
-
-            // Render Pasadas
-            const pasHtml = pasadas.length === 0 ?
-                `<div class="text-center py-5 rounded-3 style="background-color: var(--bs-light); shadow-sm"><i class="bi bi-file-earmark-text text-muted" style="font-size: 48px;"></i><p class="mt-2 text-muted" style="font-size:14px;">No hay reuniones pasadas registradas</p></div>` :
-                pasadas.map(r => {
-                    const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
-                    return `
-                <div class="card shadow-sm border-0 module-card" style="border-left: 4px solid #d1d5db !important; cursor:pointer;" onclick="app.renderDetalle('${r.id}')">
-                    <div class="card-body p-3 d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                                <span style="font-size:14px; font-weight:600; color:var(--bs-dark);">${r.titulo}</span>
-                                ${this.getBadgeEstado(r)}
-                            </div>
-                            <div class="d-flex flex-wrap gap-3" style="font-size:12px; color:var(--color-texto);">
-                                <span><i class="bi bi-clock"></i> ${this.formatDateLong(r.fecha)}</span>
-                                <span><i class="bi bi-geo-alt"></i> ${r.lugar}</span>
-                                <span><i class="bi bi-people"></i> ${confs}/${r.asistencias.length} asistentes</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-                }).join('');
-            document.getElementById('lista-pasadas').innerHTML = pasHtml;
-
-            // Activar tab correcta visualmente al iniciar
-            this.switchTab('proximas');
-        },
-
         toggleAgenda: function(id) {
             const el = document.getElementById(`agenda-${id}`);
             const icon = document.getElementById(`icon-agenda-${id}`);
@@ -370,176 +541,9 @@
         },
 
         renderDetalle: function(id) {
-            const r = reunionesDB.find(x => x.id == id);
-            if (!r) return;
-
-            const diasRestantes = Math.ceil((new Date(r.fecha) - new Date()) / (1000 * 60 * 60 * 24));
-            const total = r.asistencias.length;
-            const confs = r.asistencias.filter(a => a.confirmacion === 'confirmada').length;
-            const rechs = r.asistencias.filter(a => a.confirmacion === 'rechazada').length;
-            const pends = r.asistencias.filter(a => a.confirmacion === 'pendiente').length;
-
-            const ptConf = total > 0 ? (confs / total) * 100 : 0;
-            const ptRech = total > 0 ? (rechs / total) * 100 : 0;
-            const ptPend = total > 0 ? (pends / total) * 100 : 0;
-
-            const ahora = new Date();
-            const fechaHora = new Date(`${r.fecha}T${r.hora || '00:00'}`);
-            const isPasada = (r.estado === 'finalizada' || fechaHora < ahora);
-
-            const miAsistencia = r.asistencias.find(a => a.id_vivienda == userIdVivienda);
-
-            let panelVotoHtml = '';
-            if (!isPasada) {
-                const txtEstado = (miAsistencia && miAsistencia.confirmacion === 'confirmada') ? '<span class="text-success fw-bold">Sí, asistiré</span>' :
-                    ((miAsistencia && miAsistencia.confirmacion === 'rechazada') ? '<span class="text-danger fw-bold">No asistiré</span>' : '<span class="text-muted fw-bold">Pendiente de respuesta</span>');
-
-                panelVotoHtml = `
-            <div class="card shadow-sm border-0 mb-4" style="background-color: var(--bs-light); border-left: 4px solid var(--bs-primary) !important;">
-                <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
-                    <div>
-                        <h4 class="mb-1" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700;">Tu asistencia</h4>
-                        <p class="mb-0 text-muted" style="font-size: 14px;">Estado actual: ${txtEstado}</p>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-danger" onclick="app.enviarAsistencia('${r.id}', 'rechazada')">No asistiré</button>
-                        <button class="btn btn-success text-white" onclick="app.enviarAsistencia('${r.id}', 'confirmada')">Sí, asistiré</button>
-                    </div>
-                </div>
-            </div>`;
-            }
-
-            const html = `
-        <div class="mb-4">
-            <h1 class="mb-2" style="font-family: var(--fuente-titulos); font-size: 20px; font-weight: 700; color: var(--bs-dark);">${r.titulo}</h1>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                ${this.getBadgeEstado(r)}
-                ${!isPasada ? `<span style="font-size:12px; color:var(--color-texto);"><i class="bi bi-clock"></i> Faltan ${diasRestantes} días</span>` : ''}
-            </div>
-        </div>
-        
-        ${panelVotoHtml}
-
-        <!-- INFO -->
-        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
-            <div class="card-body p-4">
-                <h3 class="mb-3" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Información de la Reunión</h3>
-                <p style="font-size: 14px; color: var(--color-texto); margin-bottom: 1rem;">${r.descripcion}</p>
-                
-                <div class="row row-cols-1 row-cols-sm-2 g-3">
-                    <div class="col d-flex gap-2 align-items-center">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-calendar3" style="color:var(--bs-primary);font-size:14px;"></i></div>
-                        <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Fecha</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${new Date(r.fecha).toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div></div>
-                    </div>
-                    <div class="col d-flex gap-2 align-items-center">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-clock" style="color:var(--bs-primary);font-size:14px;"></i></div>
-                        <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Hora</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${r.hora}h</div></div>
-                    </div>
-                    <div class="col d-flex gap-2 align-items-center">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center" style="width:32px;height:32px;background-color:rgba(34,28,53,0.1);"><i class="bi bi-geo-alt" style="color:var(--bs-primary);font-size:14px;"></i></div>
-                        <div class="lh-1"><small style="font-size:10px; color:var(--color-texto);">Lugar</small><div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${r.lugar}</div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ORDEN DEL DIA -->
-        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
-            <div class="card-body p-4">
-                <h3 class="mb-3 d-flex align-items-center gap-2" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Orden del Día <span style="font-size:12px; font-weight:400; color:var(--color-texto);">${r.ordenDelDia.length} puntos</span></h3>
-                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                    ${r.ordenDelDia.map((o,i) => `
-                        <li class="d-flex gap-2 align-items-start">
-                            <div class="rounded-circle text-white d-flex justify-content-center align-items-center flex-shrink-0" style="width:24px; height:24px; background-color:var(--bs-primary); font-size:12px; font-family:var(--fuente-titulos); font-weight:700;">${i+1}</div>
-                            <div style="font-size:14px; color:var(--bs-dark); padding-top:2px;">${o}</div>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>
-        </div>
-        
-        <div class="d-flex gap-2 mt-3 pt-2">
-            ${r.pdf_orden_dia ? 
-            `<a href="${r.pdf_orden_dia}" target="_blank" class="btn d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="background-color: var(--bs-primary); color: white; min-height: 44px; border-radius: var(--radio-lg); font-size: 14px; font-weight: 500;">
-                <i class="bi bi-file-earmark-pdf fs-6"></i> Descargar Documento (PDF)
-            </a>` 
-            : ''}
-        </div>
-
-        <!-- ASISTENCIAS -->
-        <div class="card shadow-sm border-0 mb-4" style="border-radius: var(--radio-lg);">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between flex-wrap gap-2 mb-4">
-                    <div>
-                        <h3 class="mb-0" style="font-family: var(--fuente-titulos); font-size: 16px; font-weight: 700; color: var(--bs-dark);">Confirmación de Asistencia</h3>
-                        <span style="font-size:12px; color:var(--color-texto);">${total} viviendas convocadas</span>
-                    </div>
-                </div>
-
-                <!-- Barra tricolor -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1" style="font-size:12px; color:var(--color-texto);">
-                        <span><strong style="color:var(--bs-dark);">${Math.round(ptConf)}%</strong> confirmado</span>
-                        <span>${confs}/${total} viviendas</span>
-                    </div>
-                    <div class="progress" style="height:12px; border-radius:10px; background-color:var(--color-fondo-formularios);">
-                        <div class="progress-bar bg-success" style="width: ${ptConf}%"></div>
-                        <div class="progress-bar bg-danger" style="width: ${ptRech}%"></div>
-                        <div class="progress-bar bg-secondary" style="width: ${ptPend}%"></div>
-                    </div>
-                    <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:12px; color:var(--color-texto);">
-                        <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-success" style="width:10px;height:10px;"></span> Confirmadas (${confs})</div>
-                        <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-danger" style="width:10px;height:10px;"></span> No asisten (${rechs})</div>
-                        <div class="d-flex align-items-center gap-1"><span class="rounded-circle bg-secondary" style="width:10px;height:10px;"></span> Pendientes (${pends})</div>
-                    </div>
-                </div>
-
-                <!-- Tabla Listado -->
-                <div class="border rounded-2 overflow-hidden">
-                    <div class="d-flex p-2" style="background-color: var(--color-fondo-formularios); font-size:12px; font-weight:600; color:var(--color-texto);">
-                        <div class="flex-grow-1 px-2">Vivienda</div>
-                        <div class="text-center px-2" style="width:80px;">Estado</div>
-                        <div class="text-end px-2" style="width:90px;">Respuesta</div>
-                    </div>
-                    ${r.asistencias.map((a, i) => {
-                        let icon = '', bg = '', txtC = '', strEst = '', bcolor = '';
-                        if(a.confirmacion === 'confirmada') { icon='bi-person-check'; bg='rgba(92,178,68,0.1)'; txtC='var(--bs-success)'; strEst='Asiste'; bcolor='var(--bs-success)';}
-                        else if(a.confirmacion === 'rechazada') { icon='bi-person-x'; bg='rgba(164,30,52,0.1)'; txtC='var(--bs-danger)'; strEst='No asiste'; bcolor='var(--bs-danger)';}
-                        else { icon='bi-person-dash'; bg='var(--color-fondo-formularios)'; txtC='var(--color-texto)'; strEst='Pendiente'; bcolor='var(--color-texto)';}
-                        
-                        const rowBg = i%2!==0 ? 'var(--bs-light)' : 'var(--bs-secondary)';
-                        const fresp = a.fechaRespuesta ? a.fechaRespuesta.split('-').slice(1).reverse().join('/') : '-';
-
-                        return `
-                            <div class="d-flex align-items-center p-2 border-top" style="background-color:${rowBg};">
-                                <div class="flex-grow-1 px-2 d-flex align-items-center gap-2">
-                                    <div class="rounded-circle d-flex justify-content-center align-items-center flex-shrink-0" style="width:28px; height:28px; background-color:${bg}; color:${txtC};">
-                                        <i class="bi ${icon}"></i>
-                                    </div>
-                                    <div class="lh-1">
-                                        <div style="font-size:14px; font-weight:500; color:var(--bs-dark);">${a.piso}</div>
-                                    </div>
-                                </div>
-                                <div class="text-center px-2" style="width:80px;">
-                                    <span style="background-color:${bg}; color:${bcolor}; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:500;">${strEst}</span>
-                                </div>
-                                <div class="text-end px-2" style="width:90px; font-size:12px; color:var(--color-texto);">${fresp}</div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-
-                ${userRol === 'presidente' ? `
-                <div class="d-flex gap-2 mt-4 pt-3 border-top">
-                    <button class="btn btn-outline-primary flex-grow-1 fw-semibold" onclick="app.abrirFormularioEditar('${r.id}')"><i class="bi bi-pencil"></i> Editar</button>
-                    <button class="btn btn-outline-danger flex-grow-1 fw-semibold" onclick="app.eliminarReunion('${r.id}')"><i class="bi bi-trash"></i> Eliminar</button>
-                </div>
-                ` : ''}
-            </div>
-        </div>
-        `;
-
-            document.getElementById('detalle-content').innerHTML = html;
+            // Ocultamos todos los contenedores de detalles y mostramos solo el seleccionado
+            document.querySelectorAll('.detalle-reunion-container').forEach(el => el.classList.add('d-none'));
+            document.getElementById('detalle-reunion-' + id).classList.remove('d-none');
             this.showView('vista-detalle');
         },
 

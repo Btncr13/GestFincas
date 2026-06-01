@@ -19,7 +19,7 @@
                         </span>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-danger fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalGasto">
+                        <button class="btn btn-danger fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalGasto">
                             <i class="fa-solid fa-arrow-trend-down me-1"></i> Registrar Gasto
                         </button>
                         <button class="btn btn-success fw-semibold shadow-sm text-white" data-bs-toggle="modal" data-bs-target="#modalCuota">

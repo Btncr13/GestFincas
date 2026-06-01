@@ -23,15 +23,15 @@
                     
                     <!-- BOTONES DE ACCIÓN (Estilo unificado) -->
                     <div class="d-flex flex-wrap gap-2">
-                        <button class="btn btn-success btn-sm rounded-pill px-3 fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearVivienda">
+                        <button class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearVivienda">
                             <i class="bi bi-plus-lg"></i>
                             <span>Crear Vivienda</span>
                         </button>
-                        <button class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold shadow-sm text-white d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-secondary fw-semibold shadow-sm d-flex align-items-center gap-2">
                             <i class="bi bi-pencil-square"></i>
                             <span>Modificar</span>
                         </button>
-                        <button class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="prepararEliminacion()">
+                        <button class="btn btn-danger fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="prepararEliminacion()">
                             <i class="bi bi-trash"></i>
                             <span>Eliminar</span>
                         </button>

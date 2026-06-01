@@ -27,8 +27,8 @@ include 'src/views/components/topbar.php';
                         <h2 class="fw-bold mb-1 font-title">Foro Vecinal</h2>
                         <p class="text-muted small mb-0">Debate y propón ideas con tus vecinos</p>
                     </div>
-                    <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoTema">
-                        <i class="fa-solid fa-plus me-2"></i> Crear Nuevo Tema
+                    <button type="button" class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevoTema">
+                        <i class="fa-solid fa-plus"></i> Crear Nuevo Tema
                     </button>
                 </div>
 
@@ -168,8 +168,8 @@ include 'src/views/components/topbar.php';
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Publicar Tema</button>
+                    <button type="button" class="btn btn-outline-secondary fw-semibold shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-semibold shadow-sm d-flex align-items-center gap-2"><i class="bi bi-send-fill"></i> Publicar Tema</button>
                 </div>
             </form>
         </div>

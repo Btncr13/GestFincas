@@ -8,16 +8,19 @@
         <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
             <div class="container-fluid p-0">
                 
-                <!-- ENCABEZADO -->
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-                    <div>
-                        <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos);">Comunicaciones</h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0">
-                                <li class="breadcrumb-item small"><a href="index.php?route=auth/panel<?= $rol === 'presidente' ? 'presi' : 'vecino' ?>" class="text-decoration-none">Panel</a></li>
-                                <li class="breadcrumb-item small active" aria-current="page">Tablón de Anuncios</li>
-                            </ol>
-                        </nav>
+                <!-- 1. BANNER PRINCIPAL -->
+                <div class="card border-0 mb-4 overflow-hidden shadow-sm banner-presi-card">
+                    <img src="public/assets/img/banner.jpeg" alt="Comunicaciones" class="card-img w-100 h-100 object-fit-cover position-absolute banner-presi-img">
+                    <div class="card-img-overlay d-flex flex-column justify-content-end p-4 text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded d-flex align-items-center justify-content-center flex-shrink-0 glass-icon-48">
+                                <i class="bi bi-megaphone-fill fs-4 text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="mb-1 fw-bold text-white text-shadow-main font-titulos">Comunicaciones</h2>
+                                <p class="mb-0 fw-semibold text-white text-shadow-sub fs-5">Tablón de anuncios y avisos importantes</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -48,11 +51,11 @@
                                         </label>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-light btn-sm rounded-pill px-4 fw-semibold border" onclick="document.getElementById('formComunicado').reset()">
+                                        <button type="button" class="btn btn-outline-secondary fw-semibold shadow-sm d-flex align-items-center gap-2" onclick="document.getElementById('formComunicado').reset()">
                                             Cancelar
                                         </button>
-                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold shadow-sm">
-                                            <i class="bi bi-send-fill me-1"></i> Publicar
+                                        <button type="submit" class="btn btn-primary fw-semibold shadow-sm d-flex align-items-center gap-2">
+                                            <i class="bi bi-send-fill"></i> Publicar
                                         </button>
                                     </div>
                                 </div>
@@ -63,7 +66,7 @@
 
                 <!-- TABLA DE COMUNICADOS (Común para ambos, pero con acciones para presidente) -->
                 <div class="card border-0 shadow-sm overflow-hidden">
-                    <div class="card-header bg-white py-3 border-bottom">
+                    <div class="card-header bg-light py-3 border-bottom">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-megaphone-fill text-primary"></i>
                             <h5 class="mb-0 fs-6 fw-bold" style="font-family: var(--fuente-titulos);">Historial de Avisos</h5>

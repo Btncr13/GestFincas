@@ -6,16 +6,17 @@
         <?php include 'src/views/components/sidebar.php'; ?>
 
         <main class="col-12 col-md-9 col-lg-10 ms-auto px-2 px-md-4 pt-3 pt-md-4 pb-5 d-flex flex-column min-vh-100">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <div>
-                    <h2 class="fw-bold mb-1" style="font-family: var(--fuente-titulos); color: var(--bs-dark);">Gestión Espacios / Reservas</h2>
-                    <p class="mb-0" style="color: var(--color-texto); font-size: 14px; margin-top: 0.25rem;">Gestión de reservas y espacios de la comunidad</p> 
+            <div class="container-fluid p-0">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1 font-title">Gestión Espacios / Reservas</h2>
+                        <p class="text-muted small mb-0">Gestión de reservas y espacios de la comunidad</p> 
+                    </div>
+                    <button type="button" class="btn btn-success text-white fw-semibold shadow-sm d-flex align-items-center gap-2"
+                        data-bs-toggle="modal" data-bs-target="#modalCrearEspacio">
+                        <i class="fa-solid fa-plus"></i> Nuevo Espacio
+                    </button>
                 </div>
-                <button type="button" class="btn btn-primary fw-semibold shadow-sm"
-                    data-bs-toggle="modal" data-bs-target="#modalCrearEspacio">
-                    <i class="fa-solid fa-plus me-2"></i> Nuevo Espacio
-                </button>
-            </div>
 
             <?php
             // Procesar y dividir las reservas en activas e inactivas (últimas 2 semanas)
@@ -38,9 +39,9 @@
             ?>
 
             <!-- PESTAÑAS PRINCIPALES: Reservas vs Espacios -->
-            <div class="d-flex mb-4 p-1" style="background-color: var(--color-fondo-formularios, #f8f9fa); border-radius: var(--radio-lg, 0.5rem);">
-                <button id="btn-sec-reservas" class="btn flex-fill text-center rounded-2 py-2 text-dark" style="font-size: 14px; font-weight: 500; transition: all 0.2s; background-color: var(--bs-light, #fff); box-shadow: 0 1px 3px rgba(0,0,0,0.1);" onclick="switchMainTab('reservas')">Reservas</button>
-                <button id="btn-sec-espacios" class="btn flex-fill text-center rounded-2 py-2 text-muted" style="font-size: 14px; font-weight: 500; transition: all 0.2s; background-color: transparent; box-shadow: none;" onclick="switchMainTab('espacios')">Espacios de la Comunidad</button>
+            <div class="d-flex mb-4 p-1 nav-tabs-custom" style="background-color: var(--color-fondo-formularios, #f8f9fa); border-radius: var(--radio-lg, 0.5rem);">
+                <button id="btn-sec-reservas" class="btn flex-fill text-center rounded-2 py-2 fw-semibold active" style="font-size: 14px; transition: all 0.2s;" onclick="switchMainTab('reservas')">Reservas</button>
+                <button id="btn-sec-espacios" class="btn flex-fill text-center rounded-2 py-2 fw-semibold text-muted" style="font-size: 14px; transition: all 0.2s;" onclick="switchMainTab('espacios')">Espacios de la Comunidad</button>
             </div>
 
             <!-- SECCIÓN 1: RESERVAS -->
