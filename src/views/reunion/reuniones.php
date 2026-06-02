@@ -339,7 +339,7 @@ if ($totalProximas > 0) {
                                             <div class="d-flex p-2" style="background-color: var(--color-fondo-formularios); font-size:12px; font-weight:600; color:var(--color-texto);">
                                                 <div class="flex-grow-1 px-2">Vivienda</div>
                                                 <div class="text-center px-2" style="width:80px;">Estado</div>
-                                                <div class="text-end px-2" style="width:90px;">Respuesta</div>
+                                                <div class="text-end px-2" style="width:90px;">Fecha</div>
                                             </div>
                                             <?php foreach ($r['asistencias'] as $i => $a): ?>
                                                 <?php
@@ -348,7 +348,7 @@ if ($totalProximas > 0) {
                                                 else { $icon='bi-person-dash'; $bg='var(--color-fondo-formularios)'; $txtC='var(--color-texto)'; $strEst='Pendiente'; $bcolor='var(--color-texto)';}
                                                 
                                                 $rowBg = $i % 2 !== 0 ? 'var(--bs-light)' : 'var(--bs-secondary)';
-                                                $fresp = $a['fechaRespuesta'] ? date('d/m/Y', strtotime($a['fechaRespuesta'])) : '-';
+                                                $fresp = !empty($a['fecha_respuesta']) ? date('d/m/Y', strtotime($a['fecha_respuesta'])) : '-';
                                                 ?>
                                                 <div class="d-flex align-items-center p-2 border-top" style="background-color:<?= $rowBg ?>;">
                                                     <div class="flex-grow-1 px-2 d-flex align-items-center gap-2">

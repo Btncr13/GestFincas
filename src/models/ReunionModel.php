@@ -97,15 +97,30 @@ class ReunionModel extends BaseModel
     public function confirmarAsistencia($id_reunion, $id_vivienda, $confirmacion)
     {
         try {
-            $sql = "INSERT INTO asistencia_reunion (id_reunion, id_vivienda, confirmacion, fecha_respuesta) 
-                    VALUES (:id_reunion, :id_vivienda, :confirmacion, CURRENT_DATE())
-                    ON DUPLICATE KEY UPDATE confirmacion = :confirmacion2, fecha_respuesta = CURRENT_DATE()";
+            // 1. Comprobamos si la vivienda ya tiene un registro para esta reunión
+            $sqlCheck = "SELECT COUNT(*) FROM asistencia_reunion WHERE id_reunion = :id_reunion AND id_vivienda = :id_vivienda";
+            $stmtCheck = $this->db->prepare($sqlCheck);
+            $stmtCheck->execute([
+                ':id_reunion' => $id_reunion,
+                ':id_vivienda' => $id_vivienda
+            ]);
+            
+            if ($stmtCheck->fetchColumn() > 0) {
+                // 2. Si ya existe, simplemente actualizamos su respuesta
+                $sql = "UPDATE asistencia_reunion 
+                        SET confirmacion = :confirmacion, fecha_respuesta = CURRENT_DATE() 
+                        WHERE id_reunion = :id_reunion AND id_vivienda = :id_vivienda";
+            } else {
+                // 3. Si no existe (por si es una vivienda nueva), insertamos
+                $sql = "INSERT INTO asistencia_reunion (id_reunion, id_vivienda, confirmacion, fecha_respuesta) 
+                        VALUES (:id_reunion, :id_vivienda, :confirmacion, CURRENT_DATE())";
+            }
+            
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
-                'confirmacion' => $confirmacion,
-                'confirmacion2' => $confirmacion,
-                'id_reunion' => $id_reunion,
-                'id_vivienda' => $id_vivienda
+                ':confirmacion' => $confirmacion,
+                ':id_reunion' => $id_reunion,
+                ':id_vivienda' => $id_vivienda
             ]);
         } catch (PDOException $e) {
             return false;
