@@ -1,61 +1,180 @@
-GestFincas es una aplicación web desarrollada en PHP bajo el patrón de arquitectura MVC (Modelo-Vista-Controlador). Permite la gestión de comunidades de vecinos, facilitando la administración de viviendas, usuarios (vecinos y presidentes) y el control de accesos mediante un sistema de validación por códigos.
+# 🏢 Gestfincas: Web App de Gestión Comunitaria
 
-🚀 Requisitos Previos
-Para ejecutar este proyecto en tu entorno local, necesitarás tener instalado:
+![Estado](https://img.shields.io/badge/Estado-Terminado-success)
+![PHP](https://img.shields.io/badge/Backend-PHP_7.4%2B-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/Base_de_Datos-MySQL-4479A1?logo=mysql&logoColor=white)
+![JavaScript](https://img.shields.io/badge/Frontend-JS_ES6-F7DF1E?logo=javascript&logoColor=black)
+![Bootstrap](https://img.shields.io/badge/UI-Bootstrap_5.3-7952B3?logo=bootstrap&logoColor=white)
+![Composer](https://img.shields.io/badge/Dependencias-Composer-405360?logo=composer&logoColor=white)
+![Arquitectura](https://img.shields.io/badge/Arquitectura-MVC-orange)
 
-Un entorno de servidor local como XAMPP, WAMP, o MAMP.
-PHP 8.0 o superior.
-MySQL o MariaDB.
-Git (opcional, para el control de versiones).
-🛠️ Guía de Instalación Paso a Paso
-Sigue estos pasos exactamente en orden para desplegar el proyecto en tu máquina local:
+Este repositorio contiene el código fuente de **Gestfincas**, una solución integral y moderna diseñada para la administración automatizada de fincas y comunidades de vecinos. Desarrollado en colaboración por un equipo de 5 desarrolladores como proyecto de fin de ciclo (DAW), el sistema simula un entorno real de gestión comunitaria, separando flujos de trabajo e interfaces bajo una sólida arquitectura **Modelo-Vista-Controlador (MVC)**.
 
-Paso 1: Descargar el proyecto
-Abre tu terminal o consola.
-Navega hasta la carpeta pública de tu servidor local (por ejemplo, htdocs en XAMPP o www en WAMP).
-Clona el repositorio ejecutando:
-git clone [https://github.com/tu-usuario/JR_M26_ComunidadVecinos.git](https://github.com/tu-usuario/JR_M26_ComunidadVecinos.git)
-(Si no usas Git, simplemente descarga el ZIP del proyecto y descomprímelo en esa misma carpeta).
+## 🎯 Contexto y Valor de Negocio
 
-Paso 2: Crear y configurar la Base de Datos
-Abre el panel de control de tu servidor (ej. XAMPP) y asegúrate de que Apache y MySQL estén en ejecución.
-Ve a tu gestor de base de datos (por ejemplo, entra a http://localhost/phpmyadmin).
-Crea una nueva base de datos vacía llamada exactamente: gestfincas.
-Ve a la pestaña Importar y selecciona el archivo gestfincas.sql que se encuentra dentro de la carpeta database/ de este proyecto.
-Haz clic en "Importar" o "Continuar". Esto creará todas las tablas necesarias y cargará los datos de prueba.
-Paso 3: Configurar la conexión (Archivo Local)
-Por motivos de seguridad, las credenciales no se suben al repositorio. Debes crear tu archivo de configuración:
+La gestión tradicional de comunidades de vecinos a menudo sufre de procesos manuales, falta de transparencia financiera y comunicaciones fragmentadas (notas en el portal, grupos de mensajería caóticos). 
 
-Ve a la carpeta config/ del proyecto.
-Localiza el archivo llamado config.php.example.
-Duplica ese archivo y renombra la copia como config.local.php.
-Abre config.local.php en tu editor de código y pon las credenciales de tu base de datos local (por defecto en XAMPP el usuario es "root" y la contraseña se deja vacía):
-PHP
+Este sistema centraliza, digitaliza y gobierna la información operativa de la finca para dar respuesta a **necesidades estratégicas** mediante paneles interactivos orientados a diferentes roles:
 
-'localhost', // o 127.0.0.1 'db' => 'gestfincas', // Nombre de la base de datos 'user' => 'root', // Tu usuario de MySQL 'pass' => '', // Tu contraseña de MySQL 'charset' => 'utf8mb4', ]; ?>
-Paso 4: Arrancar la aplicación
-Abre tu navegador web. Accede a la ruta pública del proyecto. Dependiendo del nombre de la carpeta, la URL será algo como: http://localhost/JR_M26_ComunidadVecinos-main/public/index.php
-¡Listo! Deberías ver la pantalla de inicio de sesión de GestFincas.
-🔑 Datos de Prueba para Iniciar Sesión
+* **Transparencia Financiera:** ¿Cuál es el estado de mis cuotas como vecino? ¿Cuál es el balance global y el nivel de morosidad que audita el Presidente?
+* **Operaciones y Mantenimiento:** ¿Qué incidencias o averías están activas, quién las reportó y cuál es su estado de resolución?
+* **Gobernanza y Convivencia:** ¿Cómo se toman decisiones vinculantes de forma remota y cómo se democratiza el acceso a las actas de reuniones y espacios comunes?
 
-El archivo SQL ya incluye un usuario de prueba para que puedas probar el sistema inmediatamente:
+<p align="center">
+  <img src="public/assets/img/screenshot_dashboard.jpg" width="800" alt="Dashboard final interactivo de Gestfincas">
+</p>
 
-Nombre de la Vivienda: Planta 2-1B
+---
 
-Correo Electrónico: mariapelaez@gmail.com
+## 🚀 Stack Tecnológico
 
-Contraseña: casacasa
+* 🐘 **Backend & Lógica:** PHP 7.4+ (POO, Enrutamiento Dinámico).
+* 🗄️ **Base de Datos:** MySQL (Relacional, Triggers, Integridad Referencial).
+* 🎨 **Frontend & UI:** HTML5, CSS3 (Variables nativas), JavaScript (ES6 asíncrono) y Bootstrap 5.3.
+* 📦 **Gestión de Paquetes:** Composer.
+* ⚙️ **Control de Versiones:** Git / GitHub.
 
-🏗️ Estructura del Proyecto (Arquitectura MVC) /config: Archivos de configuración de DB y enrutador.
+---
 
-/database: Archivos SQL y volcados de base de datos.
+## 📐 Arquitectura de Software (MVC)
 
-/public: Contiene el punto de entrada principal (index.php) y los recursos estáticos (assets/ con CSS e imágenes).
+El proyecto está diseñado bajo una estricta separación de responsabilidades para garantizar seguridad, escalabilidad y un mantenimiento ágil.
 
-/src: Código fuente de la app:
+<p align="center">
+  <img src="public/assets/img/arquitectura_mvc.jpg" width="800" alt="Diagrama de Arquitectura MVC">
+</p>
 
-controllers/: Manejan la lógica y peticiones (ej. AuthController.php).
+1. 🥇 **Controladores (`src/controllers`):** Actúan como el cerebro de la aplicación. Interceptan la petición del usuario, aplican reglas de negocio, validan permisos (RBAC) y orquestan la comunicación entre Modelos y Vistas.
+2. 🥈 **Modelos (`src/models`):** Capa de abstracción de datos. Encapsulan todas las sentencias SQL preparadas para prevenir inyecciones y garantizan la integridad transaccional con la base de datos MySQL.
+3. 🥉 **Vistas (`src/views`):** Componentes modulares de interfaz gráfica renderizados al cliente. Utilizan plantillas de componentes (`components/`) como topbars, sidebars y modales reutilizables.
 
-models/: Interactúan con la base de datos (ej. UsuarioModel.php).
+**Punto Único de Entrada (Front Controller):** Toda petición pasa por `public/index.php`. Este diseño blinda el directorio `src/` y `config/` del acceso directo desde el navegador, asegurando que solo los recursos estáticos queden expuestos.
 
-views/: Interfaces de usuario y componentes HTML.
+---
+
+## 📂 Estructura del Repositorio
+
+```text
+gestfincas/
+├── config/              # Archivos de conexión a BD, variables globales y Router
+├── database/            # Volcado estructurado de la Base de Datos (gestfincas.sql)
+├── public/              # Directorio público y punto de entrada al servidor web
+│   ├── assets/          # CSS, JS, e imágenes (UI)
+│   ├── uploads/         # Archivos dinámicos seguros (Imágenes de incidencias, Actas PDF)
+│   └── index.php        # Front Controller
+├── src/                 # Lógica core de negocio (Protegida del acceso web)
+│   ├── controllers/     # Controladores por módulo (Finanzas, Reservas, Auth...)
+│   ├── models/          # Lógica de base de datos
+│   └── views/           # Vistas y fragmentos HTML/PHP reutilizables
+├── vendor/              # Librerías gestionadas por Composer (Autocargadas)
+├── .gitignore           # Archivos ignorados por Git
+├── composer.json        # Declaración de dependencias (PHPMailer, Dompdf)
+└── README.md            # Documentación del proyecto
+```
+
+---
+
+## ⚙️ Módulos y Características Clave
+
+### 🔐 1. Autenticación y Control de Acceso (RBAC)
+* **Roles Jerárquicos:** Flujos y menús adaptados dinámicamente para **Vecino**, **Presidente** y **Superadministrador**.
+* **Seguridad de Credenciales:** Encriptación robusta usando el algoritmo nativo `password_hash`.
+* **Recuperación de Cuentas:** Sistema de tokens temporales de un solo uso enviados vía SMTP para el restablecimiento de contraseñas.
+
+### 📊 2. Finanzas y Dashboard
+* **Presidente:** Panel analítico para cargar presupuestos, registrar cobros/pagos y monitorizar impagos.
+* **Vecino:** Historial personal interactivo de recibos emitidos y pendientes de liquidar.
+
+### 📅 3. Reservas de Espacios Comunes
+* Sistema de calendario interactivo para apartar instalaciones (ej: pádel, piscina, salas).
+* Manejo de franjas horarias y solapamientos en tiempo real gestionado íntegramente con JavaScript y PHP.
+
+### 📢 4. Actas, Votaciones e Incidencias
+* **Generación PDF Dinámica:** Creación automatizada de Actas de Reuniones en el servidor utilizando `dompdf`.
+* **Kanban de Averías:** Panel interactivo para reportar incidencias estructurales con carga segura de imágenes `.webp` (optimizadas para rendimiento).
+* **Foros y Votaciones:** Espacio de debate seguro y sistema de encuestas vinculantes inmutables.
+
+---
+
+## 🧠 Retos Técnicos y Soluciones
+
+Durante el ciclo de desarrollo, se implementaron refactorizaciones críticas para asegurar la calidad y madurez del código:
+
+* **Gestión Profesional de Dependencias:** El proyecto pasó de alojar miles de líneas de librerías externas en formato manual (carpeta *libs*) a utilizar **Composer**. Esto redujo drásticamente el peso del repositorio, estandarizó el uso de un *Autoloader* nativo (PSR-4) y delegó la actualización de paquetes como `PHPMailer` y `dompdf` a un estándar industrial.
+* **Seguridad en la Subida de Archivos:** Las imágenes adjuntas a las incidencias generaban riesgos de seguridad (subida de scripts maliciosos). **Solución:** Implementación de validación estricta de tipos MIME en PHP, conversión forzada a formato `.webp`, ofuscación de nombres con identificadores únicos (`uniqid()`) y almacenamiento fuera de rutas ejecutables en el backend.
+* **Aislamiento del Core (Front Controller):** Las rutas iniciales apuntaban directamente a archivos físicos `.php`, exponiendo la estructura del servidor. **Solución:** Centralización de las rutas a través de un `router.php`, procesando variables por la URL (ej: `?controller=Incidencias&action=crear`) para mapear dinámicamente los controladores, logrando URLs limpias y seguras.
+
+---
+
+## 🛠️ Configuración y Prerrequisitos
+
+### Prerrequisitos del Sistema
+* Servidor local Apache/Nginx (XAMPP, Laragon, etc).
+* PHP 7.4 o superior (Con extensión `zip` habilitada).
+* MySQL 8.0 o MariaDB.
+* [Composer](https://getcomposer.org/) instalado globalmente.
+
+---
+
+## 🏃‍♂️ Ejecución y Despliegue en Local
+
+### Paso 1: Clonar y Preparar Dependencias
+Abre una terminal, clona el proyecto y descarga los paquetes gestionados en `composer.json`:
+
+```bash
+git clone https://github.com/tu-usuario/gestfincas.git
+cd gestfincas
+composer install
+```
+*(Este comando generará automáticamente la carpeta `vendor/` con los recursos necesarios).*
+
+### Paso 2: Base de Datos y Variables
+1.  Importa el esquema relacional estructurado que encontrarás en `database/gestfincas.sql` a tu gestor de base de datos MySQL.
+2.  Renombra o duplica el archivo `config/config.php.example` a `config/config.php`.
+3.  Abre `config.php` y ajusta las credenciales de base de datos y tus parámetros SMTP para el envío de correos:
+    ```php
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'tu_usuario');
+    define('DB_PASS', 'tu_contraseña');
+    define('DB_NAME', 'gestfincas');
+    ```
+
+### Paso 3: Lanzar la Aplicación
+Apunta el *DocumentRoot* de tu servidor local hacia el directorio `public/` del proyecto. Si usas el servidor integrado de PHP para pruebas, ejecuta desde la raíz:
+
+```bash
+php -S localhost:8000 -t public/
+```
+Accede desde el navegador a `http://localhost:8000`.
+
+---
+
+## 👥 Equipo y Coautoría
+
+Este software ha sido diseñado, maquetado y programado colaborativamente por 5 estudiantes del ciclo formativo de Desarrollo de Aplicaciones Web:
+
+* [Desarrollador 1] - Rol Principal / Módulos
+* [Desarrollador 2] - Rol Principal / Módulos
+* [Desarrollador 3] - Rol Principal / Módulos
+* [Desarrollador 4] - Rol Principal / Módulos
+* [Desarrollador 5] - Rol Principal / Módulos
+
+---
+
+## 📩 Contacto
+
+Si tienes alguna pregunta técnica sobre la arquitectura de este proyecto, sugerencias, o estás interesado en conversar sobre ingeniería y desarrollo de software, ¡no dudes en escribirme!
+
+<p align="left">
+<a href="https://www.linkedin.com/in/cesarbetancorcano/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="LinkedIn" height="30" width="40" /></a>
+</p>
+
+* **LinkedIn:** [César Betancor Cano](https://www.linkedin.com/in/cesarbetancorcano/)
+* **Portfolio:** [btncr13.github.io](https://btncr13.github.io/portfolio/)
+* **Email:** [betancor13@gmail.com](mailto:betancor13@gmail.com)
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la Licencia MIT. Siéntete libre de usarlo, modificarlo y distribuirlo para fines educativos o de portfolio profesional.

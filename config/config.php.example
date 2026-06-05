@@ -1,9 +1,0 @@
-<?php
-return [
-    'host'    => 'localhost',
-    'db'      => 'gestfincas', // El nombre exacto de tu base de datos
-    'user'    => 'root',       // Usuario por defecto
-    'pass'    => '',           // En XAMPP va en blanco
-    'charset' => 'utf8mb4'
-];
-?>
