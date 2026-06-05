@@ -21,7 +21,7 @@ Este sistema centraliza, digitaliza y gobierna la información operativa de la f
 * **Gobernanza y Convivencia:** ¿Cómo se toman decisiones vinculantes de forma remota y cómo se democratiza el acceso a las actas de reuniones y espacios comunes?
 
 <p align="center">
-  <img src="public/assets/img/dashboard.webp" width="800" alt="Dashboard final interactivo de Gestfincas">
+  <img src="public/assets/img/dashboard_gestfincas.webp" width="800" alt="Dashboard final interactivo de Gestfincas">
 </p>
 
 ---
@@ -153,11 +153,11 @@ Accede desde el navegador a `http://localhost:8000`.
 
 Este software ha sido diseñado, maquetado y programado colaborativamente por 5 estudiantes del ciclo formativo de Desarrollo de Aplicaciones Web:
 
-* Raul Beardo - Rol Principal / Módulos
-* César Betancor - Rol Principal / Módulos
-* Alejandro Morales - Rol Principal / Módulos
-* Moisés Moreno - Rol Principal / Módulos
-* Natalia Pérez Gamero - Rol Principal / Módulos
+* **Raul Beardo** - Desarrollador Full Stack
+* **César Betancor** - Desarrollador Full Stack
+* **Alejandro Morales** - Desarrollador Full Stack
+* **Moisés Moreno** - Desarrollador Full Stack
+* **Natalia Pérez Gamero** - Desarrollador Full Stack
 
 ---
 
