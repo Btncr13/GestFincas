@@ -1,0 +1,8 @@
+{
+    "name": "gestfincas/app",
+    "description": "Aplicación web para la gestión de fincas",
+    "require": {
+        "phpmailer/phpmailer": "^6.9",
+        "dompdf/dompdf": "^2.0"
+    }
+}

@@ -2,7 +2,6 @@
 
 require_once "src/models/UsuarioModel.php";
 // Incluir Dompdf (ajusta la ruta si es necesario)
-require_once 'libs/dompdf/autoload.inc.php';
 
 use Dompdf\Dompdf;
 

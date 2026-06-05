@@ -4,10 +4,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Rutas directas partiendo desde la raíz del proyecto (donde está el index.php)
-require_once 'libs/PHPMailer/src/Exception.php';
-require_once 'libs/PHPMailer/src/PHPMailer.php';
-require_once 'libs/PHPMailer/src/SMTP.php';
-
 require_once "src/models/UsuarioModel.php";
 require_once "src/models/MiComunidadModel.php";
 

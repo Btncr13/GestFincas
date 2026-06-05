@@ -1,9 +1,6 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-require_once 'libs/PHPMailer/src/Exception.php';
-require_once 'libs/PHPMailer/src/PHPMailer.php';
-require_once 'libs/PHPMailer/src/SMTP.php';
 
 require_once "src/models/UsuarioModel.php";
 require_once "src/models/EspacioModel.php";

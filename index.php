@@ -9,6 +9,8 @@ ini_set('display_startup_errors', 1);
 ob_start();
 session_start();
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 // 1. Cargamos la configuración (ahora sin el ../)
 $configFile = __DIR__ . '/config/config.local.php';
 

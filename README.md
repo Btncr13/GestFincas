@@ -21,7 +21,7 @@ Paso 2: Crear y configurar la Base de Datos
 Abre el panel de control de tu servidor (ej. XAMPP) y asegúrate de que Apache y MySQL estén en ejecución.
 Ve a tu gestor de base de datos (por ejemplo, entra a http://localhost/phpmyadmin).
 Crea una nueva base de datos vacía llamada exactamente: gestfincas.
-Ve a la pestaña Importar y selecciona el archivo gestfincas.sql que se encuentra dentro de la carpeta config/ de este proyecto.
+Ve a la pestaña Importar y selecciona el archivo gestfincas.sql que se encuentra dentro de la carpeta database/ de este proyecto.
 Haz clic en "Importar" o "Continuar". Esto creará todas las tablas necesarias y cargará los datos de prueba.
 Paso 3: Configurar la conexión (Archivo Local)
 Por motivos de seguridad, las credenciales no se suben al repositorio. Debes crear tu archivo de configuración:
@@ -46,7 +46,9 @@ Correo Electrónico: mariapelaez@gmail.com
 
 Contraseña: casacasa
 
-🏗️ Estructura del Proyecto (Arquitectura MVC) /config: Archivos de configuración de DB, enrutador y scripts SQL.
+🏗️ Estructura del Proyecto (Arquitectura MVC) /config: Archivos de configuración de DB y enrutador.
+
+/database: Archivos SQL y volcados de base de datos.
 
 /public: Contiene el punto de entrada principal (index.php) y los recursos estáticos (assets/ con CSS e imágenes).
 
