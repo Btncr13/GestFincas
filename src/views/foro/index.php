@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var string $rol
  * @var array $temas
@@ -6,7 +7,8 @@
 
 // Helper para generar colores consistentes e iniciales
 if (!function_exists('getAvatarForo')) {
-    function getAvatarForo($id, $nombre, $apellidos) {
+    function getAvatarForo($id, $nombre, $apellidos)
+    {
         $iniciales = mb_strtoupper(mb_substr($nombre, 0, 1) . mb_substr($apellidos, 0, 1));
         $hue = abs(crc32($id . 'gestfincas')) % 360;
         return ['color' => "hsl({$hue}, 70%, 45%)", 'iniciales' => $iniciales];
@@ -34,8 +36,8 @@ include 'src/views/components/topbar.php';
 
                 <?php
                 $categoria_actual = $_GET['cat'] ?? null;
-                
-                // BUENA PRÁCTICA: Array estructurado separando la lógica de la presentación
+
+                // Array estructurado separando la lógica de la presentación
                 $categorias_info = [
                     'general' => ['titulo' => 'General', 'icono' => 'bi-megaphone-fill', 'badge' => 'bg-primary', 'desc' => 'Avisos, debates sin clasificar, saludos o temas que no encajan en otras partes.'],
                     'propuestas' => ['titulo' => 'Mejoras y Propuestas', 'icono' => 'bi-lightbulb-fill', 'badge' => 'bg-warning', 'desc' => 'El lugar ideal para proponer instalaciones, mejoras estéticas o cambios.'],
@@ -95,7 +97,7 @@ include 'src/views/components/topbar.php';
                                             <div class="d-flex w-100 justify-content-between align-items-center mb-2">
                                                 <h5 class="card-title mb-0 fw-bold text-dark font-title"><?= htmlspecialchars($t['titulo']) ?></h5>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <?php 
+                                                    <?php
                                                     $cat_key = $t['categoria'] ?? 'general';
                                                     $cat_nombre = $categorias_info[$cat_key]['titulo'] ?? ucfirst($cat_key);
                                                     $cat_badge = $categorias_info[$cat_key]['badge'] ?? 'bg-primary';
@@ -110,17 +112,17 @@ include 'src/views/components/topbar.php';
                                             </div>
                                             <p class="card-text text-muted small mb-3 line-clamp-2"><?= htmlspecialchars($t['descripcion']) ?></p>
                                             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mt-3 gap-2">
-                                                <?php 
-                                                $avatarList = getAvatarForo($t['id_usuario'], $t['nombre'], $t['apellidos']); 
+                                                <?php
+                                                $avatarList = getAvatarForo($t['id_usuario'], $t['nombre'], $t['apellidos']);
                                                 ?>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm flex-shrink-0 avatar-sm" style="background-color: <?= $avatarList['color'] ?>;">
                                                         <?= htmlspecialchars($avatarList['iniciales']) ?>
                                                     </div>
                                                     <small class="text-muted fw-semibold text-truncate"><?= htmlspecialchars($t['nombre'] . ' ' . $t['apellidos']) ?> <span class="fw-normal opacity-75">(<?= htmlspecialchars($t['nombre_vivienda']) ?>)</span>
-                                                    <?php if (isset($t['rol']) && $t['rol'] === 'presidente'): ?>
-                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 ms-1 badge-sm">Presidente</span>
-                                                    <?php endif; ?>
+                                                        <?php if (isset($t['rol']) && $t['rol'] === 'presidente'): ?>
+                                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 ms-1 badge-sm">Presidente</span>
+                                                        <?php endif; ?>
                                                     </small>
                                                 </div>
                                                 <div class="d-flex gap-3 text-muted small">
