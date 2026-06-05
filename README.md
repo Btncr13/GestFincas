@@ -158,6 +158,7 @@ Este software ha sido diseñado, maquetado y programado colaborativamente por 5 
 * **Alejandro Morales** - Desarrollador Full Stack
 * **Moisés Moreno** - Desarrollador Full Stack
 * **Natalia Pérez Gamero** - Desarrollador Full Stack
+* **Lidia Ruiz de Valdivia** - Desarrollador Ful Stack
 
 ---
 
