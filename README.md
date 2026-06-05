@@ -1,6 +1,6 @@
 # 🏢 Gestfincas: Web App de Gestión Comunitaria
 
-![Estado](https://img.shields.io/badge/Estado-Terminado-success)
+![Estado](https://img.shields.io/badge/Estado-En_progreso-yellow)
 ![PHP](https://img.shields.io/badge/Backend-PHP_7.4%2B-777BB4?logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/Base_de_Datos-MySQL-4479A1?logo=mysql&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/Frontend-JS_ES6-F7DF1E?logo=javascript&logoColor=black)
@@ -21,7 +21,7 @@ Este sistema centraliza, digitaliza y gobierna la información operativa de la f
 * **Gobernanza y Convivencia:** ¿Cómo se toman decisiones vinculantes de forma remota y cómo se democratiza el acceso a las actas de reuniones y espacios comunes?
 
 <p align="center">
-  <img src="public/assets/img/screenshot_dashboard.jpg" width="800" alt="Dashboard final interactivo de Gestfincas">
+  <img src="public/assets/img/dashboard.webp" width="800" alt="Dashboard final interactivo de Gestfincas">
 </p>
 
 ---
@@ -41,7 +41,7 @@ Este sistema centraliza, digitaliza y gobierna la información operativa de la f
 El proyecto está diseñado bajo una estricta separación de responsabilidades para garantizar seguridad, escalabilidad y un mantenimiento ágil.
 
 <p align="center">
-  <img src="public/assets/img/arquitectura_mvc.jpg" width="800" alt="Diagrama de Arquitectura MVC">
+  <img src="public/assets/img/mvc.webp" width="800" alt="Diagrama de Arquitectura MVC">
 </p>
 
 1. 🥇 **Controladores (`src/controllers`):** Actúan como el cerebro de la aplicación. Interceptan la petición del usuario, aplican reglas de negocio, validan permisos (RBAC) y orquestan la comunicación entre Modelos y Vistas.
@@ -153,11 +153,11 @@ Accede desde el navegador a `http://localhost:8000`.
 
 Este software ha sido diseñado, maquetado y programado colaborativamente por 5 estudiantes del ciclo formativo de Desarrollo de Aplicaciones Web:
 
-* [Desarrollador 1] - Rol Principal / Módulos
-* [Desarrollador 2] - Rol Principal / Módulos
-* [Desarrollador 3] - Rol Principal / Módulos
-* [Desarrollador 4] - Rol Principal / Módulos
-* [Desarrollador 5] - Rol Principal / Módulos
+* Raul Beardo - Rol Principal / Módulos
+* César Betancor - Rol Principal / Módulos
+* Alejandro Morales - Rol Principal / Módulos
+* Moisés Moreno - Rol Principal / Módulos
+* Natalia Pérez Gamero - Rol Principal / Módulos
 
 ---
 

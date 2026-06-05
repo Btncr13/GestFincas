@@ -12,7 +12,7 @@ $codigoPreevaluado = $_GET['codigo'] ?? '';
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
                 <div class="d-inline-flex justify-content-center align-items-center rounded-circle mb-3 logo-bg-brand" style="width: 60px; height: 60px;">
-                    <img src="public/assets/img/Logo.png" class="rounded-circle w-100 h-100 object-fit-cover logo-adaptable">
+                    <img src="public/assets/img/Logo2.png" class="rounded-circle w-100 h-100 object-fit-cover logo-adaptable">
                 </div>
                 <h1 class="fs-5 fw-bold mb-1">GestFincas</h1>
                 <p class="text-muted small mb-0">Registro de nuevo vecino</p>

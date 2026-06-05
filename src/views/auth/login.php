@@ -7,7 +7,7 @@
 
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <img src="public/assets/img/Logo.png" alt="Logo" class="rounded-circle shadow-sm mb-3 logo-adaptable">
+                <img src="public/assets/img/Logo2.png" alt="Logo" class="rounded-circle shadow-sm mb-3 logo-adaptable">
                 <h2 class="fw-bold mb-1">GestFincas</h2>
                 <p class="text-secondary small mb-0">Sistema de gestión de comunidades</p>
             </div>
