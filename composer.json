@@ -3,6 +3,7 @@
     "description": "Aplicación web para la gestión de fincas",
     "require": {
         "phpmailer/phpmailer": "^6.9",
-        "dompdf/dompdf": "^2.0"
+        "dompdf/dompdf": "^2.0",
+        "vlucas/phpdotenv": "^5.6"
     }
 }

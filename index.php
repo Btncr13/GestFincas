@@ -11,6 +11,10 @@ session_start();
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+// Cargar las variables de entorno desde el archivo .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 // 1. Cargamos la configuración (ahora sin el ../)
 $configFile = __DIR__ . '/config/config.local.php';
 

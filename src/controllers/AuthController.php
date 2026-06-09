@@ -315,21 +315,20 @@ class AuthController
         $token = $this->usuarioModel->generarTokenRecuperacion($email);
 
         if (!$token) {
-            // Utilizamos el jsonResponse que ya tienes en el AuthController
             $this->jsonResponse(false, 'No existe ningún usuario registrado con ese correo.');
         }
 
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com'; 
+            $mail->Host       = $_ENV['SMTP_HOST']; 
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'moisesmrobles@gmail.com'; // Tu cuenta real
-            $mail->Password   = 'xonw eroz tnke xszg'; // Tu contraseña de aplicación
+            $mail->Username   = $_ENV['SMTP_USER']; 
+            $mail->Password   = $_ENV['SMTP_PASS']; 
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Port       = $_ENV['SMTP_PORT'];
 
-            $mail->setFrom('moisesmrobles@gmail.com', 'GestFincas Seguridad');
+            $mail->setFrom($_ENV['SMTP_USER'], 'GestFincas Seguridad');
             $mail->addAddress($email);
 
             // Ajusta "ComunidadVecinos/JR_M26..." si la ruta de tu proyecto cambia

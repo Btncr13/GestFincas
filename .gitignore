@@ -4,3 +4,6 @@ config/config.local.php
 # Archivos de sistema y logs
 *.log
 .DS_Store
+
+# Variables de entorno
+.env
